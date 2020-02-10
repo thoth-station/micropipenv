@@ -1,0 +1,23 @@
+- project:
+    check:
+      jobs:
+        - "thoth-coala"
+        - "thoth-pytest"
+    gate:
+      queue: "CHANGEME"
+      jobs:
+        - "thoth-coala"
+        - "thoth-pytest"
+    post:
+      jobs:
+        - "trigger-build":
+            vars:
+              cluster: "paas.psi.redhat.com"
+              namespace: "CHANGEME"
+              buildConfigName: "CHANGEME"
+
+    kebechet-auto-gate:
+      queue: "thoth-station/core"
+      jobs:
+        - "thoth-coala"
+        - "thoth-pytest"

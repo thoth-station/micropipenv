@@ -1,0 +1,11 @@
+host: test.thoth-station.ninja
+tls_verify: false
+requirements_format: pipenv
+
+runtime_environments:
+  - name: ubi8
+    operating_system:
+      name: ubi
+      version: "8"
+    python_version: "3.6"
+    recommendation_type: latest
