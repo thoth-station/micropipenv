@@ -1,0 +1,13 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[packages]
+connexion = {extras = ["swagger-ui"], version = "*", marker="python_version > '3'"}
+
+[dev-packages]
+sentry-sdk = {extras = ["flask"], version = ">=0.14", marker="python_version > '2'"}
+
+[requires]
+python_version = "3.6"

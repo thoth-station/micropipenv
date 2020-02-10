@@ -1,0 +1,10 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+pytest = {version="==5.3.5", marker="python_version > '3'"}
+
+[packages]
+click = {version="==7.0", marker="python_version > '3'"}

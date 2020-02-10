@@ -1,11 +1,28 @@
-host: test.thoth-station.ninja
+host: khemenu.thoth-station.ninja
 tls_verify: false
 requirements_format: pipenv
 
 runtime_environments:
-  - name: ubi8
+  - name: 'rhel:8'
     operating_system:
-      name: ubi
-      version: "8"
+      name: rhel
+      version: "8.0"
     python_version: "3.6"
     recommendation_type: latest
+    limit_latest_versions: 5
+
+managers:
+  - name: update
+    configuration:
+      labels: [bot]
+  - name: info
+  - name: version
+    configuration:
+      maintainers:
+        - fridex
+        - harshad16
+        - goern
+      assignees:
+        - sesheta
+      labels: [bot]
+      changelog_file: true

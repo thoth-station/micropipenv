@@ -1,0 +1,5 @@
+--index-url https://pypi.python.org/simple
+#
+# Dev dependencies
+#
+pytest

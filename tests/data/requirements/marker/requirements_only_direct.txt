@@ -1,0 +1,9 @@
+--index-url https://pypi.org/simple
+#
+# Default dependencies
+#
+click==7.0
+#
+# Dev dependencies
+#
+pytest==5.3.5

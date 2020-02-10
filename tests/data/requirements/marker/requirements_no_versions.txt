@@ -1,0 +1,19 @@
+--index-url https://pypi.org/simple
+#
+# Default dependencies
+#
+click
+#
+# Dev dependencies
+#
+attrs; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+importlib-metadata; python_version < '3.8'
+more-itertools; python_version >= '3.5'
+packaging; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+pluggy; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+py; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+pyparsing; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2'
+pytest
+six; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'
+wcwidth
+zipp; python_version >= '3.6'
