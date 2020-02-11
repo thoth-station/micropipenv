@@ -8,7 +8,7 @@ pip-tools compatible output.
 micropipenv use cases
 =====================
 
-Why I should use micropipenv instead of `Pipenv <https://github.com/pypa/pipenv>`_?
+Why should I use ``micropipenv`` instead of `Pipenv <https://github.com/pypa/pipenv>`_?
 
 * I would like to convert files produced by Pipenv to a pip-tools compatible
   output.
@@ -72,9 +72,9 @@ To generate output compatible with `pip-tools
   micropipenv requirements
 
 Additional configuration options can limit what is present in the output (e.g.
-``--no-develop`` to remove development dependencies).
+``--no-dev`` to remove development dependencies).
 
-A special option ``--only-direct`` makes ``micropipenv`` work on ``Pipfile````
+A special option ``--only-direct`` makes ``micropipenv`` work on ``Pipfile``
 instead of ``Pipfile.lock``. This requires toml extras, so install
 ``micropipenv[toml]`` for this functionality (see installation instructions
 bellow). To get direct dependencies of an application and store them in
