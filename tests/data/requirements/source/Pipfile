@@ -1,0 +1,12 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[[source]]
+url = "https://tensorflow.pypi.thoth-station.ninja/"
+verify_ssl = false
+name = "tf-thoth-station"
+
+[packages]
+requests = "*"

@@ -1,0 +1,40 @@
+--index-url https://pypi.org/simple
+#
+# Default dependencies
+#
+attrs; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+certifi
+chardet
+click; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+clickclick
+connexion[swagger-ui]
+flask; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+idna
+importlib-metadata; python_version < '3.8'
+inflection
+itsdangerous; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+jinja2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+jsonschema
+markupsafe; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+openapi-spec-validator
+pyrsistent
+pyyaml
+requests; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+six; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2'
+swagger-ui-bundle
+urllib3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'
+werkzeug; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+zipp; python_version >= '3.6'
+#
+# Dev dependencies
+#
+blinker
+certifi
+click; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+flask; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+itsdangerous; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+jinja2; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+markupsafe; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+sentry-sdk[flask]
+urllib3; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4' and python_version < '4'
+werkzeug; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'

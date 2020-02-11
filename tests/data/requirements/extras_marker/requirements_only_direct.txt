@@ -1,0 +1,9 @@
+--index-url https://pypi.org/simple
+#
+# Default dependencies
+#
+connexion[swagger-ui]
+#
+# Dev dependencies
+#
+sentry-sdk[flask]>=0.14

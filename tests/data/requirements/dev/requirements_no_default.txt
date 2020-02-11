@@ -1,0 +1,7 @@
+--index-url https://pypi.org/simple
+#
+# Dev dependencies
+#
+pytest==5.3.5 \
+    --hash=sha256:0d5fe9189a148acc3c3eb2ac8e1ac0742cb7618c084f3d228baaec0c254b318d \
+    --hash=sha256:ff615c761e25eb25df19edddc0b970302d2a9091fbce0e7213298d85fb61fef6
