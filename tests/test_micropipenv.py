@@ -48,7 +48,7 @@ def test_install(venv):
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install"]
     with cwd(os.path.join(_DATA_DIR, "install", "venv_install")):
         subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": os.path.join(venv.path, "bin", "pip3")})
-        assert str(venv.get_version("daiquiri")) == "==2.0.0"
+        assert str(venv.get_version("daiquiri")) == "2.0.0"
 
 
 def test_install_deploy_error_python():
