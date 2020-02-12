@@ -130,7 +130,7 @@ def test_requirements(tmp_path, test, options, expected_file):
 
 def test_main_install_params():
     """Test running install from main with default parameters set."""
-    flexmock(micropipenv).should_receive("install").with_args(deploy=True, dev=True).once()
+    flexmock(micropipenv).should_receive("install").with_args(deploy=True, dev=True, pip_args=[]).once()
     micropipenv.main(argv=["install", "--deploy", "--dev"])
 
 

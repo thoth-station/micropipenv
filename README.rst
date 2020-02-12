@@ -58,6 +58,14 @@ corresponds to Pipefile.lock used (digest computed on ``Pipfile`` content).
 ``micropipenv`` requires toml extras for this functionality, so you will need
 to install ``micropipenv[toml]`` (see installation instructions bellow).
 
+You can supply additional positional arguments that will be passed to ``pip``.
+Use double dashes to distinguish ``pip`` options from ``micropipenv`` options.
+
+.. code-block::
+
+  # issue `pip install --user'
+  micropipenv install -- --user
+
 See ``micropipenv install --help`` for more info.
 
 
@@ -169,4 +177,6 @@ Anything after ``python3 -`` will be passed as an argument to
 
 .. code-block:: console
 
-  curl https://raw.githubusercontent.com/thoth-station/micropipenv/master/micropipenv.py | python3 - install --deploy
+  curl https://raw.githubusercontent.com/thoth-station/micropipenv/master/micropipenv.py | python3 - install -- --user
+
+All arguments after -- will be passed to ``pip`` as options.
