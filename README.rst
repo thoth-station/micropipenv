@@ -2,7 +2,7 @@
 -------
 
 A lightweight wrapper for pip to support Pipenv files or converting them to
-pip-tools compatible output.
+`pip-tools <https://pypi.org/project/pip-tools/>`_ compatible output.
 
 
 micropipenv use cases
