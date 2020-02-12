@@ -165,8 +165,8 @@ def _compute_pipfile_hash(pipfile):  # type: (Dict[str, Any]) -> str
 
 
 def install(
-    pipfile=None, pipfile_lock=None, *, deploy=False, dev=False
-):  # type: (Optional[Dict[str, Any]], Optional[Dict[str, Any]], bool, bool) -> None
+    pipfile=None, pipfile_lock=None, *, deploy=False, dev=False, pip_args=None
+):  # type: (Optional[Dict[str, Any]], Optional[Dict[str, Any]], bool, bool, Optional[List[str]]) -> None
     """Perform installation of packages from Pipfile.lock."""
     pipfile_lock = pipfile_lock or _read_pipfile_lock()
 
@@ -198,7 +198,8 @@ def install(
         with open(tmp_file.name, "w") as f:
             f.write(req)
 
-        cmd = [_PIP_BIN, "install", "-r", tmp_file.name]
+        cmd = [_PIP_BIN, "install", "-r", tmp_file.name, *(pip_args or [])]
+        _LOGGER.debug("Executing %r", cmd)
         os.execvp(_PIP_BIN, cmd)
 
 
@@ -397,6 +398,13 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
         action="store_true",
         required=False,
         default=bool(int(os.getenv("MICROPIPENV_DEV", os.getenv("PIPENV_DEV", 0)))),
+    )
+    parser_install.add_argument(
+        "pip_args",
+        help="Specify additional argument to pip, can be supplied multiple times (add "
+             "'--' to command line to delimit positional arguments that start with dash "
+             "from CLI options).",
+        nargs="*",
     )
     parser_install.set_defaults(func=install)
 
