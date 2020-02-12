@@ -92,6 +92,8 @@ For a setup that follows ``pip-tools`` convention with ``requirements.in`` and
 
   micropipenv requirements --no-dev > requirements.txt
   micropipenv requirements --no-dev --only-direct > requirements.in
+  micropipenv requirements --no-default > dev-requirements.txt
+  micropipenv requirements --no-default --only-direct > dev-requirements.in
 
 
 See ``micropipenv requirements --help`` for more info.
