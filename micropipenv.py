@@ -459,27 +459,27 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
     if not handler:
         parser.print_help()
         return 1
+
+    verbose = arguments.pop("verbose", 0)
+    if (verbose is not None and verbose >= 2) or _DEBUG:
+        _LOGGER.setLevel(logging.DEBUG)
+        _LOGGER.debug("Debug mode is on.")
+        _LOGGER.debug("Running %r with arguments %r", handler.__name__, arguments)
+    elif verbose == 1:
+        _LOGGER.setLevel(logging.INFO)
     else:
-        verbose = arguments.pop("verbose", 0)
-        if (verbose is not None and verbose >= 2) or _DEBUG:
-            _LOGGER.setLevel(logging.DEBUG)
-            _LOGGER.debug("Debug mode is on.")
-            _LOGGER.debug("Running %r with arguments %r", handler.__name__, arguments)
-        elif verbose == 1:
-            _LOGGER.setLevel(logging.INFO)
-        else:
-            _LOGGER.setLevel(logging.WARNING)
+        _LOGGER.setLevel(logging.WARNING)
 
-        try:
-            handler(**arguments)
-        except Exception as exc:
-            if _LOGGER.level <= logging.DEBUG:
-                raise
+    try:
+        handler(**arguments)
+    except Exception as exc:
+        if _LOGGER.level <= logging.DEBUG:
+            raise
 
-            _LOGGER.error(str(exc))
-            return 3
+        _LOGGER.error(str(exc))
+        return 3
 
-        return 0
+    return 0
 
 
 if __name__ == "__main__":
