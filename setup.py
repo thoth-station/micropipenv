@@ -59,6 +59,8 @@ setup(
     name="micropipenv",
     version=get_version(),
     description="A simple wrapper around pip to support Pipenv files",
+    url="https://github.com/thoth-station/micropipenv",
+    download_url="https://pypi.org/project/micropipenv",
     long_description=open(os.path.join(os.path.dirname(__file__), "README.rst")).read(),
     author="Fridolin Pokorny",
     author_email="fridex.devel@gmail.com",
