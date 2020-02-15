@@ -203,21 +203,6 @@ def install(
         os.execvp(_PIP_BIN, cmd)
 
 
-def _get_indexes_str(meta):  # type: (Dict[str, Any]) -> List[str]
-    """Get configuration for package indexes out of Pipfile.lock metadata."""
-    result = []  # type: List[str]
-    for source in meta.get("sources", []):
-        if result:
-            result.append("--extra-index-url {}".format(source["url"]))
-        else:
-            result.append("--index-url {}".format(source["url"]))
-
-        if source["verify_ssl"] is False:
-            result.append("--trusted-host {}".format(urlparse(source["url"]).netloc))
-
-    return result
-
-
 def _parse_pipfile_dependency_info(pipfile_entry):  # type: (Union[str, Dict[str, Any]]) -> Dict[str, Any]
     """Parse a Pipfile entry for a package and return a compatible version with Pipfile.lock entry."""
     if isinstance(pipfile_entry, str):
