@@ -198,7 +198,7 @@ def install(
         with open(tmp_file.name, "w") as f:
             f.write(req)
 
-        cmd = [_PIP_BIN, "install", "-r", tmp_file.name, *(pip_args or [])]
+        cmd = [_PIP_BIN, "install", "--no-deps", "-r", tmp_file.name, *(pip_args or [])]
         _LOGGER.debug("Executing %r", cmd)
         os.execvp(_PIP_BIN, cmd)
 
