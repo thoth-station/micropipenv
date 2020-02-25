@@ -156,7 +156,7 @@ def _read_pipfile():  # type: () -> Any
 def _compute_pipfile_hash(pipfile):  # type: (Dict[str, Any]) -> str
     """Compute Pipfile hash based on its content."""
     data = {
-        "_meta": {"requires": pipfile.get("requires"), "sources": pipfile["source"]},
+        "_meta": {"requires": pipfile.get("requires", {}), "sources": pipfile["source"]},
         "default": pipfile.get("packages", {}),
         "develop": pipfile.get("dev-packages", {}),
     }
