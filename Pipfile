@@ -9,6 +9,7 @@ pytest = "*"
 pytest-timeout = "*"
 pytest-mypy = "*"
 pytest-venv = "*"
+importlib-resources = "*"
 
 [packages]
 toml = "*"
