@@ -64,7 +64,7 @@ def test_install_deploy_error_hash():
     with cwd(os.path.join(_DATA_DIR, "install", "error_hash")):
         err_msg = (
             "Pipfile.lock hash 'foobar' does not correspond to hash computed based "
-            "on Pipfile '56c4edbb37014791ec323932f85ed5b9439fe119c8889f9f41bfe46d9a695608', "
+            "on Pipfile '70e8bf6bc774f5ca177467cab4e67d4264d0536857993326abc13ff43063bec0', "
             "aborting deployment"
         )
         with pytest.raises(micropipenv.HashMismatch, match=err_msg):
