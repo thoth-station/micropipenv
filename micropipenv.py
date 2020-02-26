@@ -49,7 +49,10 @@ import sys
 import json
 import os
 import hashlib
+import subprocess
 import tempfile
+from collections import deque
+from itertools import chain
 from urllib.parse import urlparse
 
 try:
@@ -97,6 +100,10 @@ class PythonVersionMismatch(MicropipenvException):
 
 class HashMismatch(MicropipenvException):
     """Raised when computed hash out of Pipfile does not correspond to the hash stated in Pipfile.lock."""
+
+
+class PipInstallError(MicropipenvException):
+    """Raised when `pip install` returned a non-zero exit code."""
 
 
 def _traverse_up_find_file(file_name):  # type: (str) -> str
@@ -190,17 +197,56 @@ def install(
                 "Pipfile {!r}, aborting deployment".format(pipfile_lock_hash, pipfile_hash)
             )
 
-    with tempfile.NamedTemporaryFile("w", prefix="requirements.txt") as tmp_file:
-        _LOGGER.debug("Using temporary file for storing requirements: %r", tmp_file.name)
-        req = requirements_str(sections, no_dev=not dev)
-        _LOGGER.debug("requirements.txt:\n%s\n", req)
+    index_config_str = _get_index_entry_str(sections)
 
-        with open(tmp_file.name, "w") as f:
-            f.write(req)
+    tmp_file = tempfile.NamedTemporaryFile("w", prefix="requirements.txt", delete=False)
+    _LOGGER.debug("Using temporary file for storing requirements: %r", tmp_file.name)
 
-        cmd = [_PIP_BIN, "install", "--no-deps", "-r", tmp_file.name, *(pip_args or [])]
-        _LOGGER.debug("Executing %r", cmd)
-        os.execvp(_PIP_BIN, cmd)
+    cmd = [_PIP_BIN, "install", "--no-deps", "-r", tmp_file.name, *(pip_args or [])]
+    _LOGGER.debug("Requirements will be installed using %r", cmd)
+
+    packages = chain(
+        sections.get("default", {}).items(),
+        sections.get("develop", {}).items() if dev else []
+    )
+
+    # We maintain an integer assigned to each package - this integer holds a value - how
+    # many times the given package failed to install. If a package fails to install, it is
+    # re-scheduled to the next installation round, until we try all the packages to
+    # satisfy requirements. If any package succeeds with installation, the integer is
+    # set to 0 again for all failed installations. This way we can break "cycles" in
+    # installation errors.
+    to_install = deque({"package_name": i[0], "info": i[1], "error": 0} for i in packages)
+    try:
+        while to_install:
+            entry = to_install.popleft()
+            package_name, info, had_error = entry["package_name"], entry["info"], entry["error"]
+
+            with open(tmp_file.name, "w") as f:
+                f.write(index_config_str)
+                f.write(_get_package_entry_str(package_name, info))
+
+            _LOGGER.debug("Installing %r", package_name)
+            called_process = subprocess.run(cmd)
+
+            if called_process.returncode != 0:
+                if len(to_install) == 0 or (had_error and had_error > len(to_install)):
+                    raise PipInstallError(
+                        "Failed to install requirements, dependency {!r} could not be installed".format(package_name)
+                    )
+
+                _LOGGER.warning("Failed to install %r, will try in next installation round...", package_name)
+                to_install.append({"package_name": package_name, "info": info, "error": had_error + 1})
+            else:
+                # Discard any error flag if we have any packages that fail to install.
+                for item in reversed(to_install):
+                    if item["error"] == 0:
+                        # Fast path - errors are always added to the end of the queue,
+                        # if we find a package without any error we can safely break.
+                        break
+                    item["error"] = 0
+    finally:
+        os.remove(tmp_file.name)
 
 
 def _parse_pipfile_dependency_info(pipfile_entry):  # type: (Union[str, Dict[str, Any]]) -> Dict[str, Any]
@@ -287,6 +333,21 @@ def _get_package_entry_str(
     return result + "\n"
 
 
+def _get_index_entry_str(sections):  # type: (Dict[str, Any]) -> str
+    """Get configuration entry for Python package indexes."""
+    result = ""
+    for idx, source in enumerate(sections.get("sources", [])):
+        if idx == 0:
+            result += "--index-url {}\n".format(source["url"])
+        else:
+            result += "--extra-index-url {}\n".format(source["url"])
+
+        if not source["verify_ssl"]:
+            result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
+
+    return result
+
+
 def requirements_str(
     sections=None,
     *,
@@ -303,15 +364,7 @@ def requirements_str(
         no_indexes=no_indexes, only_direct=only_direct, no_default=no_default, no_dev=no_dev
     )
 
-    result = ""
-    for idx, source in enumerate(sections.get("sources", [])):
-        if idx == 0:
-            result += "--index-url {}\n".format(source["url"])
-        else:
-            result += "--extra-index-url {}\n".format(source["url"])
-
-        if not source["verify_ssl"]:
-            result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
+    result = _get_index_entry_str(sections)
 
     if not no_comments and sections.get("default"):
         result += "#\n# Default dependencies\n#\n"
