@@ -75,7 +75,7 @@ _DEBUG = int(os.getenv("MICROPIPENV_DEBUG", 0))
 
 
 class MicropipenvException(Exception):
-    """A base class for all micropipenv exceptions."""
+    """A base class for all micropipenv exceptions"""
 
 
 class FileNotFound(MicropipenvException):
