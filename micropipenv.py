@@ -26,6 +26,8 @@ dependencies using raw pip. The virtual environment is not created, but one can
 issue `python3 -m venv venv/ && . venv/bin/activate` to create one.
 """
 
+from __future__ import print_function
+
 __version__ = "0.0.4"
 __author__ = "Fridolin Pokorny <fridex.devel@gmail.com>"
 __title__ = "micropipenv"
@@ -53,7 +55,10 @@ import subprocess
 import tempfile
 from collections import deque
 from itertools import chain
-from urllib.parse import urlparse
+try:
+    from urllib.parse import urlparse
+except ImportError:
+    from urlparse import urlparse
 
 try:
     from typing import TYPE_CHECKING
@@ -128,9 +133,9 @@ def _read_pipfile_lock():  # type: () -> Any
         with open(pipfile_lock_path) as input_file:
             content = json.load(input_file)
     except json.JSONDecodeError as exc:
-        raise FileReadError("Filed to parse Pipfile.lock: {}".format(str(exc))) from exc
+        raise FileReadError("Filed to parse Pipfile.lock: {}".format(str(exc)))
     except Exception as exc:
-        raise FileReadError(str(exc)) from exc
+        raise FileReadError(str(exc))
 
     pipfile_spec_version = content.get("_meta", {}).get("pipfile-spec")
     if pipfile_spec_version != 6:
@@ -147,7 +152,7 @@ def _read_pipfile():  # type: () -> Any
         raise ExtrasMissing(
             "Failed to import toml needed for parsing Pipfile, please install micropipenv "
             "with toml extra: pip install micropipenv[toml]"
-        ) from exc
+        )
 
     pipfile_path = _traverse_up_find_file("Pipfile")
 
@@ -155,9 +160,9 @@ def _read_pipfile():  # type: () -> Any
         with open(pipfile_path) as input_file:
             return toml.load(input_file)
     except toml.TomlDecodeError as exc:
-        raise FileReadError("Failed to parse Pipfile: {}".format(str(exc))) from exc
+        raise FileReadError("Failed to parse Pipfile: {}".format(str(exc)))
     except Exception as exc:
-        raise FileReadError(str(exc)) from exc
+        raise FileReadError(str(exc))
 
 
 def _compute_pipfile_hash(pipfile):  # type: (Dict[str, Any]) -> str
@@ -172,7 +177,7 @@ def _compute_pipfile_hash(pipfile):  # type: (Dict[str, Any]) -> str
 
 
 def install(
-    pipfile=None, pipfile_lock=None, *, deploy=False, dev=False, pip_args=None
+    pipfile=None, pipfile_lock=None, deploy=False, dev=False, pip_args=None
 ):  # type: (Optional[Dict[str, Any]], Optional[Dict[str, Any]], bool, bool, Optional[List[str]]) -> None
     """Perform installation of packages from Pipfile.lock."""
     pipfile_lock = pipfile_lock or _read_pipfile_lock()
@@ -202,7 +207,9 @@ def install(
     tmp_file = tempfile.NamedTemporaryFile("w", prefix="requirements.txt", delete=False)
     _LOGGER.debug("Using temporary file for storing requirements: %r", tmp_file.name)
 
-    cmd = [_PIP_BIN, "install", "--no-deps", "-r", tmp_file.name, *(pip_args or [])]
+    cmd = [_PIP_BIN, "install", "--no-deps", "-r", tmp_file.name]
+    if pip_args:
+        cmd.extend(pip_args)
     _LOGGER.debug("Requirements will be installed using %r", cmd)
 
     packages = chain(
@@ -268,7 +275,7 @@ def _parse_pipfile_dependency_info(pipfile_entry):  # type: (Union[str, Dict[str
 
 
 def get_requirements_sections(
-    *, pipfile=None, pipfile_lock=None, no_indexes=False, only_direct=False, no_default=False, no_dev=False
+    pipfile=None, pipfile_lock=None, no_indexes=False, only_direct=False, no_default=False, no_dev=False
 ):  # type: (Optional[Dict[str, Any]], Optional[Dict[str, Any]], bool, bool, bool, bool) -> Dict[str, Dict[str, Any]]
     """Compute requirements of an application, the output generated is compatible with pip-tools."""
     if no_dev and no_default:
@@ -311,7 +318,7 @@ def get_requirements_sections(
 
 
 def _get_package_entry_str(
-    package_name, info, *, no_hashes=False, no_versions=False
+    package_name, info, no_hashes=False, no_versions=False
 ):  # type: (str, Dict[str, Any], bool, bool) -> str
     """Print entry for the given package."""
     result = package_name
@@ -350,7 +357,6 @@ def _get_index_entry_str(sections):  # type: (Dict[str, Any]) -> str
 
 def requirements_str(
     sections=None,
-    *,
     no_hashes=False,
     no_indexes=False,
     no_versions=False,
@@ -383,7 +389,6 @@ def requirements_str(
 
 def requirements(
     sections=None,
-    *,
     no_hashes=False,
     no_indexes=False,
     no_versions=False,
@@ -446,7 +451,7 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
     )
     parser_install.set_defaults(func=install)
 
-    parser_requirements = subparsers.add_parser("requirements", aliases=["req"], help=requirements.__doc__)
+    parser_requirements = subparsers.add_parser("requirements", help=requirements.__doc__)
     parser_requirements.add_argument(
         "--no-hashes",
         help="Do not include hashes in the generated output.",
