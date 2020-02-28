@@ -122,7 +122,7 @@ def _traverse_up_find_file(file_name):  # type: (str) -> str
 
 
 def _read_pipfile_lock():  # type: () -> Any
-    """Find and load Pipfile.lock"""
+    """Find and load Pipfile.lock."""
     pipfile_lock_path = _traverse_up_find_file("Pipfile.lock")
     try:
         with open(pipfile_lock_path) as input_file:
