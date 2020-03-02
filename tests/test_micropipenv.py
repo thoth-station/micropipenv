@@ -19,18 +19,26 @@
 """Testsuite for micropipenv."""
 
 from contextlib import contextmanager
-from contextlib import redirect_stdout
 import flexmock
 import os
 import pytest
 import shutil
 import subprocess
+import sys
 
 import micropipenv
 
 
 _DATA_DIR = os.path.join(os.path.dirname(os.path.relpath(__file__)), "data")
 
+@contextmanager
+def redirect_stdout(target):
+    original = sys.stdout
+    sys.stdout = target
+    try:
+        yield
+    finally:
+        sys.stdout = original
 
 @contextmanager
 def cwd(target):
