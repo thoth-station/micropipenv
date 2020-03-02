@@ -17,7 +17,7 @@ def get_version():
     raise ValueError("No version identifier found")
 
 
-class Test(TestCommand):
+class Test(TestCommand, object):
     """Introduce test command to run testsuite using pytest."""
 
     _IMPLICIT_PYTEST_ARGS = [
@@ -35,11 +35,11 @@ class Test(TestCommand):
     user_options = [("pytest-args=", "a", "Arguments to pass into py.test")]
 
     def initialize_options(self):
-        super().initialize_options()
+        super(Test, self).initialize_options()
         self.pytest_args = None
 
     def finalize_options(self):
-        super().finalize_options()
+        super(Test, self).finalize_options()
         self.test_args = []
         self.test_suite = True
 
