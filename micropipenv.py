@@ -234,9 +234,9 @@ def install(
                 f.write(_get_package_entry_str(package_name, info))
 
             _LOGGER.debug("Installing %r", package_name)
-            called_process = subprocess.run(cmd)
+            return_code = subprocess.call(cmd)
 
-            if called_process.returncode != 0:
+            if return_code != 0:
                 if len(to_install) == 0 or (had_error and had_error > len(to_install)):
                     raise PipInstallError(
                         "Failed to install requirements, dependency {!r} could not be installed".format(package_name)
