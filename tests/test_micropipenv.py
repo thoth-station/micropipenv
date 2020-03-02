@@ -121,15 +121,15 @@ def test_install_deploy_error_hash():
 )
 def test_requirements(tmp_path, test, options, expected_file):
     """Test generating requirements out of Pipfile and Pipfile.lock."""
-    shutil.copyfile(os.path.join(_DATA_DIR, "requirements", test, "Pipfile"), os.path.join(tmp_path, "Pipfile"))
+    shutil.copyfile(os.path.join(_DATA_DIR, "requirements", test, "Pipfile"), os.path.join(str(tmp_path), "Pipfile"))
     shutil.copyfile(
-        os.path.join(_DATA_DIR, "requirements", test, "Pipfile.lock"), os.path.join(tmp_path, "Pipfile.lock")
+        os.path.join(_DATA_DIR, "requirements", test, "Pipfile.lock"), os.path.join(str(tmp_path), "Pipfile.lock")
     )
     expected_output_file_path = os.path.join(_DATA_DIR, "requirements", test, expected_file)
     with open(expected_output_file_path, "r") as f:
         expected = f.read()
 
-    with cwd(tmp_path):
+    with cwd(str(tmp_path)):
         with open("output.txt", "w") as f, redirect_stdout(f):
             micropipenv.requirements(**options)
         with open("output.txt", "r") as f:
