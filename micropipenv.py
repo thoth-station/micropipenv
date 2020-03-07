@@ -39,6 +39,7 @@ __all__ = [
     "install",
     "install_pipenv",
     "install_requirements",
+    "install_poetry",
     "main",
     "MicropipenvException",
     "PythonVersionMismatch",
@@ -57,10 +58,13 @@ from collections import deque
 from itertools import chain
 from urllib.parse import urlparse
 
+from pip._vendor.packaging.requirements import Requirement
+
 try:
     from pip._internal.req import parse_requirements
 except ImportError:  # for pip<10
     from pip.req import parse_requirements
+
 try:
     try:
         from pip._internal.network.session import PipSession
@@ -86,6 +90,7 @@ if TYPE_CHECKING:
     from typing import Dict
     from typing import List
     from typing import Optional
+    from typing import Tuple
     from typing import Union
 
 
@@ -136,6 +141,10 @@ class PipRequirementsNotLocked(MicropipenvException):
 
 class RequirementsError(MicropipenvException):
     """Raised when requirements file has any issue."""
+
+
+class PoetryError(MicropipenvException):
+    """Raised when any of the pyproject.toml or poetry.lock file has any issue."""
 
 
 def _traverse_up_find_file(file_name):  # type: (str) -> str
@@ -190,6 +199,38 @@ def _read_pipfile():  # type: () -> Any
         raise FileReadError("Failed to parse Pipfile: {}".format(str(exc))) from exc
     except Exception as exc:
         raise FileReadError(str(exc)) from exc
+
+
+def _read_poetry():  # type: () -> Tuple[Dict[str, Any], Dict[str, Any]]
+    """Find and read poetry.lock and pyproject.toml."""
+    try:
+        import toml
+    except ImportError as exc:
+        raise ExtrasMissing(
+            "Failed to import toml needed for parsing poetry.lock and pyproject.toml as used by Poetry, "
+            "please install micropipenv with toml extra: pip install micropipenv[toml]"
+        ) from exc
+
+    poetry_lock_path = _traverse_up_find_file("poetry.lock")
+    pyproject_toml_path = _traverse_up_find_file("pyproject.toml")
+
+    try:
+        with open(poetry_lock_path) as input_file:
+            poetry_lock = toml.load(input_file)
+    except toml.TomlDecodeError as exc:
+        raise FileReadError("Failed to parse poetry.lock: {}".format(str(exc))) from exc
+    except Exception as exc:
+        raise FileReadError(str(exc)) from exc
+
+    try:
+        with open(pyproject_toml_path) as input_file:
+            pyproject_toml = toml.load(input_file)
+    except toml.TomlDecodeError as exc:
+        raise FileReadError("Failed to parse pyproject.toml: {}".format(str(exc))) from exc
+    except Exception as exc:
+        raise FileReadError(str(exc)) from exc
+
+    return poetry_lock, pyproject_toml
 
 
 def _compute_pipfile_hash(pipfile):  # type: (Dict[str, Any]) -> str
@@ -413,7 +454,104 @@ def _maybe_print_pip_freeze():  # type: () -> None
         _LOGGER.warning("Failed to perform pip freeze to check installed dependencies, the error is not fatal")
 
 
-def install_requirements(pip_args=None):  # type: (Optional[List[str]]) -> None
+def _poetry2pipfile_lock():  # type: () -> Dict[str, Any]
+    """Convert Poetry files to Pipfile.lock as Pipenv would produce."""
+    poetry_lock, pyproject_toml = _read_poetry()
+
+    sources = []
+    has_default = False  # If default flag is set, it disallows PyPI.
+    for item in pyproject_toml.get("tool", {}).get("poetry", {}).get("source", []):
+        sources.append({
+            "name": item["name"],
+            "url": item["url"],
+            "verify_ssl": True,
+        })
+
+        has_default = has_default or item.get("default", False)
+
+    for index_url in reversed(_DEFAULT_INDEX_URLS) if not has_default else []:
+        # Place defaults as first.
+        entry = {
+            "url": index_url,
+            "name": hashlib.sha256(index_url.encode()).hexdigest(),
+            "verify_ssl": True
+        }
+        sources.insert(0, entry)
+
+    default = {}
+    develop = {}
+    for entry in poetry_lock["package"]:
+        hashes = []
+        for file_entry in poetry_lock["metadata"]["files"][entry["name"]]:
+            hashes.append(file_entry["hash"])
+
+        requirement = {
+            "hashes": hashes,
+            "version": "=={}".format(entry["version"]),
+        }
+
+        if entry.get("marker"):
+            requirement["markers"] = entry["marker"]
+
+        # Poetry does not store information about extras in poetry.lock
+        # (directly).  It stores extras used for direct dependencies in
+        # pyproject.toml but it lacks this info being tracked for the
+        # transitive ones. We approximate extras used - we check what
+        # dependencies are installed as optional. If they form a set with all
+        # dependencies present in specific extra, the given extra was used.
+        extra_dependencies = set()
+
+        for dependency_name, dependency_info in entry.get("dependencies", {}).items():
+            if isinstance(dependency_info, dict) and dependency_info.get("optional", False):
+                extra_dependencies.add(dependency_name)
+
+        for extra_name, extras_listed in entry.get("extras", {}).items():
+            # Turn requirement specification into the actual requirement name.
+            all_extra_dependencies = set(Requirement(r.split(" ", maxsplit=1)[0]).name for r in extras_listed)
+            if all_extra_dependencies.issubset(extra_dependencies):
+                if "extras" not in requirement:
+                    requirement["extras"] = []
+
+                requirement["extras"].append(extra_name)
+
+        # Sort extras to have always the same output.
+        if "extras" in requirement:
+            requirement["extras"] = sorted(requirement["extras"])
+
+        if entry["category"] == "main":
+            default[entry["name"]] = requirement
+        elif entry["category"] == "dev":
+            develop[entry["name"]] = requirement
+        else:
+            raise PoetryError("Unknown category for package {}: {}".format(entry["name"], entry["category"]))
+
+    return {
+        "_meta": {
+            "hash": {
+                "sha256": poetry_lock["metadata"]["content-hash"],
+            },
+            "pipfile-spec": 6,
+            "sources": sources,
+            "requires": {
+                "python_version": "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+            },
+        },
+        "default": default,
+        "develop": develop,
+    }
+
+
+def install_poetry(*, dev=False, pip_args=None):  # type: (bool, Optional[List[str]]) -> None
+    """Install requirements from poetry.lock."""
+    try:
+        pipfile_lock = _poetry2pipfile_lock()
+    except KeyError as exc:
+        raise PoetryError("Failed to parse poetry.lock and pyproject.toml: {}".format(str(exc))) from exc
+    _maybe_print_pipfile_lock(pipfile_lock)
+    install_pipenv(pipfile_lock=pipfile_lock, pip_args=pip_args, dev=dev, deploy=False)
+
+
+def install_requirements(*, pip_args=None):  # type: (Optional[List[str]]) -> None
     """Install requirements from requirements.txt."""
     requirements_txt_path = _traverse_up_find_file("requirements.txt")
 
@@ -450,9 +588,14 @@ def install(
             _traverse_up_find_file("requirements.txt")
             method = "requirements"
         except FileNotFound as exc:
-            _LOGGER.info("Failed to find requirements.txt file, looking up Pipfile.lock: %s", str(exc))
-            _traverse_up_find_file("Pipfile.lock")
-            method = "pipenv"
+            try:
+                _LOGGER.info("Failed to find requirements.txt file, looking up Pipfile.lock: %s", str(exc))
+                _traverse_up_find_file("Pipfile.lock")
+                method = "pipenv"
+            except FileNotFound as exc:
+                _LOGGER.info("Failed to find Pipfile.lock, looking up poetry.lock: %s", str(exc))
+                _traverse_up_find_file("poetry.lock")
+                method = "poetry"
 
     if method == "requirements":
         if deploy:
@@ -465,6 +608,12 @@ def install(
         return
     elif method == "pipenv":
         install_pipenv(deploy=deploy, dev=dev, pip_args=pip_args)
+        return
+    elif method == "poetry":
+        if deploy:
+            _LOGGER.debug("Discarding deploy flag when poetry.lock is used")
+
+        install_poetry(pip_args=pip_args, dev=dev)
         return
 
     raise MicropipenvException("Unhandled method for installing re")
@@ -661,7 +810,7 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
     parser_install.add_argument(
         "--method",
         help="Source of packages for the installation, perform detection if not provided.",
-        choices=["pipenv", "requirements"],
+        choices=["pipenv", "requirements", "poetry"],
     )
     parser_install.add_argument(
         "pip_args",
