@@ -37,6 +37,8 @@ __all__ = [
     "get_requirements_sections",
     "HashMismatch",
     "install",
+    "install_pipenv",
+    "install_requirements",
     "main",
     "MicropipenvException",
     "PythonVersionMismatch",
@@ -56,6 +58,25 @@ from itertools import chain
 from urllib.parse import urlparse
 
 try:
+    from pip._internal.req import parse_requirements
+except ImportError:  # for pip<10
+    from pip.req import parse_requirements
+try:
+    try:
+        from pip._internal.network.session import PipSession
+    except ImportError:
+        from pip._internal.download import PipSession
+except ImportError:
+    from pip.download import PipSession
+try:
+    from pip._internal.index.package_finder import PackageFinder
+except ImportError:
+    try:
+        from pip._internal.index import PackageFinder
+    except ImportError:
+        from pip.index import PackageFinder
+
+try:
     from typing import TYPE_CHECKING
 except ImportError:
     TYPE_CHECKING = False
@@ -69,9 +90,12 @@ if TYPE_CHECKING:
 
 
 _LOGGER = logging.getLogger(__title__)
+_DEFAULT_INDEX_URLS = ("https://pypi.org/simple",)
 _MAX_DIR_TRAVERSAL = 42  # Avoid any symlinks that would loop.
 _PIP_BIN = os.getenv("MICROPIPENV_PIP_BIN", "pip")
 _DEBUG = int(os.getenv("MICROPIPENV_DEBUG", 0))
+_NO_LOCKFILE_PRINT = int(os.getenv("MICROPIPENV_NO_LOCKFILE_PRINT", 0))
+_NO_LOCKFILE_WRITE = int(os.getenv("MICROPIPENV_NO_LOCKFILE_WRITE", 0))
 
 
 class MicropipenvException(Exception):
@@ -104,6 +128,14 @@ class HashMismatch(MicropipenvException):
 
 class PipInstallError(MicropipenvException):
     """Raised when `pip install` returned a non-zero exit code."""
+
+
+class PipRequirementsNotLocked(MicropipenvException):
+    """Raised when requirements in requirements.txt are not fully locked."""
+
+
+class RequirementsError(MicropipenvException):
+    """Raised when requirements file has any issue."""
 
 
 def _traverse_up_find_file(file_name):  # type: (str) -> str
@@ -171,7 +203,7 @@ def _compute_pipfile_hash(pipfile):  # type: (Dict[str, Any]) -> str
     return hashlib.sha256(content.encode("utf8")).hexdigest()
 
 
-def install(
+def install_pipenv(
     pipfile=None, pipfile_lock=None, *, deploy=False, dev=False, pip_args=None
 ):  # type: (Optional[Dict[str, Any]], Optional[Dict[str, Any]], bool, bool, Optional[List[str]]) -> None
     """Perform installation of packages from Pipfile.lock."""
@@ -202,12 +234,12 @@ def install(
     tmp_file = tempfile.NamedTemporaryFile("w", prefix="requirements.txt", delete=False)
     _LOGGER.debug("Using temporary file for storing requirements: %r", tmp_file.name)
 
-    cmd = [_PIP_BIN, "install", "--no-deps", "-r", tmp_file.name, *(pip_args or [])]
+    cmd = [_PIP_BIN, "install", "--no-deps", "--disable-pip-version-check", "-r", tmp_file.name, *(pip_args or [])]
     _LOGGER.debug("Requirements will be installed using %r", cmd)
 
     packages = chain(
         sections.get("default", {}).items(),
-        sections.get("develop", {}).items() if dev else []
+        sections.get("develop", {}).items() if dev else [],
     )
 
     # We maintain an integer assigned to each package - this integer holds a value - how
@@ -247,6 +279,195 @@ def install(
                     item["error"] = 0
     finally:
         os.remove(tmp_file.name)
+
+
+def _instantiate_package_finder(pip_session): # type: (PipSession) -> PackageFinder
+    """Instantiate package finder, in a pip>=10 and pip<10 compatible way."""
+    try:
+        return PackageFinder(find_links=[], session=pip_session, index_urls=_DEFAULT_INDEX_URLS)
+    except TypeError:  # API changed in pip>=10
+        from pip._internal.models.search_scope import SearchScope
+        from pip._internal.models.selection_prefs import SelectionPreferences
+        from pip._internal.index.collector import LinkCollector
+
+        link_collector = LinkCollector(
+            session=pip_session,
+            search_scope=SearchScope([], []),
+        )
+        selection_prefs = SelectionPreferences(
+            allow_yanked=True,
+        )
+        return PackageFinder.create(
+            link_collector=link_collector,
+            selection_prefs=selection_prefs,
+        )
+
+
+def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
+    """Parse requirements.txt file and return its Pipfile.lock representation."""
+    requirements_txt_path = _traverse_up_find_file("requirements.txt")
+
+    pip_session = PipSession()
+    finder = _instantiate_package_finder(pip_session)
+
+    result = {}
+    for requirement in parse_requirements(filename=requirements_txt_path, session=PipSession(), finder=finder):
+        version = str(requirement.specifier)
+
+        if not (requirement.has_hash_options and len(requirement.specifier) == 1 and version.startswith("==")):
+            # Not pinned down software stack using pip-tools.
+            raise PipRequirementsNotLocked
+
+        # We add all dependencies to default, develop should not be present in requirements.txt file, but rather
+        # in dev-requirements.txt or similar.
+        if requirement.name in result:
+            raise RequirementsError("Duplicate entry for requirement {}".format(requirement.name))
+
+        if hasattr(requirement, "options"):
+            hash_options = requirement.options.get("hashes")
+        else:
+            hash_options = requirement.hash_options  # More recent pip.
+
+        hashes = []
+        for hash_type, hashes_present in hash_options.items():
+            hashes.extend(["{}:{}".format(hash_type, h) for h in hashes_present])
+
+        entry = {
+            "hashes": sorted(hashes),
+            "version": version,
+        }
+
+        if requirement.extras:
+            entry["extras"] = sorted(requirement.extras)
+
+        if requirement.markers:
+            entry["markers"] = requirement.markers
+
+        result[requirement.name] = entry
+
+    sources = []
+    for index_url in chain(finder.index_urls, _DEFAULT_INDEX_URLS):
+        if any(s["url"] == index_url for s in sources):
+            continue
+
+        sources.append({
+            "name": hashlib.sha256(index_url.encode()).hexdigest(),
+            "url": index_url,
+            "verify_ssl": True,
+        })
+
+    if len(sources) == 1:
+        # Explicitly assign index if there is just one.
+        for entry in result.values():
+            entry["index"] = sources[0]["name"]
+
+    with open(requirements_txt_path, "r") as requirements_file:
+        requirements_hash = hashlib.sha256(requirements_file.read().encode()).hexdigest()
+
+    return {
+        "_meta": {
+            "hash": {
+                "sha256": requirements_hash,
+            },
+            "pipfile-spec": 6,
+            "sources": sources,
+            "requires": {
+                "python_version": "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+            },
+        },
+        "default": result,
+        "develop": {}
+    }
+
+
+def _maybe_print_pipfile_lock(pipfile_lock):  # type: (Dict[str, Any]) -> None
+    """Print and store Pipfile.lock based on configuration supplied."""
+    if _NO_LOCKFILE_PRINT and _NO_LOCKFILE_WRITE:
+        return
+
+    pipfile_lock_json = json.dumps(pipfile_lock, sort_keys=True, indent=4)
+
+    if not _NO_LOCKFILE_PRINT:
+        print("-" * 33 + "- Pipfile.lock -" + "-" * 33, file=sys.stderr)
+        print(pipfile_lock_json, file=sys.stderr)
+        print("-" * 33 + "- Pipfile.lock -" + "-" * 33, file=sys.stderr)
+
+    if not _NO_LOCKFILE_WRITE:
+        try:
+            with open("Pipfile.lock", "w") as lock_file:
+                lock_file.write(pipfile_lock_json)
+        except Exception as exc:
+            _LOGGER.warning("Failed to write lockfile to container image: %s", str(exc))
+
+
+def _maybe_print_pip_freeze():  # type: () -> None
+    """Print and store requirements.txt based on configuration supplied."""
+    if _NO_LOCKFILE_PRINT:
+        return
+
+    print("-" * 33 + "- pip freeze -" + "-" * 33, file=sys.stderr)
+    cmd = [_PIP_BIN, "freeze", "--disable-pip-version-check"]
+    called_process = subprocess.run(cmd)
+    print("-" * 33 + "- pip freeze -" + "-" * 33, file=sys.stderr)
+    if called_process.returncode != 0:
+        _LOGGER.warning("Failed to perform pip freeze to check installed dependencies, the error is not fatal")
+
+
+def install_requirements(pip_args=None):  # type: (Optional[List[str]]) -> None
+    """Install requirements from requirements.txt."""
+    requirements_txt_path = _traverse_up_find_file("requirements.txt")
+
+    try:
+        pipfile_lock = _requirements2pipfile_lock()
+        _maybe_print_pipfile_lock(pipfile_lock)
+        # Deploy set to false as there is no Pipfile to check against.
+        install_pipenv(pipfile_lock=pipfile_lock, pip_args=pip_args, deploy=False)
+    except PipRequirementsNotLocked:
+        _LOGGER.warning("!"*80)
+        _LOGGER.warning("!!!")
+        _LOGGER.warning("!!!\t\tThe provided requirements.txt file is not fully locked")
+        _LOGGER.warning("!!!")
+        _LOGGER.warning("!"*80)
+
+        cmd = [_PIP_BIN, "install", "-r", requirements_txt_path, "--disable-pip-version-check", *(pip_args or [])]
+        _LOGGER.debug("Requirements will be installed using %r", cmd)
+        called_process = subprocess.run(cmd)
+        if called_process.returncode != 0:
+            raise PipInstallError(
+                "Failed to install requirements, it's highly recommended to use a lock file to "
+                "to make sure correct dependencies are installed in the correct order"
+            )
+
+        _maybe_print_pip_freeze()
+
+
+def install(
+    method=None, *, deploy=False, dev=False, pip_args=None
+):  # type: (Optional[str], bool, bool, Optional[List[str]]) -> None
+    """Perform installation of requirements based on the method used."""
+    if method is None:
+        try:
+            _traverse_up_find_file("requirements.txt")
+            method = "requirements"
+        except FileNotFound as exc:
+            _LOGGER.info("Failed to find requirements.txt file, looking up Pipfile.lock: %s", str(exc))
+            _traverse_up_find_file("Pipfile.lock")
+            method = "pipenv"
+
+    if method == "requirements":
+        if deploy:
+            _LOGGER.debug("Discarding deploy flag when requirements.txt are used")
+
+        if dev:
+            _LOGGER.debug("Discarding dev flag when requirements.txt are used")
+
+        install_requirements(pip_args=pip_args)
+        return
+    elif method == "pipenv":
+        install_pipenv(deploy=deploy, dev=dev, pip_args=pip_args)
+        return
+
+    raise MicropipenvException("Unhandled method for installing re")
 
 
 def _parse_pipfile_dependency_info(pipfile_entry):  # type: (Union[str, Dict[str, Any]]) -> Dict[str, Any]
@@ -436,6 +657,11 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
         action="store_true",
         required=False,
         default=bool(int(os.getenv("MICROPIPENV_DEV", os.getenv("PIPENV_DEV", 0)))),
+    )
+    parser_install.add_argument(
+        "--method",
+        help="Source of packages for the installation, perform detection if not provided.",
+        choices=["pipenv", "requirements"],
     )
     parser_install.add_argument(
         "pip_args",
