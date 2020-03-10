@@ -33,10 +33,10 @@ Why should I use ``micropipenv`` instead of `Pipenv <https://github.com/pypa/pip
 
 The tool supports installing dependencies of the following formats:
 
- * ``Pipenv`` style lock format - files ``Pipfile`` and ``Pipfile.lock``
- * ``Poetry`` style lock format - files ``pyproject.toml`` and ``poetry.lock``
- * ``pip-tools`` style lock format - file ``requirements.txt``
- * raw ``requirements.txt`` as used by ``pip`` (not a lock file)
+* ``Pipenv`` style lock format - files ``Pipfile`` and ``Pipfile.lock``
+* ``Poetry`` style lock format - files ``pyproject.toml`` and ``poetry.lock``
+* ``pip-tools`` style lock format - file ``requirements.txt``
+* raw ``requirements.txt`` as used by ``pip`` (not a lock file)
 
 In case of Pipenv, Poetry and pip-tools style format, the tool performs
 automatic recovery if the installation order of dependencies is relevant (one
@@ -47,9 +47,9 @@ To enforce the installation method used, specify ``--method`` option to the
 from the current working directory and looks for the relevant files in the
 following order:
 
- 1. ``requirements.txt`` for ``pip-tools`` and raw ``pip`` requirements
- 2. ``Pipfile.lock`` and optionally ``Pipfile`` (if ``--deploy`` set)
- 2. ``poetry.lock`` and ``pyproject.toml``
+1. ``requirements.txt`` for ``pip-tools`` and raw ``pip`` requirements
+2. ``Pipfile.lock`` and optionally ``Pipfile`` (if ``--deploy`` set)
+3. ``poetry.lock`` and ``pyproject.toml``
 
 To install dependencies issue the following command:
 
@@ -168,14 +168,15 @@ alternate ``pip`` binary.
 To run this tool in a verbose mode, you can set the ``MICROPIPENV_DEBUG=1`` (the
 same behavior can be achieved with multiple ``--verbose`` supplied).
 
-The tool prints software stack information to standard error output. This was
+The tool prints software stack information to the standard error output. This was
 designed for Thoth to capture information about installed dependencies as a
 useful source of information for Thoth's build analyzers. This behaviour can be
 suppressed by setting ``MICROPIPENV_NO_LOCKFILE_PRINT=1`` environment variable.
 
 Besides printing, the tool also writes the content of Pipfile.lock (if a locked
-software stack is used). This behaviour can be suppressed by providing
-``MICROPIPENV_NO_LOCKFILE_WRITE=1`` environment variable.
+software stack is used) to the directory where lock files are present (for Pipenv
+files, the Pipfile.lock is kept untouched). This behaviour can be suppressed by
+providing ``MICROPIPENV_NO_LOCKFILE_WRITE=1`` environment variable.
 
 Installation
 ============
@@ -190,7 +191,7 @@ installing it using ``pip`` works as expected:
 The default installation does not bring any dependencies so its just
 ``micropipenv`` that gets installed. However, the default installation supports
 only ``Pipfile.lock`` management. If you would like to manipulate also with
-``Pipfile`` or Poetry specific flock files, you will need to install
+``Pipfile`` or Poetry specific lock files, you will need to install
 ``micropipenv`` with TOML support (TOML is not in the standard Python library):
 
 .. code-block:: console
