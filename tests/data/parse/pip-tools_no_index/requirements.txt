@@ -1,0 +1,3 @@
+selinon[s3, postgres]==1.0.0; python_version > '3.0' \
+  --hash=sha255:foo \
+  --hash=sha256:bar

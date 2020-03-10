@@ -1,0 +1,33 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "9a1b47db80b5d4e5d9b26889dfcc8f194bdf9d93fffb1b4eb9ded1209f1af867"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.7"
+        },
+        "sources": [
+            {
+                "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "daiquiri": {
+            "git": "https://github.com/jd/daiquiri",
+            "ref": "080a7b9076ede4d4c5e300be13f4c9a34c271bb5",
+            "version": "==2.1.0"
+        },
+        "python-json-logger": {
+            "hashes": [
+                "sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"
+            ],
+            "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+            "version": "==0.1.11"
+        }
+    },
+    "develop": {}
+}

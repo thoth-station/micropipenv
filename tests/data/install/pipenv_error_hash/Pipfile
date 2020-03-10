@@ -1,7 +1,9 @@
 [[source]]
+name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-name = "pypi"
+
+[dev-packages]
 
 [packages]
-requests = "*"
+requests = "==1.0.0"

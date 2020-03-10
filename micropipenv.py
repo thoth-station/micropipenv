@@ -89,6 +89,7 @@ if TYPE_CHECKING:
     from typing import Any
     from typing import Dict
     from typing import List
+    from typing import MutableMapping
     from typing import Optional
     from typing import Tuple
     from typing import Union
@@ -201,7 +202,7 @@ def _read_pipfile():  # type: () -> Any
         raise FileReadError(str(exc)) from exc
 
 
-def _read_poetry():  # type: () -> Tuple[Dict[str, Any], Dict[str, Any]]
+def _read_poetry():  # type: () -> Tuple[MutableMapping[str, Any], MutableMapping[str, Any]]
     """Find and read poetry.lock and pyproject.toml."""
     try:
         import toml
@@ -245,10 +246,11 @@ def _compute_pipfile_hash(pipfile):  # type: (Dict[str, Any]) -> str
 
 
 def install_pipenv(
-    pipfile=None, pipfile_lock=None, *, deploy=False, dev=False, pip_args=None
-):  # type: (Optional[Dict[str, Any]], Optional[Dict[str, Any]], bool, bool, Optional[List[str]]) -> None
+    pip_bin=_PIP_BIN, pipfile=None, pipfile_lock=None, *, deploy=False, dev=False, pip_args=None
+):  # type: (str, Optional[Dict[str, Any]], Optional[Dict[str, Any]], bool, bool, Optional[List[str]]) -> None
     """Perform installation of packages from Pipfile.lock."""
     pipfile_lock = pipfile_lock or _read_pipfile_lock()
+    _maybe_print_pipfile_lock(pipfile_lock)
 
     sections = get_requirements_sections(pipfile_lock=pipfile_lock, no_dev=not dev)
     if deploy:
@@ -275,13 +277,10 @@ def install_pipenv(
     tmp_file = tempfile.NamedTemporaryFile("w", prefix="requirements.txt", delete=False)
     _LOGGER.debug("Using temporary file for storing requirements: %r", tmp_file.name)
 
-    cmd = [_PIP_BIN, "install", "--no-deps", "--disable-pip-version-check", "-r", tmp_file.name, *(pip_args or [])]
+    cmd = [pip_bin, "install", "--no-deps", "--disable-pip-version-check", "-r", tmp_file.name, *(pip_args or [])]
     _LOGGER.debug("Requirements will be installed using %r", cmd)
 
-    packages = chain(
-        sections.get("default", {}).items(),
-        sections.get("develop", {}).items() if dev else [],
-    )
+    packages = chain(sections.get("default", {}).items(), sections.get("develop", {}).items() if dev else [],)
 
     # We maintain an integer assigned to each package - this integer holds a value - how
     # many times the given package failed to install. If a package fails to install, it is
@@ -297,9 +296,13 @@ def install_pipenv(
 
             with open(tmp_file.name, "w") as f:
                 f.write(index_config_str)
-                f.write(_get_package_entry_str(package_name, info))
+                package_entry_str = _get_package_entry_str(package_name, info)
+                f.write(package_entry_str)
 
-            _LOGGER.debug("Installing %r", package_name)
+            if "git" in info:
+                _LOGGER.warning("!!! Requirement %s%s uses a VCS version", package_name, info["version"])
+
+            _LOGGER.info("Installing %r", package_entry_str)
             called_process = subprocess.run(cmd)
 
             if called_process.returncode != 0:
@@ -322,26 +325,22 @@ def install_pipenv(
         os.remove(tmp_file.name)
 
 
-def _instantiate_package_finder(pip_session): # type: (PipSession) -> PackageFinder
+def _instantiate_package_finder(pip_session):  # type: (PipSession) -> PackageFinder
     """Instantiate package finder, in a pip>=10 and pip<10 compatible way."""
     try:
         return PackageFinder(find_links=[], session=pip_session, index_urls=_DEFAULT_INDEX_URLS)
     except TypeError:  # API changed in pip>=10
         from pip._internal.models.search_scope import SearchScope
         from pip._internal.models.selection_prefs import SelectionPreferences
-        from pip._internal.index.collector import LinkCollector
 
-        link_collector = LinkCollector(
-            session=pip_session,
-            search_scope=SearchScope([], []),
-        )
-        selection_prefs = SelectionPreferences(
-            allow_yanked=True,
-        )
-        return PackageFinder.create(
-            link_collector=link_collector,
-            selection_prefs=selection_prefs,
-        )
+        try:
+            from pip._internal.index.collector import LinkCollector
+        except ModuleNotFoundError:
+            from pip._internal.collector import LinkCollector
+
+        link_collector = LinkCollector(session=pip_session, search_scope=SearchScope([], []),)
+        selection_prefs = SelectionPreferences(allow_yanked=True,)
+        return PackageFinder.create(link_collector=link_collector, selection_prefs=selection_prefs,)
 
 
 def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
@@ -351,11 +350,13 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
     pip_session = PipSession()
     finder = _instantiate_package_finder(pip_session)
 
-    result = {}
+    result = {}  # type: Dict[str, Any]
     for requirement in parse_requirements(filename=requirements_txt_path, session=PipSession(), finder=finder):
         version = str(requirement.specifier)
 
-        if not (requirement.has_hash_options and len(requirement.specifier) == 1 and version.startswith("==")):
+        if requirement.specifier is None or not (
+            requirement.has_hash_options and len(requirement.specifier) == 1 and version.startswith("==")
+        ):
             # Not pinned down software stack using pip-tools.
             raise PipRequirementsNotLocked
 
@@ -382,20 +383,18 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
             entry["extras"] = sorted(requirement.extras)
 
         if requirement.markers:
-            entry["markers"] = requirement.markers
+            entry["markers"] = str(requirement.markers)
 
         result[requirement.name] = entry
 
-    sources = []
+    sources = []  # type: List[Dict[str, Any]]
     for index_url in chain(finder.index_urls, _DEFAULT_INDEX_URLS):
         if any(s["url"] == index_url for s in sources):
             continue
 
-        sources.append({
-            "name": hashlib.sha256(index_url.encode()).hexdigest(),
-            "url": index_url,
-            "verify_ssl": True,
-        })
+        sources.append(
+            {"name": hashlib.sha256(index_url.encode()).hexdigest(), "url": index_url, "verify_ssl": True}
+        )
 
     if len(sources) == 1:
         # Explicitly assign index if there is just one.
@@ -407,17 +406,13 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
 
     return {
         "_meta": {
-            "hash": {
-                "sha256": requirements_hash,
-            },
+            "hash": {"sha256": requirements_hash},
             "pipfile-spec": 6,
             "sources": sources,
-            "requires": {
-                "python_version": "{}.{}".format(sys.version_info.major, sys.version_info.minor)
-            },
+            "requires": {"python_version": "{}.{}".format(sys.version_info.major, sys.version_info.minor)},
         },
         "default": result,
-        "develop": {}
+        "develop": {},
     }
 
 
@@ -441,13 +436,13 @@ def _maybe_print_pipfile_lock(pipfile_lock):  # type: (Dict[str, Any]) -> None
             _LOGGER.warning("Failed to write lockfile to container image: %s", str(exc))
 
 
-def _maybe_print_pip_freeze():  # type: () -> None
+def _maybe_print_pip_freeze(pip_bin):  # type: (str) -> None
     """Print and store requirements.txt based on configuration supplied."""
     if _NO_LOCKFILE_PRINT:
         return
 
     print("-" * 33 + "- pip freeze -" + "-" * 33, file=sys.stderr)
-    cmd = [_PIP_BIN, "freeze", "--disable-pip-version-check"]
+    cmd = [pip_bin, "freeze", "--disable-pip-version-check"]
     called_process = subprocess.run(cmd)
     print("-" * 33 + "- pip freeze -" + "-" * 33, file=sys.stderr)
     if called_process.returncode != 0:
@@ -461,11 +456,9 @@ def _poetry2pipfile_lock():  # type: () -> Dict[str, Any]
     sources = []
     has_default = False  # If default flag is set, it disallows PyPI.
     for item in pyproject_toml.get("tool", {}).get("poetry", {}).get("source", []):
-        sources.append({
-            "name": item["name"],
-            "url": item["url"],
-            "verify_ssl": True,
-        })
+        sources.append(
+            {"name": item["name"], "url": item["url"], "verify_ssl": True}
+        )
 
         has_default = has_default or item.get("default", False)
 
@@ -474,8 +467,8 @@ def _poetry2pipfile_lock():  # type: () -> Dict[str, Any]
         entry = {
             "url": index_url,
             "name": hashlib.sha256(index_url.encode()).hexdigest(),
-            "verify_ssl": True
-        }
+            "verify_ssl": True,
+        }  # type: Any
         sources.insert(0, entry)
 
     default = {}
@@ -485,13 +478,22 @@ def _poetry2pipfile_lock():  # type: () -> Dict[str, Any]
         for file_entry in poetry_lock["metadata"]["files"][entry["name"]]:
             hashes.append(file_entry["hash"])
 
-        requirement = {
-            "hashes": hashes,
-            "version": "=={}".format(entry["version"]),
-        }
+        requirement = {"version": "=={}".format(entry["version"])}  # type: Any
+
+        if hashes:
+            requirement["hashes"] = hashes
 
         if entry.get("marker"):
             requirement["markers"] = entry["marker"]
+
+        if "source" in entry:
+            if entry["source"]["type"] != "git":
+                raise NotImplementedError(
+                    "Micropipenv supports Git VCS, got {} instead".format(entry["source"]["type"])
+                )
+
+            requirement["git"] = entry["source"]["url"]
+            requirement["ref"] = entry["source"]["reference"]
 
         # Poetry does not store information about extras in poetry.lock
         # (directly).  It stores extras used for direct dependencies in
@@ -528,51 +530,46 @@ def _poetry2pipfile_lock():  # type: () -> Dict[str, Any]
     if len(sources) == 1:
         # Explicitly assign index if there is just one.
         for entry in chain(default.values(), develop.values()):
-            entry["index"] = sources[0]["name"]
+            if "git" not in entry:
+                entry["index"] = sources[0]["name"]
 
     return {
         "_meta": {
-            "hash": {
-                "sha256": poetry_lock["metadata"]["content-hash"],
-            },
+            "hash": {"sha256": poetry_lock["metadata"]["content-hash"]},
             "pipfile-spec": 6,
             "sources": sources,
-            "requires": {
-                "python_version": "{}.{}".format(sys.version_info.major, sys.version_info.minor)
-            },
+            "requires": {"python_version": "{}.{}".format(sys.version_info.major, sys.version_info.minor)},
         },
         "default": default,
         "develop": develop,
     }
 
 
-def install_poetry(*, dev=False, pip_args=None):  # type: (bool, Optional[List[str]]) -> None
+def install_poetry(pip_bin=_PIP_BIN, *, dev=False, pip_args=None):  # type: (str, bool, Optional[List[str]]) -> None
     """Install requirements from poetry.lock."""
     try:
         pipfile_lock = _poetry2pipfile_lock()
     except KeyError as exc:
         raise PoetryError("Failed to parse poetry.lock and pyproject.toml: {}".format(str(exc))) from exc
-    _maybe_print_pipfile_lock(pipfile_lock)
-    install_pipenv(pipfile_lock=pipfile_lock, pip_args=pip_args, dev=dev, deploy=False)
+    install_pipenv(pip_bin, pipfile_lock=pipfile_lock, pip_args=pip_args, dev=dev, deploy=False)
 
 
-def install_requirements(*, pip_args=None):  # type: (Optional[List[str]]) -> None
+def install_requirements(pip_bin=_PIP_BIN, *, pip_args=None):  # type: (str, Optional[List[str]]) -> None
     """Install requirements from requirements.txt."""
     requirements_txt_path = _traverse_up_find_file("requirements.txt")
 
     try:
         pipfile_lock = _requirements2pipfile_lock()
-        _maybe_print_pipfile_lock(pipfile_lock)
         # Deploy set to false as there is no Pipfile to check against.
-        install_pipenv(pipfile_lock=pipfile_lock, pip_args=pip_args, deploy=False)
+        install_pipenv(pip_bin, pipfile_lock=pipfile_lock, pip_args=pip_args, deploy=False)
     except PipRequirementsNotLocked:
-        _LOGGER.warning("!"*80)
+        _LOGGER.warning("!" * 80)
         _LOGGER.warning("!!!")
         _LOGGER.warning("!!!\t\tThe provided requirements.txt file is not fully locked")
         _LOGGER.warning("!!!")
-        _LOGGER.warning("!"*80)
+        _LOGGER.warning("!" * 80)
 
-        cmd = [_PIP_BIN, "install", "-r", requirements_txt_path, "--disable-pip-version-check", *(pip_args or [])]
+        cmd = [pip_bin, "install", "-r", requirements_txt_path, "--disable-pip-version-check", *(pip_args or [])]
         _LOGGER.debug("Requirements will be installed using %r", cmd)
         called_process = subprocess.run(cmd)
         if called_process.returncode != 0:
@@ -581,7 +578,7 @@ def install_requirements(*, pip_args=None):  # type: (Optional[List[str]]) -> No
                 "to make sure correct dependencies are installed in the correct order"
             )
 
-        _maybe_print_pip_freeze()
+        _maybe_print_pip_freeze(pip_bin)
 
 
 def install(
@@ -621,7 +618,7 @@ def install(
         install_poetry(pip_args=pip_args, dev=dev)
         return
 
-    raise MicropipenvException("Unhandled method for installing re")
+    raise MicropipenvException("Unhandled method for installing requirements: {}".format(method))
 
 
 def _parse_pipfile_dependency_info(pipfile_entry):  # type: (Union[str, Dict[str, Any]]) -> Dict[str, Any]
@@ -689,8 +686,14 @@ def _get_package_entry_str(
     package_name, info, *, no_hashes=False, no_versions=False
 ):  # type: (str, Dict[str, Any], bool, bool) -> str
     """Print entry for the given package."""
-    result = package_name
+    if "git" in info:  # A special case for a VCS package
+        result = "git+{}".format(info["git"])
+        if "ref" in info:
+            result += "@{}".format(info["ref"])
+        result += "#egg={}".format(package_name)
+        return result
 
+    result = package_name
     if info.get("extras"):
         result += "[{}]".format(",".join(info["extras"]))
 
@@ -757,6 +760,7 @@ def requirements_str(
 
 
 def requirements(
+    method="pipenv",
     sections=None,
     *,
     no_hashes=False,
@@ -766,11 +770,17 @@ def requirements(
     no_default=False,
     no_dev=False,
     no_comments=False,
-):  # type: (Optional[Dict[str, Any]], bool, bool, bool, bool, bool, bool, bool) -> None
+):  # type: (str, Optional[Dict[str, Any]], bool, bool, bool, bool, bool, bool, bool) -> None
     """Show requirements of an application, the output generated is compatible with pip-tools."""
-    sections = sections or get_requirements_sections(
-        no_indexes=no_indexes, only_direct=only_direct, no_default=no_default, no_dev=no_dev
-    )
+    if method == "pipenv":
+        sections = sections or get_requirements_sections(
+            no_indexes=no_indexes, only_direct=only_direct, no_default=no_default, no_dev=no_dev
+        )
+    elif method == "poetry":
+        sections = _poetry2pipfile_lock()
+    else:
+        raise MicropipenvException("Unhandled method for installing requirements: {}".format(method))
+
     print(
         requirements_str(
             sections,
@@ -816,12 +826,13 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
         "--method",
         help="Source of packages for the installation, perform detection if not provided.",
         choices=["pipenv", "requirements", "poetry"],
+        default=os.getenv("MICROPIPENV_METHOD", "pipenv")
     )
     parser_install.add_argument(
         "pip_args",
         help="Specify additional argument to pip, can be supplied multiple times (add "
-             "'--' to command line to delimit positional arguments that start with dash "
-             "from CLI options).",
+        "'--' to command line to delimit positional arguments that start with dash "
+        "from CLI options).",
         nargs="*",
     )
     parser_install.set_defaults(func=install)
@@ -876,6 +887,12 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
         action="store_true",
         required=False,
         default=bool(int(os.getenv("MICROPIPENV_NO_DEV", 0))),
+    )
+    parser_requirements.add_argument(
+        "--method",
+        help="Source of packages for the requirements file, perform detection if not provided.",
+        choices=["pipenv", "poetry"],
+        default=os.getenv("MICROPIPENV_METHOD", "pipenv")
     )
     parser_requirements.set_defaults(func=requirements)
 
