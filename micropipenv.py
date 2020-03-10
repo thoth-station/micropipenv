@@ -525,6 +525,11 @@ def _poetry2pipfile_lock():  # type: () -> Dict[str, Any]
         else:
             raise PoetryError("Unknown category for package {}: {}".format(entry["name"], entry["category"]))
 
+    if len(sources) == 1:
+        # Explicitly assign index if there is just one.
+        for entry in chain(default.values(), develop.values()):
+            entry["index"] = sources[0]["name"]
+
     return {
         "_meta": {
             "hash": {
