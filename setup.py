@@ -21,7 +21,7 @@ class Test(TestCommand):
     """Introduce test command to run testsuite using pytest."""
 
     _IMPLICIT_PYTEST_ARGS = [
-        "--timeout=5",
+        "--timeout=300",
         "--mypy",
         "micropipenv.py",
         "--capture=no",

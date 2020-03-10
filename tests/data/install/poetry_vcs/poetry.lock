@@ -1,0 +1,36 @@
+[[package]]
+category = "main"
+description = "Library to configure Python logging easily"
+name = "daiquiri"
+optional = false
+python-versions = "*"
+version = "2.1.0"
+
+[package.dependencies]
+python-json-logger = "*"
+
+[package.extras]
+systemd = ["systemd-python (>=234)"]
+test = ["pytest", "six", "mock"]
+
+[package.source]
+reference = "080a7b9076ede4d4c5e300be13f4c9a34c271bb5"
+type = "git"
+url = "https://github.com/jd/daiquiri"
+[[package]]
+category = "main"
+description = "A python library adding a json log formatter"
+name = "python-json-logger"
+optional = false
+python-versions = ">=2.7"
+version = "0.1.11"
+
+[metadata]
+content-hash = "9a1b47db80b5d4e5d9b26889dfcc8f194bdf9d93fffb1b4eb9ded1209f1af867"
+python-versions = "^3.7"
+
+[metadata.files]
+daiquiri = []
+python-json-logger = [
+    {file = "python-json-logger-0.1.11.tar.gz", hash = "sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"},
+]

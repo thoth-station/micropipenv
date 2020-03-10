@@ -1,0 +1,5 @@
+micropipenv==1.0.0; python_version >= '3' --hash=sha256:baz
+hexsticker==1.0.0 --hash=sha256:foobar
+selinon[s3, postgres]==1.0.0; python_version >= '3.0' or python_version == '2.7' \
+  --hash=sha256:foo \
+  --hash=sha256:bar

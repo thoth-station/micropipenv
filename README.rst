@@ -1,8 +1,9 @@
 µPipenv
 -------
 
-A lightweight wrapper for pip to support Pipenv files or converting them to
-`pip-tools <https://pypi.org/project/pip-tools/>`_ compatible output.
+A lightweight wrapper for pip to support Pipenv and Poetry lock files or
+converting them to `pip-tools <https://pypi.org/project/pip-tools/>`_
+compatible output.
 
 
 micropipenv use cases
@@ -10,11 +11,11 @@ micropipenv use cases
 
 Why should I use ``micropipenv`` instead of `Pipenv <https://github.com/pypa/pipenv>`_?
 
-* I would like to convert files produced by Pipenv to a pip-tools compatible
-  output.
+* I would like to convert files produced by Pipenv/Poetry to a pip-tools
+  compatible output.
 
-* I don't want to install Pipenv, but I would like to run a project that uses
-  Pipenv for dependency management (e.g. restricted environments).
+* I don't want to install Pipenv/Poetry, but I would like to run a project that
+  uses Pipenv/Poetry for dependency management (e.g. restricted environments).
 
 * My Pipenv installation is broken and `Pipenv upstream did not issue any new
   Pipenv release <https://github.com/pypa/pipenv/issues/4058>`_ - see also
@@ -22,23 +23,51 @@ Why should I use ``micropipenv`` instead of `Pipenv <https://github.com/pypa/pip
   possible fix.
 
 * I would like to deploy my application into a production environment and my
-  application dependencies are managed by Pipenv (dependencies are already
-  resolved), but I don't want to run Pipenv in production (e.g. OpenShift's s2i
-  build process).
+  application dependencies are managed by Pipenv/Poetry (dependencies are
+  already resolved), but I don't want to run Pipenv/Poetry in production (e.g.
+  OpenShift's s2i build process).
 
 
 ``micropipenv install``
 =======================
 
-You can install dependencies found in ``Pipfile.lock`` by issuing:
+The tool supports installing dependencies of the following formats:
+
+ * ``Pipenv`` style lock format - files ``Pipfile`` and ``Pipfile.lock``
+ * ``Poetry`` style lock format - files ``pyproject.toml`` and ``poetry.lock``
+ * ``pip-tools`` style lock format - file ``requirements.txt``
+ * raw ``requirements.txt`` as used by ``pip`` (not a lock file)
+
+In case of Pipenv, Poetry and pip-tools style format, the tool performs
+automatic recovery if the installation order of dependencies is relevant (one
+dependency fails to install as it depends on an another one).
+
+To enforce the installation method used, specify ``--method`` option to the
+``install`` subcommand. By default, ``micropipenv`` traverses the filesystem up
+from the current working directory and looks for the relevant files in the
+following order:
+
+ 1. ``requirements.txt`` for ``pip-tools`` and raw ``pip`` requirements
+ 2. ``Pipfile.lock`` and optionally ``Pipfile`` (if ``--deploy`` set)
+ 2. ``poetry.lock`` and ``pyproject.toml``
+
+To install dependencies issue the following command:
 
 .. code-block:: console
 
   micropipenv install --dev  # --dev is optional
 
-``micropipenv`` does not create any virtual environment as in case of Pipenv.
-It rather directly talks to ``pip``, if necessary, and constructs arguments for
-it out of ``Pipfile.lock`` file.
+You can supply additional positional arguments that will be passed to ``pip``.
+Use double dashes to distinguish ``pip`` options from ``micropipenv`` options.
+
+.. code-block::
+
+  # issue `pip install --user'
+  micropipenv install -- --user
+
+``micropipenv`` does not create any virtual environment as in case of
+Pipenv/Poetry.  It rather directly talks to ``pip``, if necessary, and
+constructs arguments out of the lock file used.
 
 To create a virtual environment to be used by ``micropipenv``:
 
@@ -46,6 +75,9 @@ To create a virtual environment to be used by ``micropipenv``:
 
   python3 -m venv venv/ && . venv/bin/activate
 
+
+``micropipenv install --deploy``
+================================
 
 If you wish to mimic ``pipenv --deploy`` functionality, you can do so:
 
@@ -58,15 +90,15 @@ corresponds to Pipefile.lock used (digest computed on ``Pipfile`` content).
 ``micropipenv`` requires toml extras for this functionality, so you will need
 to install ``micropipenv[toml]`` (see installation instructions bellow).
 
-You can supply additional positional arguments that will be passed to ``pip``.
-Use double dashes to distinguish ``pip`` options from ``micropipenv`` options.
+The ``--deploy`` option takes no effect for Poetry and requirements
+installation methods.
 
-.. code-block::
 
-  # issue `pip install --user'
-  micropipenv install -- --user
+``micropipenv install --dev``
+================================
 
-See ``micropipenv install --help`` for more info.
+Installation of "development" dependnecies can be acomplished using the
+``--dev`` flag. This flag has no effect when ``requirements.txt`` file is used.
 
 
 ``micropipenv requirements`` / ``micropipenv req``
@@ -78,6 +110,8 @@ To generate output compatible with `pip-tools
 .. code-block:: console
 
   micropipenv requirements
+
+This applies to conversion from Poetry and Pipenv specific lock files.
 
 Additional configuration options can limit what is present in the output (e.g.
 ``--no-dev`` to remove development dependencies).
@@ -112,8 +146,8 @@ See ``micropipenv requirements --help`` for more info.
 
 ``micropipenv`` exposes some core functionality on top of
 ``Pipfile``/``Pipfile.lock``.  You can import its functions and use
-``micropipenv`` as a lightweight library for ``Pipfile``/``Pipfile.lock``
-manipulation.
+``micropipenv`` as a lightweight library for ``Pipfile``/``Pipfile.lock`` and
+``pyproject.toml``/``poetry.lock`` manipulation.
 
 
 Adjusting options using environment variables
@@ -134,6 +168,14 @@ alternate ``pip`` binary.
 To run this tool in a verbose mode, you can set the ``MICROPIPENV_DEBUG=1`` (the
 same behavior can be achieved with multiple ``--verbose`` supplied).
 
+The tool prints software stack information to standard error output. This was
+designed for Thoth to capture information about installed dependencies as a
+useful source of information for Thoth's build analyzers. This behaviour can be
+suppressed by setting ``MICROPIPENV_NO_LOCKFILE_PRINT=1`` environment variable.
+
+Besides printing, the tool also writes the content of Pipfile.lock (if a locked
+software stack is used). This behaviour can be suppressed by providing
+``MICROPIPENV_NO_LOCKFILE_WRITE=1`` environment variable.
 
 Installation
 ============
@@ -145,11 +187,11 @@ installing it using ``pip`` works as expected:
 
   pip install micropipenv
 
-The default installation does no bring any dependencies so its just
+The default installation does not bring any dependencies so its just
 ``micropipenv`` that gets installed. However, the default installation supports
 only ``Pipfile.lock`` management. If you would like to manipulate also with
-``Pipfile`` you will need to install ``micropipenv`` with TOML support (TOML is
-not in the standard Python library):
+``Pipfile`` or Poetry specific flock files, you will need to install
+``micropipenv`` with TOML support (TOML is not in the standard Python library):
 
 .. code-block:: console
 
