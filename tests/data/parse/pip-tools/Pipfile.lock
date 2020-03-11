@@ -1,0 +1,49 @@
+{
+  "_meta": {
+    "hash": {
+      "sha256": "3f15e9211a908e2da94c8cdeaa54e780fd41c97f6a2ecbc226685468449ecea3"
+    },
+    "pipfile-spec": 6,
+    "requires": {
+      "python_version": "3.7"
+    },
+    "sources": [
+      {
+        "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+        "url": "https://pypi.org/simple",
+        "verify_ssl": true
+      }
+    ]
+  },
+  "default": {
+    "hexsticker": {
+      "hashes": [
+        "sha256:foobar"
+      ],
+      "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+      "version": "==1.0.0"
+    },
+    "micropipenv": {
+      "hashes": [
+        "sha256:baz"
+      ],
+      "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+      "markers": "python_version >= \"3\"",
+      "version": "==1.0.0"
+    },
+    "selinon": {
+      "extras": [
+        "postgres",
+        "s3"
+      ],
+      "hashes": [
+        "sha256:bar",
+        "sha256:foo"
+      ],
+      "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+      "markers": "python_version >= \"3.0\" or python_version == \"2.7\"",
+      "version": "==1.0.0"
+    }
+  },
+  "develop": {}
+}

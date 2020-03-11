@@ -47,12 +47,13 @@ __all__ = [
 ]
 
 import argparse
-import logging
-import sys
-import json
-import os
 import hashlib
+import json
+import logging
+import os
+import re
 import subprocess
+import sys
 import tempfile
 from collections import deque
 from itertools import chain
@@ -449,13 +450,26 @@ def _maybe_print_pip_freeze(pip_bin):  # type: (str) -> None
         _LOGGER.warning("Failed to perform pip freeze to check installed dependencies, the error is not fatal")
 
 
-def _poetry2pipfile_lock():  # type: () -> Dict[str, Any]
+def _translate_poetry_dependency(info):  # type: (str) -> str
+    """Translate Poetry dependency specification as written in pyproject.toml into its Pipfile.lock equivalent."""
+    if isinstance(info, str) and re.match(r"^\d", info):
+        return "=={}".format(info)
+
+    # TODO: poetry uses version like ^0.10.4 that are not Pipfile.lock complaint.
+    return info
+
+
+def _poetry2pipfile_lock(
+    only_direct=False, no_default=False, no_dev=False
+):  # type: (bool, bool, bool) -> Dict[str, Any]
     """Convert Poetry files to Pipfile.lock as Pipenv would produce."""
     poetry_lock, pyproject_toml = _read_poetry()
 
+    pyproject_poetry_section = pyproject_toml.get("tool", {}).get("poetry", {})
+
     sources = []
     has_default = False  # If default flag is set, it disallows PyPI.
-    for item in pyproject_toml.get("tool", {}).get("poetry", {}).get("source", []):
+    for item in pyproject_poetry_section.get("source", []):
         sources.append(
             {"name": item["name"], "url": item["url"], "verify_ssl": True}
         )
@@ -473,6 +487,27 @@ def _poetry2pipfile_lock():  # type: () -> Dict[str, Any]
 
     default = {}
     develop = {}
+
+    if only_direct:
+        if not no_default:
+            for dependency_name, info in pyproject_poetry_section.get("dependencies", {}).items():
+                default[dependency_name] = _translate_poetry_dependency(info)
+
+        if not no_dev:
+            for dependency_name, info in pyproject_poetry_section.get("dev-dependencies", {}).items():
+                develop[dependency_name] = _translate_poetry_dependency(info)
+
+        return {
+            "_meta": {
+                "hash": {"sha256": poetry_lock["metadata"]["content-hash"]},
+                "pipfile-spec": 6,
+                "sources": sources,
+                "requires": {"python_version": "{}.{}".format(sys.version_info.major, sys.version_info.minor)},
+            },
+            "default": default,
+            "develop": develop,
+        }
+
     for entry in poetry_lock["package"]:
         hashes = []
         for file_entry in poetry_lock["metadata"]["files"][entry["name"]]:
@@ -521,9 +556,11 @@ def _poetry2pipfile_lock():  # type: () -> Dict[str, Any]
             requirement["extras"] = sorted(requirement["extras"])
 
         if entry["category"] == "main":
-            default[entry["name"]] = requirement
+            if not no_default:
+                default[entry["name"]] = requirement
         elif entry["category"] == "dev":
-            develop[entry["name"]] = requirement
+            if not no_dev:
+                develop[entry["name"]] = requirement
         else:
             raise PoetryError("Unknown category for package {}: {}".format(entry["name"], entry["category"]))
 
@@ -641,12 +678,16 @@ def _parse_pipfile_dependency_info(pipfile_entry):  # type: (Union[str, Dict[str
 
 def get_requirements_sections(
     *, pipfile=None, pipfile_lock=None, no_indexes=False, only_direct=False, no_default=False, no_dev=False
-):  # type: (Optional[Dict[str, Any]], Optional[Dict[str, Any]], bool, bool, bool, bool) -> Dict[str, Dict[str, Any]]
+):  # type: (Optional[Dict[str, Any]], Optional[Dict[str, Any]], bool, bool, bool, bool) -> Dict[str, Any]
     """Compute requirements of an application, the output generated is compatible with pip-tools."""
     if no_dev and no_default:
         raise ArgumentsError("Cannot produce requirements as both, default and dev were asked to be discarded")
 
-    result = {}
+    result = {
+        "default": {},
+        "develop": {},
+        "sources": [],
+    }  # type: Dict[str, Any]
 
     if only_direct:
         pipfile = pipfile or _read_pipfile()
@@ -777,7 +818,7 @@ def requirements(
             no_indexes=no_indexes, only_direct=only_direct, no_default=no_default, no_dev=no_dev
         )
     elif method == "poetry":
-        sections = _poetry2pipfile_lock()
+        sections = _poetry2pipfile_lock(only_direct=only_direct, no_default=no_default, no_dev=no_dev)
     else:
         raise MicropipenvException("Unhandled method for installing requirements: {}".format(method))
 
@@ -826,7 +867,7 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
         "--method",
         help="Source of packages for the installation, perform detection if not provided.",
         choices=["pipenv", "requirements", "poetry"],
-        default=os.getenv("MICROPIPENV_METHOD", "pipenv")
+        default=os.getenv("MICROPIPENV_METHOD")
     )
     parser_install.add_argument(
         "pip_args",
