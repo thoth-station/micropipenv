@@ -58,7 +58,7 @@ class Test(TestCommand):
 setup(
     name="micropipenv",
     version=get_version(),
-    description="A simple wrapper around pip to support Pipenv files",
+    description="A simple wrapper around pip to support Pipenv and Poetry files",
     url="https://github.com/thoth-station/micropipenv",
     download_url="https://pypi.org/project/micropipenv",
     long_description=open(os.path.join(os.path.dirname(__file__), "README.rst")).read(),
