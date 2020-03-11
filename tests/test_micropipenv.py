@@ -232,6 +232,231 @@ def test_parse_requirements2pipfile_lock():
         assert pipfile_lock == expected_pipfile_lock
 
 
+def test_parse_pipenv2pipfile_lock_only_direct():
+    """Test parsing Pipfile and obtaining direct dependencies out of it."""
+    work_dir = os.path.join(_DATA_DIR, "parse", "pipenv")
+    with cwd(work_dir):
+        pipfile_lock = micropipenv.get_requirements_sections(only_direct=True)
+
+        assert pipfile_lock == {
+            "default": {"daiquiri": {"version": "==2.0.0"}},
+            "develop": {"flexmock": {"version": "*"}},
+            "sources": [{"name": "pypi", "url": "https://pypi.org/simple", "verify_ssl": True}],
+        }
+
+
+def test_parse_pipenv2pipfile_lock_only_direct_no_default():
+    """Test parsing Pipfile and obtaining direct dependencies out of it."""
+    work_dir = os.path.join(_DATA_DIR, "parse", "pipenv")
+    with cwd(work_dir):
+        pipfile_lock = micropipenv.get_requirements_sections(only_direct=True, no_default=True)
+
+        assert pipfile_lock == {
+            "default": {},
+            "develop": {"flexmock": {"version": "*"}},
+            "sources": [{"name": "pypi", "url": "https://pypi.org/simple", "verify_ssl": True}],
+        }
+
+
+def test_parse_pipenv2pipfile_lock_only_direct_no_dev():
+    """Test parsing Pipfile and obtaining direct dependencies out of it."""
+    work_dir = os.path.join(_DATA_DIR, "parse", "pipenv")
+    with cwd(work_dir):
+        pipfile_lock = micropipenv.get_requirements_sections(only_direct=True, no_dev=True)
+
+        assert pipfile_lock == {
+            "develop": {},
+            "default": {"daiquiri": {"version": "==2.0.0"}},
+            "sources": [{"name": "pypi", "url": "https://pypi.org/simple", "verify_ssl": True}],
+        }
+
+
+def test_parse_pipenv2pipfile_lock_no_default():
+    """Test parsing Pipfile and obtaining only dev dependencies."""
+    work_dir = os.path.join(_DATA_DIR, "parse", "pipenv")
+    with cwd(work_dir):
+        pipfile_lock = micropipenv.get_requirements_sections(no_default=True,)
+
+        assert pipfile_lock == {
+            "default": {},
+            "develop": {
+                "flexmock": {
+                    "hashes": ["sha256:5033ceb974d6452cf8716c2ff5059074b77e546df5c849fb44a53f98dfe0d82c"],
+                    "index": "pypi",
+                    "version": "==0.10.4",
+                }
+            },
+            "sources": [{"name": "pypi", "url": "https://pypi.org/simple", "verify_ssl": True}],
+        }
+
+
+def test_parse_pipenv2pipfile_lock_no_dev():
+    """Test parsing Pipfile.lock and obtaining only default dependencies."""
+    work_dir = os.path.join(_DATA_DIR, "parse", "pipenv")
+    with cwd(work_dir):
+        pipfile_lock = micropipenv.get_requirements_sections(no_dev=True,)
+
+        assert pipfile_lock == {
+            "default": {
+                "daiquiri": {
+                    "hashes": [
+                        "sha256:6b235ed15b73b87fd3cc2521aacbb727bf8443a0896dc534b07503841d03cfdb",
+                        "sha256:d57b9fd5432933c6e899054eb62cee22eab89f560c8493254d327ec27893c866",
+                    ],
+                    "index": "pypi",
+                    "version": "==2.0.0",
+                },
+                "python-json-logger": {
+                    "hashes": ["sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"],
+                    "markers": "python_version >= '2.7'",
+                    "version": "==0.1.11",
+                },
+            },
+            "develop": {},
+            "sources": [{"name": "pypi", "url": "https://pypi.org/simple", "verify_ssl": True}],
+        }
+
+
+def test_parse_poetry2pipfile_lock_only_direct():
+    """Test parsing Poetry files and obtaining direct dependencies out of them."""
+    work_dir = os.path.join(_DATA_DIR, "parse", "poetry2")
+    with cwd(work_dir):
+        pipfile_lock = micropipenv._poetry2pipfile_lock(only_direct=True)
+
+        assert pipfile_lock == {
+            "_meta": {
+                "hash": {"sha256": "b5f58798352fe4adc96b3b43d6e509458060cfeb2bc773aaed836a9a9830a2bc"},
+                "pipfile-spec": 6,
+                "requires": {"python_version": "3.7"},
+                "sources": [
+                    {
+                        "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                        "url": "https://pypi.org/simple",
+                        "verify_ssl": True,
+                    }
+                ],
+            },
+            "default": {"daiquiri": "==2.0.0"},
+            "develop": {"flexmock": "^0.10.4"},
+        }
+
+
+def test_parse_poetry2pipfile_lock_only_direct_no_default():
+    """Test parsing Poetry files and obtaining direct dependencies out of them."""
+    work_dir = os.path.join(_DATA_DIR, "parse", "poetry2")
+    with cwd(work_dir):
+        pipfile_lock = micropipenv._poetry2pipfile_lock(only_direct=True, no_default=True)
+
+        assert pipfile_lock == {
+            "_meta": {
+                "hash": {"sha256": "b5f58798352fe4adc96b3b43d6e509458060cfeb2bc773aaed836a9a9830a2bc"},
+                "pipfile-spec": 6,
+                "requires": {"python_version": "3.7"},
+                "sources": [
+                    {
+                        "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                        "url": "https://pypi.org/simple",
+                        "verify_ssl": True,
+                    }
+                ],
+            },
+            "default": {},
+            "develop": {"flexmock": "^0.10.4"},
+        }
+
+
+def test_parse_poetry2pipfile_lock_only_direct_no_dev():
+    """Test parsing Poetry files and obtaining direct dependencies out of them."""
+    work_dir = os.path.join(_DATA_DIR, "parse", "poetry2")
+    with cwd(work_dir):
+        pipfile_lock = micropipenv._poetry2pipfile_lock(only_direct=True, no_dev=True)
+
+        assert pipfile_lock == {
+            "_meta": {
+                "hash": {"sha256": "b5f58798352fe4adc96b3b43d6e509458060cfeb2bc773aaed836a9a9830a2bc"},
+                "pipfile-spec": 6,
+                "requires": {"python_version": "3.7"},
+                "sources": [
+                    {
+                        "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                        "url": "https://pypi.org/simple",
+                        "verify_ssl": True,
+                    }
+                ],
+            },
+            "default": {"daiquiri": "==2.0.0"},
+            "develop": {},
+        }
+
+
+def test_parse_poetry2pipfile_lock_no_default():
+    """Test parsing Poetry files and obtaining only dev dependencies."""
+    work_dir = os.path.join(_DATA_DIR, "parse", "poetry2")
+    with cwd(work_dir):
+        pipfile_lock = micropipenv._poetry2pipfile_lock(no_default=True)
+
+        assert pipfile_lock == {
+            "_meta": {
+                "hash": {"sha256": "b5f58798352fe4adc96b3b43d6e509458060cfeb2bc773aaed836a9a9830a2bc"},
+                "pipfile-spec": 6,
+                "requires": {"python_version": "3.7"},
+                "sources": [
+                    {
+                        "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                        "url": "https://pypi.org/simple",
+                        "verify_ssl": True,
+                    }
+                ],
+            },
+            "default": {},
+            "develop": {
+                "flexmock": {
+                    "hashes": ["sha256:5033ceb974d6452cf8716c2ff5059074b77e546df5c849fb44a53f98dfe0d82c"],
+                    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                    "version": "==0.10.4",
+                }
+            },
+        }
+
+
+def test_parse_poetry2pipfile_lock_no_dev():
+    """Test parsing Poetry files and obtaining only default dependencies."""
+    work_dir = os.path.join(_DATA_DIR, "parse", "poetry2")
+    with cwd(work_dir):
+        pipfile_lock = micropipenv._poetry2pipfile_lock(no_dev=True)
+
+        assert pipfile_lock == {
+            "_meta": {
+                "hash": {"sha256": "b5f58798352fe4adc96b3b43d6e509458060cfeb2bc773aaed836a9a9830a2bc"},
+                "pipfile-spec": 6,
+                "requires": {"python_version": "3.7"},
+                "sources": [
+                    {
+                        "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                        "url": "https://pypi.org/simple",
+                        "verify_ssl": True,
+                    }
+                ],
+            },
+            "default": {
+                "daiquiri": {
+                    "hashes": [
+                        "sha256:d57b9fd5432933c6e899054eb62cee22eab89f560c8493254d327ec27893c866",
+                        "sha256:6b235ed15b73b87fd3cc2521aacbb727bf8443a0896dc534b07503841d03cfdb",
+                    ],
+                    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                    "version": "==2.0.0",
+                },
+                "python-json-logger": {
+                    "hashes": ["sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"],
+                    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                    "version": "==0.1.11",
+                },
+            },
+            "develop": {},
+        }
+
+
 def test_parse_requirements2pipfile_lock_not_locked():
     """Test raising an exception when requirements.txt do not state all packages as locked."""
     work_dir = os.path.join(_DATA_DIR, "parse", "requirements")
@@ -320,6 +545,7 @@ def test_main_install_params_default():
 def test_main_requirements_params():
     """Test running install from main with default parameters set."""
     flexmock(micropipenv).should_receive("requirements").with_args(
+        method="pipenv",
         no_hashes=False,
         no_indexes=False,
         no_versions=False,

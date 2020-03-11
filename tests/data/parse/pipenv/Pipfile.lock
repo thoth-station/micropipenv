@@ -1,0 +1,44 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "9d95b58ec76d99d82cff5a9cda6df9750b342ac2dcf8783733b23c54eb9139cc"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.7"
+        },
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "daiquiri": {
+            "hashes": [
+                "sha256:6b235ed15b73b87fd3cc2521aacbb727bf8443a0896dc534b07503841d03cfdb",
+                "sha256:d57b9fd5432933c6e899054eb62cee22eab89f560c8493254d327ec27893c866"
+            ],
+            "index": "pypi",
+            "version": "==2.0.0"
+        },
+        "python-json-logger": {
+            "hashes": [
+                "sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"
+            ],
+            "markers": "python_version >= '2.7'",
+            "version": "==0.1.11"
+        }
+    },
+    "develop": {
+        "flexmock": {
+            "hashes": [
+                "sha256:5033ceb974d6452cf8716c2ff5059074b77e546df5c849fb44a53f98dfe0d82c"
+            ],
+            "index": "pypi",
+            "version": "==0.10.4"
+        }
+    }
+}
