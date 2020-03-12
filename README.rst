@@ -178,6 +178,83 @@ software stack is used) to the directory where lock files are present (for Pipen
 files, the Pipfile.lock is kept untouched). This behaviour can be suppressed by
 providing ``MICROPIPENV_NO_LOCKFILE_WRITE=1`` environment variable.
 
+Example usage
+=============
+
+Install dependencies managed by Poetry as ``pip install --user`` would do
+(option ``--method`` is optional, auto-discovery is performed if omitted):
+
+.. code-block:: console
+
+  $ ls
+  poetry.lock pyproject.toml project.py
+  $ micropipenv install --method poetry -- --user
+
+Install dependencies (both main and develop) managed by Poetry into a virtual
+environment:
+
+.. code-block:: console
+
+  $ ls
+  poetry.lock pyproject.toml project.py
+  $ python3 -m venv venv/
+  $ . venv/bin/activate
+  (venv) $ micropipenv install --dev
+
+Install dependencies managed by Pipenv (both main and develop) into a virtual
+environment  (option ``--method`` is optional, auto-discovery is performed if
+omitted):
+
+.. code-block:: console
+
+  $ ls
+  Pipfile Pipfile.lock src/
+  $ python3 -m venv venv/
+  $ . venv/bin/activate
+  (venv) $ micropipenv install --dev
+
+
+Perform deployment of an application as Pipenv would do with Python interpreter
+version check and Pipfile file hash check (you can create virtual environment
+only if necessary):
+
+.. code-block:: console
+
+  $ ls
+  Pipfile Pipfile.lock src/
+  $ python3 -m venv venv/
+  $ . venv/bin/activate
+  (venv) $ micropipenv --deploy
+
+Generate `pip-tools <https://pypi.org/project/pip-tools/>`_ compliant
+``requirements.in``, ``dev-requirements.in``, ``requirements.txt`` and
+``dev-requirements.txt`` out of ``Pipfile`` and ``Pipfile.lock`` - project
+dependencies managed by Pipenv:
+
+.. code-block:: console
+
+  $ ls
+  Pipfile Pipfile.lock src/
+  $ micropipenv requirements --no-dev > requirements.txt
+  $ micropipenv requirements --no-dev --only-direct > requirements.in
+  $ micropipenv requirements --no-default > dev-requirements.txt
+  $ micropipenv requirements --no-default --only-direct > dev-requirements.in
+
+Generate `pip-tools <https://pypi.org/project/pip-tools/>`_ complaint
+``requirements.in``, ``dev-requirements.in``, ``requirements.txt`` and
+``dev-requirements.txt`` out of ``pyproject.toml`` and ``poetry.lock`` - project
+dependencies managed by Poetry:
+
+.. code-block:: console
+
+  $ ls
+  poetry.lock pyproject.toml src/
+  $ micropipenv requirements --no-dev > requirements.txt
+  $ micropipenv requirements --no-dev --only-direct > requirements.in
+  $ micropipenv requirements --no-default > dev-requirements.txt
+  $ micropipenv requirements --no-default --only-direct > dev-requirements.in
+
+
 Installation
 ============
 
