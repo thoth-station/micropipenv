@@ -9,7 +9,8 @@ compatible output.
 micropipenv use cases
 =====================
 
-Why should I use ``micropipenv`` instead of `Pipenv <https://github.com/pypa/pipenv>`_?
+Why should I use ``micropipenv`` instead of `Pipenv <https://github.com/pypa/pipenv>`_
+or `Poetry <https://github.com/pypa/poetry>`_?
 
 * I would like to convert files produced by Pipenv/Poetry to a pip-tools
   compatible output.
