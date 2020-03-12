@@ -323,11 +323,14 @@ def test_parse_poetry2pipfile_lock_only_direct():
     with cwd(work_dir):
         pipfile_lock = micropipenv._poetry2pipfile_lock(only_direct=True)
 
+        python_version = pipfile_lock["_meta"]["requires"].pop("python_version")
+        assert python_version == "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+
         assert pipfile_lock == {
             "_meta": {
                 "hash": {"sha256": "b5f58798352fe4adc96b3b43d6e509458060cfeb2bc773aaed836a9a9830a2bc"},
                 "pipfile-spec": 6,
-                "requires": {"python_version": "3.7"},
+                "requires": {},
                 "sources": [
                     {
                         "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
@@ -347,11 +350,14 @@ def test_parse_poetry2pipfile_lock_only_direct_no_default():
     with cwd(work_dir):
         pipfile_lock = micropipenv._poetry2pipfile_lock(only_direct=True, no_default=True)
 
+        python_version = pipfile_lock["_meta"]["requires"].pop("python_version")
+        assert python_version == "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+
         assert pipfile_lock == {
             "_meta": {
                 "hash": {"sha256": "b5f58798352fe4adc96b3b43d6e509458060cfeb2bc773aaed836a9a9830a2bc"},
                 "pipfile-spec": 6,
-                "requires": {"python_version": "3.7"},
+                "requires": {},
                 "sources": [
                     {
                         "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
@@ -371,11 +377,14 @@ def test_parse_poetry2pipfile_lock_only_direct_no_dev():
     with cwd(work_dir):
         pipfile_lock = micropipenv._poetry2pipfile_lock(only_direct=True, no_dev=True)
 
+        python_version = pipfile_lock["_meta"]["requires"].pop("python_version")
+        assert python_version == "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+
         assert pipfile_lock == {
             "_meta": {
                 "hash": {"sha256": "b5f58798352fe4adc96b3b43d6e509458060cfeb2bc773aaed836a9a9830a2bc"},
                 "pipfile-spec": 6,
-                "requires": {"python_version": "3.7"},
+                "requires": {},
                 "sources": [
                     {
                         "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
@@ -395,11 +404,14 @@ def test_parse_poetry2pipfile_lock_no_default():
     with cwd(work_dir):
         pipfile_lock = micropipenv._poetry2pipfile_lock(no_default=True)
 
+        python_version = pipfile_lock["_meta"]["requires"].pop("python_version")
+        assert python_version == "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+
         assert pipfile_lock == {
             "_meta": {
                 "hash": {"sha256": "b5f58798352fe4adc96b3b43d6e509458060cfeb2bc773aaed836a9a9830a2bc"},
                 "pipfile-spec": 6,
-                "requires": {"python_version": "3.7"},
+                "requires": {},
                 "sources": [
                     {
                         "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
@@ -425,11 +437,14 @@ def test_parse_poetry2pipfile_lock_no_dev():
     with cwd(work_dir):
         pipfile_lock = micropipenv._poetry2pipfile_lock(no_dev=True)
 
+        python_version = pipfile_lock["_meta"]["requires"].pop("python_version")
+        assert python_version == "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+
         assert pipfile_lock == {
             "_meta": {
                 "hash": {"sha256": "b5f58798352fe4adc96b3b43d6e509458060cfeb2bc773aaed836a9a9830a2bc"},
                 "pipfile-spec": 6,
-                "requires": {"python_version": "3.7"},
+                "requires": {},
                 "sources": [
                     {
                         "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
