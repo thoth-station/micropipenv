@@ -48,9 +48,9 @@ To enforce the installation method used, specify ``--method`` option to the
 from the current working directory and looks for the relevant files in the
 following order:
 
-1. ``requirements.txt`` for ``pip-tools`` and raw ``pip`` requirements
-2. ``Pipfile.lock`` and optionally ``Pipfile`` (if ``--deploy`` set)
-3. ``poetry.lock`` and ``pyproject.toml``
+1. ``Pipfile.lock`` and optionally ``Pipfile`` (if ``--deploy`` set)
+2. ``poetry.lock`` and ``pyproject.toml``
+3. ``requirements.txt`` for ``pip-tools`` and raw ``pip`` requirements
 
 To install dependencies issue the following command:
 
