@@ -624,17 +624,17 @@ def install(
     """Perform installation of requirements based on the method used."""
     if method is None:
         try:
-            _traverse_up_find_file("requirements.txt")
-            method = "requirements"
+            _traverse_up_find_file("Pipfile.lock")
+            method = "pipenv"
         except FileNotFound as exc:
             try:
-                _LOGGER.info("Failed to find requirements.txt file, looking up Pipfile.lock: %s", str(exc))
-                _traverse_up_find_file("Pipfile.lock")
-                method = "pipenv"
-            except FileNotFound as exc:
                 _LOGGER.info("Failed to find Pipfile.lock, looking up poetry.lock: %s", str(exc))
                 _traverse_up_find_file("poetry.lock")
                 method = "poetry"
+            except FileNotFound as exc:
+                _LOGGER.info("Failed to find Poetry lock file, looking up requirements.txt: %s", str(exc))
+                _traverse_up_find_file("requirements.txt")
+                method = "requirements"
 
     if method == "requirements":
         if deploy:
