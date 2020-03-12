@@ -1,16 +1,83 @@
 µPipenv
 -------
 
-A lightweight wrapper for pip to support Pipenv and Poetry lock files or
-converting them to `pip-tools <https://pypi.org/project/pip-tools/>`_
-compatible output.
+A lightweight wrapper for pip to support requirements.txt, Pipenv and Poetry
+lock files or converting them to `pip-tools
+<https://pypi.org/project/pip-tools/>`_ compatible output. Designed for
+containerized Python applications.
 
+What's the difference in comparision to pip when using requirements.txt?
+=========================================================================
+
+* if ``requirements.txt`` state all the packages in a pinned version with
+  hashes (e.g. `pip-tools <https://pypi.org/project/pip-tools/>`_), micropipenv
+  installs packages with a possible fallback if the installation order is
+  relevant
+
+  * you don't need to care about the installation and maintain correct order or
+    requirements in ``requirements.txt``
+
+  * best effort installation - try until there is a possibility to succeed
+
+* if ``requirements.txt`` do not state all the packages in a pinned form
+
+  * pip's resolver algorithm is used and it's left on pip to resolve
+    requirements
+
+  * the same behavior as micropipenv would not be used
+
+
+What's the difference in comparision to Poetry?
+===============================================
+
+* a lightweight addition to Poetry, not a Poetry replacement
+
+  * micropipenv does not substitute Poetry it rather complements it for
+    containerized deployments where the size of the container image and
+    software shipped with it matters
+
+* no release management to Python package indexes
+
+* micropipenv does not implement resolver, it uses already resolved stack that
+  application is shipped with based on ``poetry.lock`` and ``pyproject.toml``
+
+* no virtual environment management
+
+  * virtual environment management is left on user, if needed
+
+What's the difference in comparision to Pipenv?
+===============================================
+
+* a lightweight addition to Pipenv, not a Pipenv replacement
+
+  * micropipenv does not substitute Pipenv it rather complements it for
+    containerized deployments where the size of the container image and
+    software shipped with it matters
+
+* it does not `vendor all the dependencies as Pipenv
+  <https://github.com/pypa/pipenv/tree/master/pipenv/vendor>`_
+
+* micropipenv does not implement resolver, it uses already resolved stack that
+  application is shipped with ``Pipfile.lock``
+
+* no virtual environment management
+
+  * virtual environment management is left on user, if needed
 
 micropipenv use cases
 =====================
 
 Why should I use ``micropipenv`` instead of `Pipenv <https://github.com/pypa/pipenv>`_
 or `Poetry <https://pypi.org/project/poetry>`_?
+
+* I would like to have a tool that "rules them all" - one lightweight tool to
+  support all Python dependency lock file managers (pip-tools, Poetry, Pipenv)
+  and lets users decide what they want to use when deploying Python applications
+  in containerized environments (e.g. Kubernetes, OpenShift, ...)
+
+* I would like to have containerized Python applications as small as possible
+  with minimum software shipped and required to build and run the Python
+  application in production.
 
 * I would like to convert files produced by Pipenv/Poetry to a pip-tools
   compatible output.
