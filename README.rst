@@ -226,7 +226,7 @@ only if necessary):
   $ . venv/bin/activate
   (venv) $ micropipenv --deploy
 
-Generate `pip-tools <https://pypi.org/project/pip-tools/>`_ complaint
+Generate `pip-tools <https://pypi.org/project/pip-tools/>`_ compliant
 ``requirements.in``, ``dev-requirements.in``, ``requirements.txt`` and
 ``dev-requirements.txt`` out of ``Pipfile`` and ``Pipfile.lock`` - project
 dependencies managed by Pipenv:
