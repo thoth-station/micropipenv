@@ -301,7 +301,7 @@ def install_pipenv(
                 f.write(package_entry_str)
 
             if "git" in info:
-                _LOGGER.warning("!!! Requirement %s%s uses a VCS version", package_name, info["version"])
+                _LOGGER.warning("!!! Requirement %s uses a VCS version: %r", package_name, info)
 
             _LOGGER.info("Installing %r", package_entry_str)
             called_process = subprocess.run(cmd)
