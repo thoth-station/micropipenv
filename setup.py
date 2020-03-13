@@ -66,7 +66,6 @@ setup(
     author_email="fridex.devel@gmail.com",
     license="GPLv3+",
     py_modules=["micropipenv"],
-    data_files=[("", ["LICENSE"])],
     cmdclass={"test": Test},
     entry_points={"console_scripts": ["micropipenv=micropipenv:main"]},
     extras_require={
