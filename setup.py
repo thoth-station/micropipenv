@@ -67,6 +67,7 @@ setup(
     license="GPLv3+",
     py_modules=["micropipenv"],
     cmdclass={"test": Test},
+    install_requires=["pip"],
     entry_points={"console_scripts": ["micropipenv=micropipenv:main"]},
     extras_require={
         "toml": ["toml"],
