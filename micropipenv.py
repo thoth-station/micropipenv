@@ -731,7 +731,7 @@ def _get_package_entry_str(
         result = "git+{}".format(info["git"])
         if "ref" in info:
             result += "@{}".format(info["ref"])
-        result += "#egg={}".format(package_name)
+        result += "#egg={}\n".format(package_name)
         return result
 
     result = package_name
