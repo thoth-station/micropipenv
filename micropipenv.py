@@ -632,9 +632,15 @@ def install(
                 _traverse_up_find_file("poetry.lock")
                 method = "poetry"
             except FileNotFound as exc:
-                _LOGGER.info("Failed to find Poetry lock file, looking up requirements.txt: %s", str(exc))
-                _traverse_up_find_file("requirements.txt")
-                method = "requirements"
+                try:
+                    _LOGGER.info("Failed to find Poetry lock file, looking up requirements.txt: %s", str(exc))
+                    _traverse_up_find_file("requirements.txt")
+                    method = "requirements"
+                except FileNotFound as exc:
+                    raise FileNotFound(
+                        "Failed to find Pipfile.lock, poetry.lock or requirements.txt "
+                        "in the current directory or any of its parent: {}".format(os.getcwd())
+                    ) from exc
 
     if method == "requirements":
         if deploy:
