@@ -353,6 +353,8 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
 
     result = {}  # type: Dict[str, Any]
     for requirement in parse_requirements(filename=requirements_txt_path, session=PipSession(), finder=finder):
+        entry = {}  # type: Dict[str, Any]
+
         if not requirement.editable:
             version = str(requirement.specifier)
 
@@ -371,15 +373,11 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
             for hash_type, hashes_present in hash_options.items():
                 hashes.extend(["{}:{}".format(hash_type, h) for h in hashes_present])
 
-            entry = {
-                "hashes": sorted(hashes),
-                "version": version,
-            }
+            entry["hashes"] = sorted(hashes)
+            entry["version"] = version
         else:
-            entry = {
-                "editable": True,
-                "path": str(requirement.link),
-            }
+            entry["editable"] = True
+            entry["path"] = str(requirement.link)
 
         if requirement.extras:
             entry["extras"] = sorted(requirement.extras)

@@ -51,6 +51,18 @@ def get_pip_path(venv):
     return os.path.join(venv.path, "bin", "pip3")
 
 
+def setup_module():
+    """A dirty hack for mypy that does not accept collisions in file names."""
+    for item in glob.glob(os.path.join(_DATA_DIR, "**", "setup"), recursive=True):
+        shutil.copyfile(item, "{}.py".format(item))
+
+
+def teardown_module():
+    """Recover from the dirty hack for mypy."""
+    for item in glob.glob(os.path.join(_DATA_DIR, "**", "setup.py"), recursive=True):
+        os.remove(item)
+
+
 def check_generated_pipfile_lock(pipfile_lock_path, pipfile_lock_path_expected):
     """Check generated Pipfile.lock produced during tests."""
     assert os.path.isfile(pipfile_lock_path), "No Pipfile.lock was produced"
