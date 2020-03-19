@@ -1,3 +1,4 @@
+"""A setup.py file for requirements.txt in editable mode."""
 # type: ignore
 from setuptools import setup
 

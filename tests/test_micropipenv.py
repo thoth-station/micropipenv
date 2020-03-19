@@ -186,12 +186,12 @@ def test_install_pip_editable(venv):
             subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
             assert str(venv.get_version("micropipenv-editable-test")) == "3.2.1"
             assert (
-                    len(
-                        glob.glob(
-                            os.path.join(venv.path, "lib", "python*", "site-packages", "micropipenv-editable-test.egg-link")
-                        )
+                len(
+                    glob.glob(
+                        os.path.join(venv.path, "lib", "python*", "site-packages", "micropipenv-editable-test.egg-link")
                     )
-                    == 1
+                )
+                == 1
             ), "No egg-link found for editable install"
             assert str(venv.get_version("daiquiri")) is not None
             assert str(venv.get_version("python-json-logger")) is not None
