@@ -177,6 +177,29 @@ def test_install_pip_vcs(venv):
         assert str(venv.get_version("python-json-logger")) is not None
 
 
+def test_install_pip_editable(venv):
+    """Test installation of an editable package."""
+    cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
+    work_dir = os.path.join(_DATA_DIR, "install", "requirements_editable")
+    with cwd(work_dir):
+        try:
+            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+            assert str(venv.get_version("micropipenv-editable-test")) == "3.2.1"
+            assert (
+                    len(
+                        glob.glob(
+                            os.path.join(venv.path, "lib", "python*", "site-packages", "micropipenv-editable-test.egg-link")
+                        )
+                    )
+                    == 1
+            ), "No egg-link found for editable install"
+            assert str(venv.get_version("daiquiri")) is not None
+            assert str(venv.get_version("python-json-logger")) is not None
+        finally:
+            # Clean up this file, can cause issues across multiple test runs.
+            shutil.rmtree("micropipenv_editable_test.egg-info")
+
+
 def test_install_pip_print_freeze(venv):
     """Test invoking installation when raw requirements.txt are used.
 

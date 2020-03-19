@@ -353,6 +353,10 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
 
     result = {}  # type: Dict[str, Any]
     for requirement in parse_requirements(filename=requirements_txt_path, session=PipSession(), finder=finder):
+        if requirement.editable:
+            # We need to run pip's resolver if editable is detected.
+            raise PipRequirementsNotLocked
+
         version = str(requirement.specifier)
 
         if requirement.specifier is None or not (
