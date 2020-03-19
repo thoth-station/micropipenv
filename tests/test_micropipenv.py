@@ -177,7 +177,7 @@ def test_install_pip_vcs(venv):
         assert str(venv.get_version("python-json-logger")) is not None
 
 
-def test_install_pip_editable(venv):
+def test_install_pip_tools_editable(venv):
     """Test installation of an editable package."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
     work_dir = os.path.join(_DATA_DIR, "install", "requirements_editable")
@@ -193,8 +193,8 @@ def test_install_pip_editable(venv):
                 )
                 == 1
             ), "No egg-link found for editable install"
-            assert str(venv.get_version("daiquiri")) is not None
-            assert str(venv.get_version("python-json-logger")) is not None
+            assert str(venv.get_version("daiquiri")) == "2.0.0"
+            assert str(venv.get_version("python-json-logger")) == "0.1.11"
         finally:
             # Clean up this file, can cause issues across multiple test runs.
             shutil.rmtree("micropipenv_editable_test.egg-info")

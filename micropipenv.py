@@ -353,36 +353,33 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
 
     result = {}  # type: Dict[str, Any]
     for requirement in parse_requirements(filename=requirements_txt_path, session=PipSession(), finder=finder):
-        if requirement.editable:
-            # We need to run pip's resolver if editable is detected.
-            raise PipRequirementsNotLocked
+        if not requirement.editable:
+            version = str(requirement.specifier)
 
-        version = str(requirement.specifier)
+            if requirement.specifier is None or not (
+                requirement.has_hash_options and len(requirement.specifier) == 1 and version.startswith("==")
+            ):
+                # Not pinned down software stack using pip-tools.
+                raise PipRequirementsNotLocked
 
-        if requirement.specifier is None or not (
-            requirement.has_hash_options and len(requirement.specifier) == 1 and version.startswith("==")
-        ):
-            # Not pinned down software stack using pip-tools.
-            raise PipRequirementsNotLocked
+            if hasattr(requirement, "options"):
+                hash_options = requirement.options.get("hashes")
+            else:
+                hash_options = requirement.hash_options  # More recent pip.
 
-        # We add all dependencies to default, develop should not be present in requirements.txt file, but rather
-        # in dev-requirements.txt or similar.
-        if requirement.name in result:
-            raise RequirementsError("Duplicate entry for requirement {}".format(requirement.name))
+            hashes = []
+            for hash_type, hashes_present in hash_options.items():
+                hashes.extend(["{}:{}".format(hash_type, h) for h in hashes_present])
 
-        if hasattr(requirement, "options"):
-            hash_options = requirement.options.get("hashes")
+            entry = {
+                "hashes": sorted(hashes),
+                "version": version,
+            }
         else:
-            hash_options = requirement.hash_options  # More recent pip.
-
-        hashes = []
-        for hash_type, hashes_present in hash_options.items():
-            hashes.extend(["{}:{}".format(hash_type, h) for h in hashes_present])
-
-        entry = {
-            "hashes": sorted(hashes),
-            "version": version,
-        }
+            entry = {
+                "editable": True,
+                "path": str(requirement.link),
+            }
 
         if requirement.extras:
             entry["extras"] = sorted(requirement.extras)
@@ -390,7 +387,18 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
         if requirement.markers:
             entry["markers"] = str(requirement.markers)
 
-        result[requirement.name] = entry
+        if entry.get("editable", False):
+            # Create a unique name for editable to avoid possible clashes.
+            requirement_name = hashlib.sha256(json.dumps(entry, sort_keys=True).encode("utf8")).hexdigest()
+        else:
+            requirement_name = requirement.name
+
+        # We add all dependencies to default, develop should not be present in requirements.txt file, but rather
+        # in dev-requirements.txt or similar.
+        if requirement_name in result:
+            raise RequirementsError("Duplicate entry for requirement {}".format(requirement.name))
+
+        result[requirement_name] = entry
 
     sources = []  # type: List[Dict[str, Any]]
     for index_url in chain(finder.index_urls, _DEFAULT_INDEX_URLS):
@@ -404,7 +412,8 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
     if len(sources) == 1:
         # Explicitly assign index if there is just one.
         for entry in result.values():
-            entry["index"] = sources[0]["name"]
+            if not entry.get("editable", False):
+                entry["index"] = sources[0]["name"]
 
     with open(requirements_txt_path, "r") as requirements_file:
         requirements_hash = hashlib.sha256(requirements_file.read().encode()).hexdigest()
