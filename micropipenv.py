@@ -734,13 +734,21 @@ def _get_package_entry_str(
 ):  # type: (str, Dict[str, Any], bool, bool) -> str
     """Print entry for the given package."""
     if "git" in info:  # A special case for a VCS package
-        result = "git+{}".format(info["git"])
+        if info.get("editable", False):
+            result = "--editable git+{}".format(info["git"])
+        else:
+            result = "git+{}".format(info["git"])
+
         if "ref" in info:
             result += "@{}".format(info["ref"])
         result += "#egg={}\n".format(package_name)
         return result
 
-    result = package_name
+    if info.get("editable", False):
+        result = "--editable {}".format(info.get("path", "."))
+    else:
+        result = package_name
+
     if info.get("extras"):
         result += "[{}]".format(",".join(info["extras"]))
 
@@ -750,7 +758,7 @@ def _get_package_entry_str(
     if info.get("markers"):
         result += "; {}".format(info["markers"])
 
-    if not (no_hashes or no_versions):
+    if not (no_hashes or no_versions or info.get("editable", False)):
         for digest in info.get("hashes", []):
             result += " \\\n"
             result += "    --hash={}".format(digest)

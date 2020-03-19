@@ -1,0 +1,24 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "18851a2e437692c62ea836e224a03feb67535705445d18dbdc363c02707e38e4"
+        },
+        "pipfile-spec": 6,
+        "requires": {},
+        "sources": [
+            {
+                "name": "pypi",
+                "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "daiquiri": {
+            "editable": true,
+            "git": "https://github.com/jd/daiquiri",
+            "ref": "d73e3870a0be324bf3b39d05cfca896c188ce7f4"
+        }
+    },
+    "develop": {}
+}

@@ -18,6 +18,7 @@
 
 """Testsuite for micropipenv."""
 
+import glob
 import sys
 from contextlib import contextmanager
 from contextlib import redirect_stdout
@@ -83,6 +84,39 @@ def test_install_pipenv_vcs(venv):
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_vcs")):
         subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
         assert str(venv.get_version("daiquiri")) == "2.0.0"
+
+
+def test_install_pipenv_editable(venv):
+    """Test invoking installation using information in Pipfile.lock, an editable mode is used."""
+    cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
+    with cwd(os.path.join(_DATA_DIR, "install", "pipenv_editable")):
+        try:
+            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+            assert str(venv.get_version("daiquiri")) == "2.0.0"
+            assert str(venv.get_version("python-json-logger")) == "0.1.11"
+            assert str(venv.get_version("micropipenv-editable-test")) == "1.2.3"
+            assert (
+                len(
+                    glob.glob(
+                        os.path.join(venv.path, "lib", "python*", "site-packages", "micropipenv-editable-test.egg-link")
+                    )
+                )
+                == 1
+            ), "No egg-link found for editable install"
+        finally:
+            # Clean up this file, can cause issues across multiple test runs.
+            shutil.rmtree("micropipenv_editable_test.egg-info")
+
+
+def test_install_pipenv_vcs_editable(venv):
+    """Test invoking installation using information in Pipfile.lock, a git version in editable mode is used."""
+    cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
+    with cwd(os.path.join(_DATA_DIR, "install", "pipenv_vcs_editable")):
+        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+        assert str(venv.get_version("daiquiri")) == "1.6.0"
+        assert (
+            len(glob.glob(os.path.join(venv.path, "lib", "python*", "site-packages", "daiquiri.egg-link"))) == 1
+        ), "No egg-link found for editable install"
 
 
 def test_install_poetry(venv):
