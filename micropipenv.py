@@ -398,6 +398,13 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
 
         result[requirement_name] = entry
 
+    if all(dep.get("editable", False) for dep in result.values()):
+        # If all the dependencies are editable, we cannot safely say that we
+        # have a lock file - users can easily end up with missing dependencies
+        # as we install dependencies with --no-deps in case of lock files. Let
+        # pip resolver do its job, just to be sure.
+        raise PipRequirementsNotLocked
+
     sources = []  # type: List[Dict[str, Any]]
     for index_url in chain(finder.index_urls, _DEFAULT_INDEX_URLS):
         if any(s["url"] == index_url for s in sources):
