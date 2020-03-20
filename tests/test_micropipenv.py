@@ -189,6 +189,28 @@ def test_install_pip_vcs(venv):
         assert str(venv.get_version("python-json-logger")) is not None
 
 
+def test_install_pip_editable(venv):
+    """Test installation of an editable package which is not treated as a lock file."""
+    cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
+    work_dir = os.path.join(_DATA_DIR, "install", "requirements_editable_unlocked")
+    with cwd(work_dir):
+        try:
+            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+            assert str(venv.get_version("micropipenv-editable-test")) == "3.3.3"
+            assert (
+                len(
+                    glob.glob(
+                        os.path.join(venv.path, "lib", "python*", "site-packages", "micropipenv-editable-test.egg-link")
+                    )
+                )
+                == 1
+            ), "No egg-link found for editable install"
+            assert str(venv.get_version("q")) == "1.0"
+        finally:
+            # Clean up this file, can cause issues across multiple test runs.
+            shutil.rmtree("micropipenv_editable_test.egg-info")
+
+
 def test_install_pip_tools_editable(venv):
     """Test installation of an editable package."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
