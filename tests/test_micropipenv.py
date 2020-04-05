@@ -571,3 +571,64 @@ def test_main_requirements_params():
     ).once()
 
     micropipenv.main(argv=["requirements", "--only-direct", "--no-comments"])
+
+
+def test_get_index_entry_str():
+    """Test obtaining index configuration for pip when."""
+    meta_1 = {
+        "hash": {"sha256": "foobar"},
+        "pipfile-spec": 6,
+        "requires": {},
+        "sources": [
+            {"name": "pypi", "url": "https://pypi.org/simple", "verify_ssl": True},
+            {"name": "thoth-station", "url": "https://thoth-station.ninja/simple", "verify_ssl": True},
+        ],
+    }
+
+    assert (
+        micropipenv._get_index_entry_str(meta_1)
+        == """\
+--index-url https://pypi.org/simple
+--extra-index-url https://thoth-station.ninja/simple
+"""
+    )
+
+    meta_2 = {
+        "hash": {"sha256": "foobar"},
+        "pipfile-spec": 6,
+        "requires": {},
+        "sources": [{"name": "pypi", "url": "https://pypi.org/simple", "verify_ssl": True}],
+    }
+
+    assert (
+        micropipenv._get_index_entry_str(meta_2)
+        == """\
+--index-url https://pypi.org/simple
+"""
+    )
+
+    # System configuration is used.
+    assert micropipenv._get_index_entry_str({}) == ""
+
+
+def test_get_index_entry_str_package_info():
+    """Test obtaining index configuration for pip when package information is passed."""
+    meta_1 = {
+        "hash": {"sha256": "foobar"},
+        "pipfile-spec": 6,
+        "requires": {},
+        "sources": [
+            {"name": "pypi", "url": "https://pypi.org/simple", "verify_ssl": True},
+            {"name": "thoth-station", "url": "https://thoth-station.ninja/simple", "verify_ssl": True},
+        ],
+    }
+
+    assert (
+        micropipenv._get_index_entry_str(meta_1, {"index": "thoth-station"})
+        == """\
+--index-url https://thoth-station.ninja/simple
+"""
+    )
+
+    with pytest.raises(micropipenv.RequirementsError):
+        micropipenv._get_index_entry_str(meta_1, {"index": "unknown"})
