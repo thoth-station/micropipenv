@@ -6,6 +6,10 @@ lock files or converting them to `pip-tools
 <https://pypi.org/project/pip-tools/>`_ compatible output. Designed for
 containerized Python applications.
 
+For a brief video preview, `check this demo 
+<https://www.youtube.com/watch?v=I-QC83BcLuo&t=8m58s>`_ (the micropipenv
+part starts at 9:00).
+
 What's the difference in comparision to pip when using requirements.txt?
 =========================================================================
 
@@ -322,6 +326,8 @@ dependencies managed by Poetry:
   $ micropipenv requirements --no-default > dev-requirements.txt
   $ micropipenv requirements --no-default --only-direct > dev-requirements.in
 
+For OpenShift's s2i integration, 
+`check this repo with a demo <https://github.com/fridex/s2i-example-micropipenv>`_.
 
 Installation
 ============
