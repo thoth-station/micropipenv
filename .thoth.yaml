@@ -9,7 +9,6 @@ runtime_environments:
       version: "8.0"
     python_version: "3.6"
     recommendation_type: latest
-    limit_latest_versions: 5
 
 managers:
   - name: update
