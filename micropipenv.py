@@ -273,8 +273,6 @@ def install_pipenv(
                 "Pipfile {!r}, aborting deployment".format(pipfile_lock_hash, pipfile_hash)
             )
 
-    index_config_str = _get_index_entry_str(sections)
-
     tmp_file = tempfile.NamedTemporaryFile("w", prefix="requirements.txt", delete=False)
     _LOGGER.debug("Using temporary file for storing requirements: %r", tmp_file.name)
 
@@ -296,6 +294,7 @@ def install_pipenv(
             package_name, info, had_error = entry["package_name"], entry["info"], entry["error"]
 
             with open(tmp_file.name, "w") as f:
+                index_config_str = _get_index_entry_str(sections, info)
                 f.write(index_config_str)
                 package_entry_str = _get_package_entry_str(package_name, info)
                 f.write(package_entry_str)
@@ -393,9 +392,7 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
         if any(s["url"] == index_url for s in sources):
             continue
 
-        sources.append(
-            {"name": hashlib.sha256(index_url.encode()).hexdigest(), "url": index_url, "verify_ssl": True}
-        )
+        sources.append({"name": hashlib.sha256(index_url.encode()).hexdigest(), "url": index_url, "verify_ssl": True})
 
     if len(sources) == 1:
         # Explicitly assign index if there is just one.
@@ -470,9 +467,7 @@ def _poetry2pipfile_lock(
     sources = []
     has_default = False  # If default flag is set, it disallows PyPI.
     for item in pyproject_poetry_section.get("source", []):
-        sources.append(
-            {"name": item["name"], "url": item["url"], "verify_ssl": True}
-        )
+        sources.append({"name": item["name"], "url": item["url"], "verify_ssl": True})
 
         has_default = has_default or item.get("default", False)
 
@@ -758,17 +753,33 @@ def _get_package_entry_str(
     return result + "\n"
 
 
-def _get_index_entry_str(sections):  # type: (Dict[str, Any]) -> str
+def _get_index_entry_str(sections, package_info=None):  # type: (Dict[str, Any], Optional[Dict[str, Any]]) -> str
     """Get configuration entry for Python package indexes."""
+    index_name = package_info.get("index") if package_info is not None else None
+
     result = ""
     for idx, source in enumerate(sections.get("sources", [])):
-        if idx == 0:
-            result += "--index-url {}\n".format(source["url"])
-        else:
-            result += "--extra-index-url {}\n".format(source["url"])
+        if index_name is None:
+            if idx == 0:
+                result += "--index-url {}\n".format(source["url"])
+            else:
+                result += "--extra-index-url {}\n".format(source["url"])
 
-        if not source["verify_ssl"]:
-            result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
+            if not source["verify_ssl"]:
+                result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
+        else:
+            if index_name == source["name"]:
+                result += "--index-url {}\n".format(source["url"])
+
+                if not source["verify_ssl"]:
+                    result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
+
+                break
+
+    if index_name is not None and not result:
+        raise RequirementsError(
+            "No index found given the configuration: {} (package info: {})".format(sections, package_info),
+        )
 
     return result
 
@@ -873,7 +884,7 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
         "--method",
         help="Source of packages for the installation, perform detection if not provided.",
         choices=["pipenv", "requirements", "poetry"],
-        default=os.getenv("MICROPIPENV_METHOD")
+        default=os.getenv("MICROPIPENV_METHOD"),
     )
     parser_install.add_argument(
         "pip_args",
@@ -939,7 +950,7 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
         "--method",
         help="Source of packages for the requirements file, perform detection if not provided.",
         choices=["pipenv", "poetry"],
-        default=os.getenv("MICROPIPENV_METHOD", "pipenv")
+        default=os.getenv("MICROPIPENV_METHOD", "pipenv"),
     )
     parser_requirements.set_defaults(func=requirements)
 
