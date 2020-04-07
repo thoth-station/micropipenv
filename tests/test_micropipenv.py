@@ -18,6 +18,7 @@
 
 """Testsuite for micropipenv."""
 
+import glob
 import sys
 from contextlib import contextmanager
 from contextlib import redirect_stdout
@@ -48,6 +49,18 @@ def cwd(target):
 def get_pip_path(venv):
     """Get path to pip in a virtual environment used in tests."""
     return os.path.join(venv.path, "bin", "pip3")
+
+
+def setup_module():
+    """A dirty hack for mypy that does not accept collisions in file names."""
+    for item in glob.glob(os.path.join(_DATA_DIR, "**", "setup"), recursive=True):
+        shutil.copyfile(item, "{}.py".format(item))
+
+
+def teardown_module():
+    """Recover from the dirty hack for mypy."""
+    for item in glob.glob(os.path.join(_DATA_DIR, "**", "setup.py"), recursive=True):
+        os.remove(item)
 
 
 def check_generated_pipfile_lock(pipfile_lock_path, pipfile_lock_path_expected):
@@ -83,6 +96,39 @@ def test_install_pipenv_vcs(venv):
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_vcs")):
         subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
         assert str(venv.get_version("daiquiri")) == "2.0.0"
+
+
+def test_install_pipenv_editable(venv):
+    """Test invoking installation using information in Pipfile.lock, an editable mode is used."""
+    cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
+    with cwd(os.path.join(_DATA_DIR, "install", "pipenv_editable")):
+        try:
+            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+            assert str(venv.get_version("daiquiri")) == "2.0.0"
+            assert str(venv.get_version("python-json-logger")) == "0.1.11"
+            assert str(venv.get_version("micropipenv-editable-test")) == "1.2.3"
+            assert (
+                len(
+                    glob.glob(
+                        os.path.join(venv.path, "lib", "python*", "site-packages", "micropipenv-editable-test.egg-link")
+                    )
+                )
+                == 1
+            ), "No egg-link found for editable install"
+        finally:
+            # Clean up this file, can cause issues across multiple test runs.
+            shutil.rmtree("micropipenv_editable_test.egg-info")
+
+
+def test_install_pipenv_vcs_editable(venv):
+    """Test invoking installation using information in Pipfile.lock, a git version in editable mode is used."""
+    cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
+    with cwd(os.path.join(_DATA_DIR, "install", "pipenv_vcs_editable")):
+        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+        assert str(venv.get_version("daiquiri")) == "1.6.0"
+        assert (
+            len(glob.glob(os.path.join(venv.path, "lib", "python*", "site-packages", "daiquiri.egg-link"))) == 1
+        ), "No egg-link found for editable install"
 
 
 def test_install_poetry(venv):
@@ -141,6 +187,51 @@ def test_install_pip_vcs(venv):
         subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
         assert str(venv.get_version("daiquiri")) == "2.1.0"
         assert str(venv.get_version("python-json-logger")) is not None
+
+
+def test_install_pip_editable(venv):
+    """Test installation of an editable package which is not treated as a lock file."""
+    cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
+    work_dir = os.path.join(_DATA_DIR, "install", "requirements_editable_unlocked")
+    with cwd(work_dir):
+        try:
+            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+            assert str(venv.get_version("micropipenv-editable-test")) == "3.3.3"
+            assert (
+                len(
+                    glob.glob(
+                        os.path.join(venv.path, "lib", "python*", "site-packages", "micropipenv-editable-test.egg-link")
+                    )
+                )
+                == 1
+            ), "No egg-link found for editable install"
+            assert str(venv.get_version("q")) == "1.0"
+        finally:
+            # Clean up this file, can cause issues across multiple test runs.
+            shutil.rmtree("micropipenv_editable_test.egg-info")
+
+
+def test_install_pip_tools_editable(venv):
+    """Test installation of an editable package."""
+    cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
+    work_dir = os.path.join(_DATA_DIR, "install", "requirements_editable")
+    with cwd(work_dir):
+        try:
+            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+            assert str(venv.get_version("micropipenv-editable-test")) == "3.2.1"
+            assert (
+                len(
+                    glob.glob(
+                        os.path.join(venv.path, "lib", "python*", "site-packages", "micropipenv-editable-test.egg-link")
+                    )
+                )
+                == 1
+            ), "No egg-link found for editable install"
+            assert str(venv.get_version("daiquiri")) == "2.0.0"
+            assert str(venv.get_version("python-json-logger")) == "0.1.11"
+        finally:
+            # Clean up this file, can cause issues across multiple test runs.
+            shutil.rmtree("micropipenv_editable_test.egg-info")
 
 
 def test_install_pip_print_freeze(venv):
