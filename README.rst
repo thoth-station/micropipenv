@@ -8,7 +8,8 @@ containerized Python applications.
 
 For a brief video preview, `check this demo 
 <https://www.youtube.com/watch?v=I-QC83BcLuo&t=8m58s>`_ (the micropipenv
-part starts at 9:00).
+part starts at 9:00) or this
+`blog post <https://medium.com/swlh/a-bridge-to-two-python-dependency-pinning-worlds-micropipenv-5da674f38e89>`_.
 
 What's the difference in comparision to pip when using requirements.txt?
 =========================================================================
