@@ -814,8 +814,7 @@ def _get_index_entry_str(sections, package_info=None):  # type: (Dict[str, Any],
 
 
 def _iter_index_entry_str(
-    sections,
-    package_info
+    sections, package_info
 ):  # type: (Dict[str, Any], Optional[Dict[str, Any]]) -> Generator[str, None, None]
     """Iterate over possible package index configurations for the given package to try all possible installations."""
     index_name = package_info.get("index") if package_info is not None else None

@@ -732,16 +732,17 @@ def test_get_index_entry_str_package_info():
         micropipenv._get_index_entry_str(meta_1, {"index": "unknown"})
 
 
-@pytest.mark.parametrize("sections", [
-    {"sources": [{"name": "pypi", "url": "https://pypi.org/simple", "verify_ssl": True}]},
-    {},
-    {"sources": []},
-])
+@pytest.mark.parametrize(
+    "sections",
+    [{"sources": [{"name": "pypi", "url": "https://pypi.org/simple", "verify_ssl": True}]}, {}, {"sources": []}],
+)
 def test_iter_index_entry_str(sections):
     """Test iterating over index configuration entries."""
     obj = flexmock()
     # Package info is not relevant in this case.
-    flexmock(micropipenv).should_receive("_get_index_entry_str").with_args(sections, package_info={}).and_return(obj).once()
+    flexmock(micropipenv).should_receive("_get_index_entry_str").with_args(sections, package_info={}).and_return(
+        obj
+    ).once()
     result = micropipenv._iter_index_entry_str(sections, {})
     # An iterator is returned.
     assert next(result) == obj
