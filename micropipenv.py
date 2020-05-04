@@ -89,6 +89,7 @@ except ImportError:
 if TYPE_CHECKING:
     from typing import Any
     from typing import Dict
+    from typing import Generator
     from typing import List
     from typing import MutableMapping
     from typing import Optional
@@ -293,19 +294,28 @@ def install_pipenv(
             entry = to_install.popleft()
             package_name, info, had_error = entry["package_name"], entry["info"], entry["error"]
 
-            with open(tmp_file.name, "w") as f:
-                index_config_str = _get_index_entry_str(sections, info)
-                f.write(index_config_str)
-                package_entry_str = _get_package_entry_str(package_name, info)
-                f.write(package_entry_str)
-
             if "git" in info:
                 _LOGGER.warning("!!! Requirement %s uses a VCS version: %r", package_name, info)
 
-            _LOGGER.info("Installing %r", package_entry_str)
-            called_process = subprocess.run(cmd)
+            package_entry_str = _get_package_entry_str(package_name, info)
+            for index_config_str in _iter_index_entry_str(sections, info):
+                with open(tmp_file.name, "w") as f:
+                    f.write(index_config_str)
+                    f.write(package_entry_str)
 
-            if called_process.returncode != 0:
+                _LOGGER.info("Installing %r", package_entry_str)
+                called_process = subprocess.run(cmd)
+
+                if called_process.returncode == 0:
+                    # Discard any error flag if we have any packages that fail to install.
+                    for item in reversed(to_install):
+                        if item["error"] == 0:
+                            # Fast path - errors are always added to the end of the queue,
+                            # if we find a package without any error we can safely break.
+                            break
+                        item["error"] = 0
+                    break
+            else:
                 if len(to_install) == 0 or (had_error and had_error > len(to_install)):
                     raise PipInstallError(
                         "Failed to install requirements, dependency {!r} could not be installed".format(package_name)
@@ -313,14 +323,7 @@ def install_pipenv(
 
                 _LOGGER.warning("Failed to install %r, will try in next installation round...", package_name)
                 to_install.append({"package_name": package_name, "info": info, "error": had_error + 1})
-            else:
-                # Discard any error flag if we have any packages that fail to install.
-                for item in reversed(to_install):
-                    if item["error"] == 0:
-                        # Fast path - errors are always added to the end of the queue,
-                        # if we find a package without any error we can safely break.
-                        break
-                    item["error"] = 0
+
     finally:
         os.remove(tmp_file.name)
 
@@ -804,10 +807,30 @@ def _get_index_entry_str(sections, package_info=None):  # type: (Dict[str, Any],
 
     if index_name is not None and not result:
         raise RequirementsError(
-            "No index found given the configuration: {} (package info: {})".format(sections, package_info),
+            "No index found given the configuration: {} (package info: {})".format(sections, package_info)
         )
 
     return result
+
+
+def _iter_index_entry_str(
+    sections, package_info
+):  # type: (Dict[str, Any], Optional[Dict[str, Any]]) -> Generator[str, None, None]
+    """Iterate over possible package index configurations for the given package to try all possible installations."""
+    index_name = package_info.get("index") if package_info is not None else None
+
+    if index_name is not None or len(sections.get("sources") or []) <= 1:
+        # No need to iterate over indexes, the package index is set and is just one.
+        res = _get_index_entry_str(sections, package_info)
+        yield from [res]
+        return None
+
+    for source in sections["sources"]:
+        result = "--index-url {}\n".format(source["url"])
+        if not source["verify_ssl"]:
+            result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
+
+        yield result
 
 
 def requirements_str(

@@ -308,6 +308,13 @@ def test_install_pipenv_deploy_error_hash(venv):
             micropipenv.install_pipenv(get_pip_path(venv), deploy=True)
 
 
+def test_install_pipenv_iter_index(venv):
+    """Test triggering multiple installations if index is not explicitly set to one."""
+    with cwd(os.path.join(_DATA_DIR, "install", "pipenv_iter_index")):
+        micropipenv.install_pipenv(get_pip_path(venv), deploy=False)
+        assert str(venv.get_version("requests")) == "1.0.0"
+
+
 def test_parse_requirements2pipfile_lock():
     """Test parsing of requirements.txt into their Pipfile.lock representation."""
     work_dir = os.path.join(_DATA_DIR, "parse", "pip-tools")
@@ -723,3 +730,21 @@ def test_get_index_entry_str_package_info():
 
     with pytest.raises(micropipenv.RequirementsError):
         micropipenv._get_index_entry_str(meta_1, {"index": "unknown"})
+
+
+@pytest.mark.parametrize(
+    "sections",
+    [{"sources": [{"name": "pypi", "url": "https://pypi.org/simple", "verify_ssl": True}]}, {}, {"sources": []}],
+)
+def test_iter_index_entry_str(sections):
+    """Test iterating over index configuration entries."""
+    obj = flexmock()
+    # Package info is not relevant in this case.
+    flexmock(micropipenv).should_receive("_get_index_entry_str").with_args(sections, package_info={}).and_return(
+        obj
+    ).once()
+    result = micropipenv._iter_index_entry_str(sections, {})
+    # An iterator is returned.
+    assert next(result) == obj
+    with pytest.raises(StopIteration):
+        next(result)
