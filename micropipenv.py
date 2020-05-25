@@ -417,7 +417,7 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
             hash_options = requirement.hash_options  # More recent pip.
 
     hashes = {}
-    for hash_type, hashes_present in (hash_options.items() if hash_options else []):
+    for hash_type, hashes_present in hash_options.items() if hash_options else []:
         hashes = {
             "hash_type": hash_type,
             "hashes_present": hashes_present,
@@ -469,7 +469,9 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
 
         if not requirement_info["editable"]:
             if requirement_info["version_specifier"] is None or not (
-                requirement_info["hashes"] and requirement_info["version_specifier_length"] == 1 and requirement_info["version_specifier"].startswith("==")
+                requirement_info["hashes"]
+                and requirement_info["version_specifier_length"] == 1
+                and requirement_info["version_specifier"].startswith("==")
             ):
                 # Not pinned down software stack using pip-tools.
                 raise PipRequirementsNotLocked
