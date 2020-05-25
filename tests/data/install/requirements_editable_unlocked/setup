@@ -11,5 +11,6 @@ setup(
     author_email="fridolin@redhat.com",
     extras_require={
         'baz': ['q==1.0'],
-    }
+    },
+    entry_points={"console_scripts": ["micropipenv-editable-test=main:main"]},
 )

@@ -56,10 +56,16 @@ def setup_module():
     for item in glob.glob(os.path.join(_DATA_DIR, "**", "setup"), recursive=True):
         shutil.copyfile(item, "{}.py".format(item))
 
+    for item in glob.glob(os.path.join(_DATA_DIR, "**", "main"), recursive=True):
+        shutil.copyfile(item, "{}.py".format(item))
+
 
 def teardown_module():
     """Recover from the dirty hack for mypy."""
     for item in glob.glob(os.path.join(_DATA_DIR, "**", "setup.py"), recursive=True):
+        os.remove(item)
+
+    for item in glob.glob(os.path.join(_DATA_DIR, "**", "main.py"), recursive=True):
         os.remove(item)
 
 
