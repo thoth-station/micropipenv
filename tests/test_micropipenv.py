@@ -208,7 +208,7 @@ def test_install_pip_editable(venv):
             assert str(venv.get_version("q")) == "1.0"
         finally:
             # Clean up this file, can cause issues across multiple test runs.
-            shutil.rmtree("micropipenv_editable_test.egg-info")
+            shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
 
 
 def test_install_pip_tools_editable(venv):
@@ -231,7 +231,7 @@ def test_install_pip_tools_editable(venv):
             assert str(venv.get_version("python-json-logger")) == "0.1.11"
         finally:
             # Clean up this file, can cause issues across multiple test runs.
-            shutil.rmtree("micropipenv_editable_test.egg-info")
+            shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
 
 
 def test_install_pip_print_freeze(venv):
