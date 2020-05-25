@@ -1,0 +1,10 @@
+#!/usr/bin/env python3
+"""A sample main file."""
+
+
+def main():
+    """An entry-point for CLI."""
+    print("Hello, micropipenv!")
+
+
+__name__ == "__main__" and main()
