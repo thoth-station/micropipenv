@@ -85,7 +85,7 @@ def test_install_pipenv(venv):
     """Test invoking installation using information in Pipfile.lock."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv")):
-        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
         assert str(venv.get_version("daiquiri")) == "2.0.0"
         assert str(venv.get_version("python-json-logger")) == "0.1.11"
 
@@ -94,7 +94,7 @@ def test_install_pipenv_vcs(venv):
     """Test invoking installation using information in Pipfile.lock, a git version is used."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_vcs")):
-        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
         assert str(venv.get_version("daiquiri")) == "2.0.0"
 
 
@@ -103,7 +103,7 @@ def test_install_pipenv_editable(venv):
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_editable")):
         try:
-            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
             assert str(venv.get_version("daiquiri")) == "2.0.0"
             assert str(venv.get_version("python-json-logger")) == "0.1.11"
             assert str(venv.get_version("micropipenv-editable-test")) == "1.2.3"
@@ -117,14 +117,14 @@ def test_install_pipenv_editable(venv):
             ), "No egg-link found for editable install"
         finally:
             # Clean up this file, can cause issues across multiple test runs.
-            shutil.rmtree("micropipenv_editable_test.egg-info")
+            shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
 
 
 def test_install_pipenv_vcs_editable(venv):
     """Test invoking installation using information in Pipfile.lock, a git version in editable mode is used."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_vcs_editable")):
-        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
         assert str(venv.get_version("daiquiri")) == "1.6.0"
         assert (
             len(glob.glob(os.path.join(venv.path, "lib", "python*", "site-packages", "daiquiri.egg-link"))) == 1
@@ -137,7 +137,7 @@ def test_install_poetry(venv):
     venv.install("toml==0.10.0")
     work_dir = os.path.join(_DATA_DIR, "install", "poetry")
     with cwd(os.path.join(_DATA_DIR, "install", "poetry")):
-        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
         assert str(venv.get_version("daiquiri")) == "2.0.0"
         assert str(venv.get_version("python-json-logger")) == "0.1.11"
 
@@ -150,7 +150,7 @@ def test_install_poetry_vcs(venv):
     venv.install("toml==0.10.0")
     work_dir = os.path.join(_DATA_DIR, "install", "poetry_vcs")
     with cwd(work_dir):
-        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
         assert str(venv.get_version("daiquiri")) == "2.1.0"
         assert str(venv.get_version("python-json-logger")) == "0.1.11"
 
@@ -175,7 +175,7 @@ def test_install_pip(venv):
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
     work_dir = os.path.join(_DATA_DIR, "install", "requirements")
     with cwd(work_dir):
-        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
         assert str(venv.get_version("requests")) == "1.0.0"
 
 
@@ -184,7 +184,7 @@ def test_install_pip_vcs(venv):
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
     work_dir = os.path.join(_DATA_DIR, "install", "requirements_vcs")
     with cwd(work_dir):
-        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
         assert str(venv.get_version("daiquiri")) == "2.1.0"
         assert str(venv.get_version("python-json-logger")) is not None
 
@@ -195,7 +195,7 @@ def test_install_pip_editable(venv):
     work_dir = os.path.join(_DATA_DIR, "install", "requirements_editable_unlocked")
     with cwd(work_dir):
         try:
-            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
             assert str(venv.get_version("micropipenv-editable-test")) == "3.3.3"
             assert (
                 len(
@@ -217,7 +217,7 @@ def test_install_pip_tools_editable(venv):
     work_dir = os.path.join(_DATA_DIR, "install", "requirements_editable")
     with cwd(work_dir):
         try:
-            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv)})
+            subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
             assert str(venv.get_version("micropipenv-editable-test")) == "3.2.1"
             assert (
                 len(
