@@ -95,6 +95,7 @@ if TYPE_CHECKING:
     from typing import Optional
     from typing import Tuple
     from typing import Union
+    from pip._internal.req.req_file import ParsedRequirement
 
 
 _LOGGER = logging.getLogger(__title__)
@@ -148,6 +149,10 @@ class RequirementsError(MicropipenvException):
 
 class PoetryError(MicropipenvException):
     """Raised when any of the pyproject.toml or poetry.lock file has any issue."""
+
+
+class CompatibilityError(MicropipenvException):
+    """Raised when internal pip API is incompatible with micropipenv."""
 
 
 def _traverse_up_find_file(file_name):  # type: (str) -> str
@@ -346,6 +351,110 @@ def _instantiate_package_finder(pip_session):  # type: (PipSession) -> PackageFi
         return PackageFinder.create(link_collector=link_collector, selection_prefs=selection_prefs,)
 
 
+def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str, Any]
+    """Get information about the requirement supporting multiple pip versions.
+
+    This function acts like a compatibility layer across multiple pip releases supporting
+    changes in pip's internal API to obtain information about requirements.
+    """
+    # Editable requirements.
+    editable = getattr(requirement, "editable", False) or getattr(requirement, "is_editable", False)
+
+    is_url = False
+    req = None
+    if hasattr(requirement, "req"):
+        req = requirement.req
+    elif hasattr(requirement, "requirement") and not editable:
+        if not requirement.requirement.startswith("git+"):
+            req = Requirement(requirement.requirement)
+        else:
+            is_url = True
+
+    # Link for requirements passed by URL or using path.
+    link = None
+    if editable:
+        if hasattr(requirement, "link"):
+            link = str(requirement.link)
+        elif req is not None:
+            link = req.url
+        elif hasattr(requirement, "requirement"):
+            link = str(requirement.requirement)
+        else:
+            raise CompatibilityError
+
+    # Requirement name.
+    if editable:
+        name = str(link)
+    elif hasattr(requirement, "name"):
+        name = requirement.name
+    elif req is not None:
+        name = req.name
+    elif hasattr(requirement, "requirement") and is_url:
+        name = requirement.requirement
+    else:
+        raise CompatibilityError
+
+    # Version specifier.
+    version_specifier = None
+    version_specifier_length = None
+    if not editable and not is_url:
+        if hasattr(requirement, "specifier"):
+            version_specifier = str(requirement.specifier)
+            version_specifier_length = len(requirement.specifier)
+        elif req is not None:
+            # pip>=20
+            version_specifier = str(req.specifier)
+            version_specifier_length = len(req.specifier)
+        else:
+            raise CompatibilityError
+
+    # Artifact hashes.
+    hash_options = None
+    if not editable and not is_url:
+        if hasattr(requirement, "options"):
+            hash_options = requirement.options.get("hashes")
+        else:
+            hash_options = requirement.hash_options  # More recent pip.
+
+    hashes = {}
+    for hash_type, hashes_present in hash_options.items() if hash_options else []:
+        hashes = {
+            "hash_type": hash_type,
+            "hashes_present": hashes_present,
+        }
+
+    # Markers.
+    markers = None
+    if not editable and not is_url:
+        if hasattr(requirement, "markers"):
+            markers = requirement.markers
+        elif req is not None:
+            markers = req.marker
+        else:
+            raise CompatibilityError
+
+    # Extras.
+    extras = None
+    if not editable and not is_url:
+        if hasattr(requirement, "extras"):
+            extras = requirement.extras
+        elif req is not None:
+            extras = req.extras
+        else:
+            raise CompatibilityError
+
+    return {
+        "editable": editable,
+        "version_specifier": version_specifier,
+        "version_specifier_length": version_specifier_length,
+        "hashes": hashes,
+        "link": link,
+        "extras": extras,
+        "markers": markers,
+        "name": name,
+    }
+
+
 def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
     """Parse requirements.txt file and return its Pipfile.lock representation."""
     requirements_txt_path = _traverse_up_find_file("requirements.txt")
@@ -355,43 +464,39 @@ def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
 
     result = {}  # type: Dict[str, Any]
     for requirement in parse_requirements(filename=requirements_txt_path, session=PipSession(), finder=finder):
+        requirement_info = _get_requirement_info(requirement)
         entry = {}  # type: Dict[str, Any]
 
-        if not requirement.editable:
-            version = str(requirement.specifier)
-
-            if requirement.specifier is None or not (
-                requirement.has_hash_options and len(requirement.specifier) == 1 and version.startswith("==")
+        if not requirement_info["editable"]:
+            if requirement_info["version_specifier"] is None or not (
+                requirement_info["hashes"]
+                and requirement_info["version_specifier_length"] == 1
+                and requirement_info["version_specifier"].startswith("==")
             ):
                 # Not pinned down software stack using pip-tools.
                 raise PipRequirementsNotLocked
 
-            if hasattr(requirement, "options"):
-                hash_options = requirement.options.get("hashes")
-            else:
-                hash_options = requirement.hash_options  # More recent pip.
-
             hashes = []
-            for hash_type, hashes_present in hash_options.items():
-                hashes.extend(["{}:{}".format(hash_type, h) for h in hashes_present])
+            for hash_ in requirement_info["hashes"]["hashes_present"]:
+                hashes.append("{}:{}".format(requirement_info["hashes"]["hash_type"], hash_))
 
             entry["hashes"] = sorted(hashes)
-            entry["version"] = version
+            entry["version"] = requirement_info["version_specifier"]
         else:
             entry["editable"] = True
-            entry["path"] = str(requirement.link)
+            entry["path"] = requirement_info["link"]
 
-        if requirement.extras:
-            entry["extras"] = sorted(requirement.extras)
+        if requirement_info["extras"]:
+            entry["extras"] = sorted(requirement_info["extras"])
 
-        if requirement.markers:
-            entry["markers"] = str(requirement.markers)
+        if requirement_info["markers"]:
+            entry["markers"] = str(requirement_info["markers"])
 
         if entry.get("editable", False):
             # Create a unique name for editable to avoid possible clashes.
             requirement_name = hashlib.sha256(json.dumps(entry, sort_keys=True).encode("utf8")).hexdigest()
         else:
-            requirement_name = requirement.name
+            requirement_name = requirement_info["name"]
 
         # We add all dependencies to default, develop should not be present in requirements.txt file, but rather
         # in dev-requirements.txt or similar.
