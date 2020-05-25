@@ -7,7 +7,7 @@ verify_ssl = true
 flexmock = "*"
 pytest = "*"
 pytest-timeout = "*"
-pytest-mypy = "*"
+pytest-mypy = {version = "*", markers = "python_version >= '3.5' and python_version < '3.8'"}
 pytest-venv = "*"
 importlib-resources = "*"
 
