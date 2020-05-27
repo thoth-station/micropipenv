@@ -3,10 +3,13 @@ from setuptools import setup
 import os
 import sys
 
+_HERE = os.path.dirname(os.path.abspath(__file__))
+
+
 
 def get_version():
     """Get version of micropipenv.py."""
-    with open(os.path.join("micropipenv.py")) as f:
+    with open(os.path.join(_HERE, "micropipenv.py")) as f:
         content = f.readlines()
 
     for line in content:
@@ -20,15 +23,31 @@ setup(
     name="micropipenv",
     version=get_version(),
     description="A simple wrapper around pip to support requirements.txt, Pipenv and Poetry files for containerized applications",
+    keywords=["packaging", "pipenv", "poetry", "pip", "dependencies", "dependency-management", "utilities"],
     url="https://github.com/thoth-station/micropipenv",
     download_url="https://pypi.org/project/micropipenv",
-    long_description=open(os.path.join(os.path.dirname(__file__), "README.rst")).read(),
+    long_description=open(os.path.join(_HERE, "README.rst")).read(),
+    long_description_content_type="text/x-rst",
     author="Fridolin Pokorny",
     author_email="fridex.devel@gmail.com",
+    maintainer="Fridolin Pokorny",
+    maintainer_email="fridex.devel@gmail.com",
     license="GPLv3+",
     py_modules=["micropipenv"],
     install_requires=["pip>=9"],
     entry_points={"console_scripts": ["micropipenv=micropipenv:main"]},
+    classifiers=[
+        "Development Status :: 4 - Beta",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+        "Programming Language :: Python",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: Implementation :: CPython",
+    ],
     extras_require={
         "toml": ["toml"],
     },
