@@ -33,6 +33,22 @@ import micropipenv
 
 
 _DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.relpath(__file__)), "data"))
+# Version of pip to test micropipenv with
+# the default is the pip wheel bundled in virtualenv package
+PIP_VERSION = os.getenv("PIP_VERSION")
+
+
+@pytest.fixture(name="venv")
+def venv_with_pip(venv):
+    """Fixture for virtual environment with specific version of pip.
+
+    Fixture uses the original one from pytest_venv,
+    installs pip if PIP_VERSION is given
+    and overwrites the original fixture name
+    """
+    if PIP_VERSION is not None:
+        venv.install(f"pip{PIP_VERSION}")
+    yield venv
 
 
 @contextmanager
