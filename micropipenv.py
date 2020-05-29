@@ -263,7 +263,7 @@ def install_pipenv(
                 "Pipfile {!r}, aborting deployment".format(pipfile_lock_hash, pipfile_hash)
             )
 
-    tmp_file = tempfile.NamedTemporaryFile("w", prefix="requirements.txt", delete=False)
+    tmp_file = tempfile.NamedTemporaryFile("w", prefix="requirements_micropipenv-", suffix=".txt", delete=False)
     _LOGGER.debug("Using temporary file for storing requirements: %r", tmp_file.name)
 
     cmd = [pip_bin, "install", "--no-deps", "--disable-pip-version-check", "-r", tmp_file.name, *(pip_args or [])]
