@@ -2,13 +2,10 @@
     check:
       jobs:
         - "thoth-coala"
-        - "thoth-pytest"
     gate:
       jobs:
         - "thoth-coala"
-        - "thoth-pytest"
 
     kebechet-auto-gate:
       jobs:
         - "thoth-coala"
-        - "thoth-pytest"
