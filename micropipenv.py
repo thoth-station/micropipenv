@@ -29,22 +29,6 @@ issue `python3 -m venv venv/ && . venv/bin/activate` to create one.
 __version__ = "0.1.6"
 __author__ = "Fridolin Pokorny <fridex.devel@gmail.com>"
 __title__ = "micropipenv"
-__all__ = [
-    "ArgumentsError",
-    "ExtrasMissing",
-    "FileNotFound",
-    "FileReadError",
-    "get_requirements_sections",
-    "HashMismatch",
-    "install",
-    "install_pipenv",
-    "install_requirements",
-    "install_poetry",
-    "main",
-    "MicropipenvException",
-    "PythonVersionMismatch",
-    "requirements",
-]
 
 import argparse
 import hashlib
@@ -279,7 +263,7 @@ def install_pipenv(
                 "Pipfile {!r}, aborting deployment".format(pipfile_lock_hash, pipfile_hash)
             )
 
-    tmp_file = tempfile.NamedTemporaryFile("w", prefix="requirements.txt", delete=False)
+    tmp_file = tempfile.NamedTemporaryFile("w", prefix="requirements_micropipenv-", suffix=".txt", delete=False)
     _LOGGER.debug("Using temporary file for storing requirements: %r", tmp_file.name)
 
     cmd = [pip_bin, "install", "--no-deps", "--disable-pip-version-check", "-r", tmp_file.name, *(pip_args or [])]
