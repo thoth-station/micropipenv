@@ -39,7 +39,7 @@ import re
 import subprocess
 import sys
 import tempfile
-from collections import deque
+from collections import deque, OrderedDict
 from itertools import chain
 from pathlib import Path
 from urllib.parse import urlparse
@@ -90,11 +90,11 @@ _PIP_BIN = os.getenv("MICROPIPENV_PIP_BIN", "pip")
 _DEBUG = int(os.getenv("MICROPIPENV_DEBUG", 0))
 _NO_LOCKFILE_PRINT = int(os.getenv("MICROPIPENV_NO_LOCKFILE_PRINT", 0))
 _NO_LOCKFILE_WRITE = int(os.getenv("MICROPIPENV_NO_LOCKFILE_WRITE", 0))
-_FILE_METHOD_MAP = {  # The order here defines priorities
+_FILE_METHOD_MAP = OrderedDict({  # The order here defines priorities
     "Pipfile.lock": "pipenv",
     "poetry.lock": "poetry",
     "requirements.txt": "requirements",
-}
+})
 
 
 class MicropipenvException(Exception):
@@ -746,7 +746,7 @@ def install(
                 "Failed to find Pipfile.lock, poetry.lock or requirements.txt "
                 "in the current directory or any of its parent: {}".format(os.getcwd()))
 
-        _LOGGER.debug("Dependencies definitions found: %s", str(paths))
+        _LOGGER.debug("Dependencies definitions found: %s", paths)
         # The longest path means that we are as close to CWD as possible.
         # Sorting is also stable which means that two paths with the same
         # lenght will have the same order when sorted which keeps priorities
