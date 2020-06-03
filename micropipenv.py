@@ -41,6 +41,7 @@ import sys
 import tempfile
 from collections import deque
 from itertools import chain
+from pathlib import Path
 from urllib.parse import urlparse
 
 from pip._vendor.packaging.requirements import Requirement
@@ -89,6 +90,11 @@ _PIP_BIN = os.getenv("MICROPIPENV_PIP_BIN", "pip")
 _DEBUG = int(os.getenv("MICROPIPENV_DEBUG", 0))
 _NO_LOCKFILE_PRINT = int(os.getenv("MICROPIPENV_NO_LOCKFILE_PRINT", 0))
 _NO_LOCKFILE_WRITE = int(os.getenv("MICROPIPENV_NO_LOCKFILE_WRITE", 0))
+_FILE_METHOD_MAP = {  # The order here defines priorities
+    "Pipfile.lock": "pipenv",
+    "poetry.lock": "poetry",
+    "requirements.txt": "requirements",
+}
 
 
 class MicropipenvException(Exception):
@@ -728,24 +734,26 @@ def install(
 ):  # type: (Optional[str], bool, bool, Optional[List[str]]) -> None
     """Perform installation of requirements based on the method used."""
     if method is None:
-        try:
-            _traverse_up_find_file("Pipfile.lock")
-            method = "pipenv"
-        except FileNotFound as exc:
+        paths = []
+        for file_name in _FILE_METHOD_MAP.keys():
             try:
-                _LOGGER.info("Failed to find Pipfile.lock, looking up poetry.lock: %s", str(exc))
-                _traverse_up_find_file("poetry.lock")
-                method = "poetry"
-            except FileNotFound as exc:
-                try:
-                    _LOGGER.info("Failed to find Poetry lock file, looking up requirements.txt: %s", str(exc))
-                    _traverse_up_find_file("requirements.txt")
-                    method = "requirements"
-                except FileNotFound as exc:
-                    raise FileNotFound(
-                        "Failed to find Pipfile.lock, poetry.lock or requirements.txt "
-                        "in the current directory or any of its parent: {}".format(os.getcwd())
-                    ) from exc
+                paths.append(Path(_traverse_up_find_file(file_name)))
+            except FileNotFound:
+                pass
+
+        if not paths:
+            raise FileNotFound(
+                "Failed to find Pipfile.lock, poetry.lock or requirements.txt "
+                "in the current directory or any of its parent: {}".format(os.getcwd()))
+
+        _LOGGER.debug("Dependencies definitions found: %s", str(paths))
+        # The longest path means that we are as close to CWD as possible.
+        # Sorting is also stable which means that two paths with the same
+        # lenght will have the same order when sorted which keeps priorities
+        # from _FILE_METHOS_MAP.
+        longest_path = sorted(paths, key=lambda p: len(p.parts), reverse=True)[0]
+        _LOGGER.debug("Choosen definition: %s", str(longest_path))
+        method = _FILE_METHOD_MAP[longest_path.name]
 
     if method == "requirements":
         if deploy:
