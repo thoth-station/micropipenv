@@ -355,6 +355,13 @@ the ``micropipenv`` CLI:
 
   micropipenv --help
 
+If you wish to install ``micropipenv`` on your Fedora system:
+
+.. code-block:: console
+
+  dnf install -y micropipenv
+
+See available `rpm packages in Koshei <https://koschei.fedoraproject.org/package/micropipenv>`_.
 
 No installation
 ===============
