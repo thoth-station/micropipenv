@@ -91,9 +91,7 @@ or `Poetry <https://pypi.org/project/poetry>`_?
   uses Pipenv/Poetry for dependency management (e.g. restricted environments).
 
 * My Pipenv installation is broken and `Pipenv upstream did not issue any new
-  Pipenv release <https://github.com/pypa/pipenv/issues/4058>`_ - see also
-  `Thoth's Pipenv release <https://pypi.org/project/thoth-pipenv>`_ for
-  possible fix.
+  Pipenv release <https://github.com/pypa/pipenv/issues/4058>`_
 
 * I would like to deploy my application into a production environment and my
   application dependencies are managed by Pipenv/Poetry (dependencies are
