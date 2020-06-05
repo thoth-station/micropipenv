@@ -382,3 +382,17 @@ Anything after ``python3 -`` will be passed as an argument to
   curl https://raw.githubusercontent.com/thoth-station/micropipenv/master/micropipenv.py | python3 - install -- --user
 
 All arguments after -- will be passed to ``pip`` as options.
+
+License and copying
+===================
+
+This project is licensed under the terms of the GNU Lesser General Public
+License v3 or later. See ``LICENSE-GPL`` and ``LICENSE-LGPL`` files for the
+license terms.
+
+Copyright (C) 2020 AICoE Project Thoth; Red Hat Inc.
+
+Authors and maintainers:
+ * Fridolín 'fridex' Pokorný <fridolin@redhat.com>
+ * Lumír 'Frenzy' Balhar <lbalhar@redhat.com>
+
