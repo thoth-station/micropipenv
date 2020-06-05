@@ -32,7 +32,7 @@ setup(
     author_email="fridex.devel@gmail.com",
     maintainer="Fridolin Pokorny",
     maintainer_email="fridex.devel@gmail.com",
-    license="GPLv3+",
+    license="LGPLv3+",
     py_modules=["micropipenv"],
     install_requires=["pip>=9"],
     entry_points={"console_scripts": ["micropipenv=micropipenv:main"]},
