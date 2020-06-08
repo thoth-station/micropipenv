@@ -90,11 +90,11 @@ _PIP_BIN = os.getenv("MICROPIPENV_PIP_BIN", "pip")
 _DEBUG = int(os.getenv("MICROPIPENV_DEBUG", 0))
 _NO_LOCKFILE_PRINT = int(os.getenv("MICROPIPENV_NO_LOCKFILE_PRINT", 0))
 _NO_LOCKFILE_WRITE = int(os.getenv("MICROPIPENV_NO_LOCKFILE_WRITE", 0))
-_FILE_METHOD_MAP = OrderedDict({  # The order here defines priorities
-    "Pipfile.lock": "pipenv",
-    "poetry.lock": "poetry",
-    "requirements.txt": "requirements",
-})
+_FILE_METHOD_MAP = OrderedDict([  # The order here defines priorities
+    ("Pipfile.lock", "pipenv"),
+    ("poetry.lock", "poetry"),
+    ("requirements.txt", "requirements"),
+])
 
 
 class MicropipenvException(Exception):
