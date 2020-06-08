@@ -15,13 +15,14 @@
 # You should have received a copy of the GNU Lesser General Public License
 # along with this program. If not, see <http://www.gnu.org/licenses/>.
 
-"""A lightweight wrapper for pip to support Pipenv files.
+"""A lightweight wrapper for pip to support Pipenv/Poetry/requriements files.
 
-This wrapper can convert Pipfile/Pipfile.lock to requirements.in and/or
-requirements.txt file suitable for setup.py script or for pip-tools.
+This wrapper can convert Pipfile/Pipfile.lock/poetry.lock to requirements.in
+and/or requirements.txt file suitable for setup.py script or for pip-tools.
 
-Moreover, this wrapper can mimic `pipenv install --deploy`. For any resolved
-stack, micropipenv can parse Pipfile/Pipfile.lock and install required
+Moreover, this wrapper can mimic `pipenv install --deploy` or `poetry install`.
+For any resolved stack, micropipenv can parse
+Pipfile/Pipfile.lock/poetry.lock/requirements.txt and install required
 dependencies using raw pip. The virtual environment is not created, but one can
 issue `python3 -m venv venv/ && . venv/bin/activate` to create one.
 """
