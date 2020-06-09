@@ -1,6 +1,9 @@
 µPipenv
 -------
 
+.. image:: https://travis-ci.com/thoth-station/micropipenv.svg?branch=master
+    :target: https://travis-ci.com/thoth-station/micropipenv
+
 A lightweight wrapper for pip to support requirements.txt, Pipenv and Poetry
 lock files or converting them to `pip-tools
 <https://pypi.org/project/pip-tools/>`_ compatible output. Designed for
