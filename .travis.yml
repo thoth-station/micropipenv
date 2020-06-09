@@ -1,0 +1,29 @@
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker pull frenzymadness/fedora-python-tox
+  - docker images
+
+script:
+  - docker run --rm -it -v $PWD:/src -w /src -e TOXENV frenzymadness/fedora-python-tox
+
+# Unfortunately, this matrix has to updated manually every time
+# we add or remove a tox environment.
+# To get the list run `tox -l | sed "s/^/  - env: TOXENV=/"`
+matrix:
+  include:
+  - env: TOXENV=py36-pip190
+  - env: TOXENV=py36-pip200
+  - env: TOXENV=py36-pip201
+  - env: TOXENV=py37-pip190
+  - env: TOXENV=py37-pip200
+  - env: TOXENV=py37-pip201
+  - env: TOXENV=py38-pip190
+  - env: TOXENV=py38-pip200
+  - env: TOXENV=py38-pip201
+  - env: TOXENV=py39-pip190
+  - env: TOXENV=py39-pip200
+  - env: TOXENV=py39-pip201
