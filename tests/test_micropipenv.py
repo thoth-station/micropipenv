@@ -268,6 +268,16 @@ def test_install_pip_print_freeze(venv):
         assert str(venv.get_version("requests")) == "1.0.0"
 
 
+def test_install_pip_svn(venv):
+    """Test installation of a package from VCS (git)."""
+    work_dir = os.path.join(_DATA_DIR, "install", "requirements_svn")
+    with cwd(work_dir), pytest.raises(
+        micropipenv.NotSupportedError,
+        match=r"Non-Git VCS requirement 'svn\+svn://svn.repo/some_pkg/trunk/#egg=SomePackage' is not supported yet",
+    ):
+        micropipenv.install_requirements(get_pip_path(venv))
+
+
 def test_method_detection_poetry(tmp_path):
     """Test detecting installation method to be used - Poetry."""
     # Touch files with specific names so that detection can find them.
