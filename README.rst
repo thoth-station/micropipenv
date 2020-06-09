@@ -1,8 +1,24 @@
 µPipenv
 -------
 
+.. image:: https://img.shields.io/github/v/tag/thoth-station/micropipenv?style=plastic
+  :target: https://github.com/thoth-station/micropipenv/releases
+  :alt: GitHub tag (latest by date)
+
 .. image:: https://travis-ci.com/thoth-station/micropipenv.svg?branch=master
-    :target: https://travis-ci.com/thoth-station/micropipenv
+  :target: https://travis-ci.com/thoth-station/micropipenv
+
+.. image:: https://img.shields.io/pypi/pyversions/micropipenv?style=plastic
+  :target: https://pypi.org/project/micropipenv
+  :alt: PyPI - Python Version
+
+.. image:: https://img.shields.io/pypi/l/micropipenv?style=plastic
+  :target: https://pypi.org/project/micropipenv
+  :alt: PyPI - License
+
+.. image:: https://img.shields.io/pypi/dm/micropipenv?style=plastic
+  :target: https://pypi.org/project/micropipenv
+  :alt: PyPI - Downloads
 
 A lightweight wrapper for pip to support requirements.txt, Pipenv and Poetry
 lock files or converting them to `pip-tools
