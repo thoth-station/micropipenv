@@ -47,7 +47,12 @@ def venv_with_pip(venv):
     and overwrites the original fixture name
     """
     if MICROPIPENV_TEST_PIP_VERSION is not None:
-        venv.install(f"pip{MICROPIPENV_TEST_PIP_VERSION}")
+        if MICROPIPENV_TEST_PIP_VERSION == "latest":
+            # This special value always forces the most recent pip version.
+            venv.install("pip", upgrade=True)
+        else:
+            venv.install(f"pip{MICROPIPENV_TEST_PIP_VERSION}")
+
     yield venv
 
 
