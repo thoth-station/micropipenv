@@ -446,9 +446,9 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
     }
 
 
-def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
+def _requirements2pipfile_lock(requirements_txt_path=None):  # type: (Optional[str]) -> Dict[str, Any]
     """Parse requirements.txt file and return its Pipfile.lock representation."""
-    requirements_txt_path = _traverse_up_find_file("requirements.txt")
+    requirements_txt_path = requirements_txt_path or _traverse_up_find_file("requirements.txt")
 
     pip_session = PipSession()
     finder = _instantiate_package_finder(pip_session)
@@ -708,7 +708,7 @@ def install_requirements(pip_bin=_PIP_BIN, *, pip_args=None):  # type: (str, Opt
     requirements_txt_path = _traverse_up_find_file("requirements.txt")
 
     try:
-        pipfile_lock = _requirements2pipfile_lock()
+        pipfile_lock = _requirements2pipfile_lock(requirements_txt_path)
         # Deploy set to false as there is no Pipfile to check against.
         install_pipenv(pip_bin, pipfile_lock=pipfile_lock, pip_args=pip_args, deploy=False)
     except PipRequirementsNotLocked:
