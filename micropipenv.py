@@ -146,6 +146,10 @@ class CompatibilityError(MicropipenvException):
     """Raised when internal pip API is incompatible with micropipenv."""
 
 
+class NotSupportedError(MicropipenvException):
+    """Raised when the given feature is not supported by micropipenv."""
+
+
 def _traverse_up_find_file(file_name):  # type: (str) -> str
     """Traverse the root up, find the given file by name and return its path."""
     path = os.getcwd()
@@ -332,13 +336,22 @@ def _instantiate_package_finder(pip_session):  # type: (PipSession) -> PackageFi
         from pip._internal.models.search_scope import SearchScope
         from pip._internal.models.selection_prefs import SelectionPreferences
 
+        selection_prefs = SelectionPreferences(allow_yanked=True,)
+        search_scope = SearchScope([], [])
+
         try:
             from pip._internal.index.collector import LinkCollector
         except ModuleNotFoundError:
-            from pip._internal.collector import LinkCollector
+            try:
+                from pip._internal.collector import LinkCollector
+            except ModuleNotFoundError:  # pip>=19.2<20
+                return PackageFinder.create(
+                    session=pip_session,
+                    selection_prefs=selection_prefs,
+                    search_scope=search_scope
+                )
 
-        link_collector = LinkCollector(session=pip_session, search_scope=SearchScope([], []),)
-        selection_prefs = SelectionPreferences(allow_yanked=True,)
+        link_collector = LinkCollector(session=pip_session, search_scope=search_scope)
         return PackageFinder.create(link_collector=link_collector, selection_prefs=selection_prefs,)
 
 
@@ -350,6 +363,13 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
     """
     # Editable requirements.
     editable = getattr(requirement, "editable", False) or getattr(requirement, "is_editable", False)
+
+    # Check for unsupported VCS.
+    link_url = getattr(requirement, "requirement", None) or getattr(requirement, "link", None)
+    if link_url and str(link_url).startswith(("hg+", "svn+", "bzr+")):
+        raise NotSupportedError(
+            "Non-Git VCS requirement {!r} is not supported yet".format(str(link_url))
+        )
 
     is_url = False
     req = None
@@ -446,9 +466,9 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
     }
 
 
-def _requirements2pipfile_lock():  # type: () -> Dict[str, Any]
+def _requirements2pipfile_lock(requirements_txt_path=None):  # type: (Optional[str]) -> Dict[str, Any]
     """Parse requirements.txt file and return its Pipfile.lock representation."""
-    requirements_txt_path = _traverse_up_find_file("requirements.txt")
+    requirements_txt_path = requirements_txt_path or _traverse_up_find_file("requirements.txt")
 
     pip_session = PipSession()
     finder = _instantiate_package_finder(pip_session)
@@ -635,8 +655,8 @@ def _poetry2pipfile_lock(
 
         if "source" in entry:
             if entry["source"]["type"] != "git":
-                raise NotImplementedError(
-                    "Micropipenv supports Git VCS, got {} instead".format(entry["source"]["type"])
+                raise NotSupportedError(
+                    "micropipenv supports Git VCS, got {} instead".format(entry["source"]["type"])
                 )
 
             requirement["git"] = entry["source"]["url"]
@@ -708,7 +728,7 @@ def install_requirements(pip_bin=_PIP_BIN, *, pip_args=None):  # type: (str, Opt
     requirements_txt_path = _traverse_up_find_file("requirements.txt")
 
     try:
-        pipfile_lock = _requirements2pipfile_lock()
+        pipfile_lock = _requirements2pipfile_lock(requirements_txt_path)
         # Deploy set to false as there is no Pipfile to check against.
         install_pipenv(pip_bin, pipfile_lock=pipfile_lock, pip_args=pip_args, deploy=False)
     except PipRequirementsNotLocked:
