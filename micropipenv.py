@@ -336,13 +336,22 @@ def _instantiate_package_finder(pip_session):  # type: (PipSession) -> PackageFi
         from pip._internal.models.search_scope import SearchScope
         from pip._internal.models.selection_prefs import SelectionPreferences
 
+        selection_prefs = SelectionPreferences(allow_yanked=True,)
+        search_scope = SearchScope([], [])
+
         try:
             from pip._internal.index.collector import LinkCollector
         except ModuleNotFoundError:
-            from pip._internal.collector import LinkCollector
+            try:
+                from pip._internal.collector import LinkCollector
+            except ModuleNotFoundError:  # pip>=19.2<20
+                return PackageFinder.create(
+                    session=pip_session,
+                    selection_prefs=selection_prefs,
+                    search_scope=search_scope
+                )
 
-        link_collector = LinkCollector(session=pip_session, search_scope=SearchScope([], []),)
-        selection_prefs = SelectionPreferences(allow_yanked=True,)
+        link_collector = LinkCollector(session=pip_session, search_scope=search_scope)
         return PackageFinder.create(link_collector=link_collector, selection_prefs=selection_prefs,)
 
 
