@@ -17,22 +17,30 @@ script:
 matrix:
   include:
   - env: TOXENV=py36-pip90
+  - env: TOXENV=py36-pip191
   - env: TOXENV=py36-pip192
   - env: TOXENV=py36-pip193
   - env: TOXENV=py36-pip200
   - env: TOXENV=py36-pip201
+  - env: TOXENV=py36-piplatest
   - env: TOXENV=py37-pip90
+  - env: TOXENV=py37-pip191
   - env: TOXENV=py37-pip192
   - env: TOXENV=py37-pip193
   - env: TOXENV=py37-pip200
   - env: TOXENV=py37-pip201
+  - env: TOXENV=py37-piplatest
   - env: TOXENV=py38-pip90
+  - env: TOXENV=py38-pip191
   - env: TOXENV=py38-pip192
   - env: TOXENV=py38-pip193
   - env: TOXENV=py38-pip200
   - env: TOXENV=py38-pip201
+  - env: TOXENV=py38-piplatest
   - env: TOXENV=py39-pip90
+  - env: TOXENV=py39-pip191
   - env: TOXENV=py39-pip192
   - env: TOXENV=py39-pip193
   - env: TOXENV=py39-pip200
   - env: TOXENV=py39-pip201
+  - env: TOXENV=py39-piplatest
