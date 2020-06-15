@@ -5,11 +5,11 @@ services:
   - docker
 
 before_install:
-  - docker pull frenzymadness/fedora-python-tox
+  - docker pull quay.io/thoth-station/fedora-python-tox
   - docker images
 
 script:
-  - docker run --rm -it -v $PWD:/src -w /src -e TOXENV frenzymadness/fedora-python-tox
+  - docker run --rm -it -v $PWD:/src -w /src -e TOXENV quay.io/thoth-station/fedora-python-tox
 
 # Unfortunately, this matrix has to updated manually every time
 # we add or remove a tox environment.
