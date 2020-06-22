@@ -42,6 +42,7 @@ import sys
 import tempfile
 from collections import deque, OrderedDict
 from itertools import chain
+from importlib import import_module
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -150,6 +151,20 @@ class NotSupportedError(MicropipenvException):
     """Raised when the given feature is not supported by micropipenv."""
 
 
+def _import_toml():  # type: () -> Any
+    """Import and return toml or pytoml module (in this order)."""
+    for module in "toml", "pytoml":
+        try:
+            return import_module(module)
+        except ImportError:
+            pass
+    else:
+        raise ExtrasMissing(
+            "Failed to import toml needed for parsing Pipfile, please install micropipenv "
+            "with toml extra: pip install micropipenv[toml]"
+        )
+
+
 def _traverse_up_find_file(file_name):  # type: (str) -> str
     """Traverse the root up, find the given file by name and return its path."""
     path = os.getcwd()
@@ -185,13 +200,7 @@ def _read_pipfile_lock():  # type: () -> Any
 
 def _read_pipfile():  # type: () -> Any
     """Find and read Pipfile."""
-    try:
-        import toml
-    except ImportError as exc:
-        raise ExtrasMissing(
-            "Failed to import toml needed for parsing Pipfile, please install micropipenv "
-            "with toml extra: pip install micropipenv[toml]"
-        ) from exc
+    toml = _import_toml()
 
     pipfile_path = _traverse_up_find_file("Pipfile")
 
@@ -206,13 +215,7 @@ def _read_pipfile():  # type: () -> Any
 
 def _read_poetry():  # type: () -> Tuple[MutableMapping[str, Any], MutableMapping[str, Any]]
     """Find and read poetry.lock and pyproject.toml."""
-    try:
-        import toml
-    except ImportError as exc:
-        raise ExtrasMissing(
-            "Failed to import toml needed for parsing poetry.lock and pyproject.toml as used by Poetry, "
-            "please install micropipenv with toml extra: pip install micropipenv[toml]"
-        ) from exc
+    toml = _import_toml()
 
     poetry_lock_path = _traverse_up_find_file("poetry.lock")
     pyproject_toml_path = _traverse_up_find_file("pyproject.toml")
