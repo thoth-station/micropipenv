@@ -23,7 +23,7 @@
 A lightweight wrapper for pip to support requirements.txt, Pipenv and Poetry
 lock files or converting them to `pip-tools
 <https://pypi.org/project/pip-tools/>`_ compatible output. Designed for
-containerized Python applications.
+containerized Python applications but not limited to them.
 
 For a brief video preview, `check this demo 
 <https://www.youtube.com/watch?v=I-QC83BcLuo&t=8m58s>`_ (the micropipenv
