@@ -36,6 +36,8 @@ _DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.relpath(__file_
 # Version of pip to test micropipenv with
 # the default is the pip wheel bundled in virtualenv package
 MICROPIPENV_TEST_PIP_VERSION = os.getenv("MICROPIPENV_TEST_PIP_VERSION")
+# Implementation of `toml` to test micropipenv with
+MICROPIPENV_TEST_TOML_MODULE = os.getenv("MICROPIPENV_TEST_TOML_MODULE", "toml")
 
 
 @pytest.fixture(name="venv")
@@ -161,7 +163,7 @@ def test_install_pipenv_vcs_editable(venv):
 def test_install_poetry(venv):
     """Test invoking installation using information from a Poetry project."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "poetry"]
-    venv.install("toml==0.10.0")
+    venv.install(MICROPIPENV_TEST_TOML_MODULE)
     work_dir = os.path.join(_DATA_DIR, "install", "poetry")
     with cwd(os.path.join(_DATA_DIR, "install", "poetry")):
         subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
@@ -174,7 +176,7 @@ def test_install_poetry(venv):
 def test_install_poetry_vcs(venv):
     """Test invoking installation using information from a Poetry project, a git version is used."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "poetry"]
-    venv.install("toml==0.10.0")
+    venv.install(MICROPIPENV_TEST_TOML_MODULE)
     work_dir = os.path.join(_DATA_DIR, "install", "poetry_vcs")
     with cwd(work_dir):
         subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
@@ -785,3 +787,24 @@ def test_iter_index_entry_str(sections):
     assert next(result) == obj
     with pytest.raises(StopIteration):
         next(result)
+
+
+def test_import_toml(venv):
+    """Test the correct order of toml modules."""
+    # cmd to run the function inside the venv
+    cmd = [os.path.join(venv.path, "bin", "python3"), "-c",
+           "from micropipenv import _import_toml; print(_import_toml())"]
+
+    # no toml package should raise an exception
+    with pytest.raises(subprocess.CalledProcessError) as exc:
+        output = subprocess.check_output(cmd, universal_newlines=True)
+        assert "micropipenv.ExtrasMissing" in exc.output
+
+    venv.install("pytoml")
+    output = subprocess.check_output(cmd, universal_newlines=True)
+    assert "<module 'pytoml'" in output
+
+    # toml, if installed, takes precedence
+    venv.install("toml")
+    output = subprocess.check_output(cmd, universal_newlines=True)
+    assert "<module 'toml'" in output
