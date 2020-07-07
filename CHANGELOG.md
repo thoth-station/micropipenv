@@ -1,5 +1,12 @@
 # Changelog for Thoth's micropipenv
 
+## [0.4.0] - 2020-Jul-07 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Added pytoml support needed for Red Hat Enterprise Linux
+  thanks to Lumir 'Frenzy' Balhar <lbalhar@redhat.com>
+
 ## [0.3.0] - 2020-Jun-12 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
