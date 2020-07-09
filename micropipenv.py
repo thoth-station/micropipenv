@@ -885,6 +885,9 @@ def _get_package_entry_str(
         result = "--editable {}".format(info.get("path", "."))
     else:
         result = package_name
+    
+    if info.get('file'):
+        result = "{}#egg{}".format(info.get("file"), package_name)
 
     if info.get("extras"):
         result += "[{}]".format(",".join(info["extras"]))
