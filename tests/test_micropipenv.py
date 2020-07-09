@@ -126,6 +126,14 @@ def test_install_pipenv_vcs(venv):
         subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
         assert str(venv.get_version("daiquiri")) == "2.0.0"
 
+def test_install_pipenv_file(venv):
+    """Test invoking installation using information in Pipfile.lock, a file mode is used."""
+    cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
+    with cwd(os.path.join(_DATA_DIR, "install", "pipenv_file")):
+        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
+        assert str(venv.get_version("daiquiri")) == "2.0.0"
+        assert str(venv.get_version("python-json-logger")) == "0.1.11"
+
 
 def test_install_pipenv_editable(venv):
     """Test invoking installation using information in Pipfile.lock, an editable mode is used."""
