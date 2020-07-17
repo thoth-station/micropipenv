@@ -253,6 +253,25 @@ def test_install_pip_tools_editable(venv):
             shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
 
 
+@pytest.mark.skipif(PIP_VERSION.release >= (19, 3, 0), reason="Direct reference installation is supported in pip starting 19.3")
+def test_install_pip_tools_direct_reference(venv):
+    """Test installation of a direct reference.
+
+    See https://pip.pypa.io/en/stable/reference/pip_install/#requirement-specifiers
+    """
+    cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
+    work_dir = os.path.join(_DATA_DIR, "install", "pip-tools_direct_reference")
+    with cwd(work_dir):
+        with open("requirements.txt", "w") as requirements_file:
+            artifact_path = os.path.join(os.getcwd(), "micropipenv-0.0.0.tar.gz")
+            requirements_file.write(
+                "micropipenv @ file://{} --hash=sha256:03b3f06d0e3c403337c73d8d95b1976449af8985e40a6aabfd9620c282c8d060\n".format(artifact_path)
+            )
+
+        subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
+        assert str(venv.get_version("micropipenv")) == "0.0.0"
+
+
 def test_install_pip_print_freeze(venv):
     """Test invoking installation when raw requirements.txt are used.
 
