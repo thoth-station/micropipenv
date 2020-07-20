@@ -31,31 +31,12 @@ import json
 
 import micropipenv
 
+from conftest import PIP_VERSION
+
 
 _DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.relpath(__file__)), "data"))
-# Version of pip to test micropipenv with
-# the default is the pip wheel bundled in virtualenv package
-MICROPIPENV_TEST_PIP_VERSION = os.getenv("MICROPIPENV_TEST_PIP_VERSION")
 # Implementation of `toml` to test micropipenv with
 MICROPIPENV_TEST_TOML_MODULE = os.getenv("MICROPIPENV_TEST_TOML_MODULE", "toml")
-
-
-@pytest.fixture(name="venv")
-def venv_with_pip(venv):
-    """Fixture for virtual environment with specific version of pip.
-
-    Fixture uses the original one from pytest_venv,
-    installs pip if MICROPIPENV_TEST_PIP_VERSION is given
-    and overwrites the original fixture name
-    """
-    if MICROPIPENV_TEST_PIP_VERSION is not None:
-        if MICROPIPENV_TEST_PIP_VERSION == "latest":
-            # This special value always forces the most recent pip version.
-            venv.install("pip", upgrade=True)
-        else:
-            venv.install(f"pip{MICROPIPENV_TEST_PIP_VERSION}")
-
-    yield venv
 
 
 @contextmanager
@@ -125,6 +106,7 @@ def test_install_pipenv_vcs(venv):
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_vcs")):
         subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
         assert str(venv.get_version("daiquiri")) == "2.0.0"
+
 
 def test_install_pipenv_file(venv):
     """Test invoking installation using information in Pipfile.lock, a file mode is used."""
