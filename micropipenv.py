@@ -737,7 +737,10 @@ def install_requirements(pip_bin=_PIP_BIN, *, pip_args=None):  # type: (str, Opt
     except PipRequirementsNotLocked:
         _LOGGER.warning("!" * 80)
         _LOGGER.warning("!!!")
-        _LOGGER.warning("!!!\t\tThe provided requirements.txt file is not fully locked")
+        _LOGGER.warning("!!!\t\tProvenance and integrity of installed packages cannot be checked!")
+        _LOGGER.warning("!!!")
+        _LOGGER.warning("!!!\t\tThe provided requirements.txt file is not fully locked as not all dependencies are")
+        _LOGGER.warning("!!!\t\tpinned to specific versions with digests of artifacts to be installed.")
         _LOGGER.warning("!!!")
         _LOGGER.warning("!" * 80)
 
