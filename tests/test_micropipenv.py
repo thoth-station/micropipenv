@@ -253,7 +253,7 @@ def test_install_pip_tools_editable(venv):
             shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
 
 
-@pytest.mark.skipif(PIP_VERSION.release < (19, 3, 0), reason="Direct reference installation is supported in pip starting 19.3")
+@pytest.mark.skipif(PIP_VERSION.release < (19, 1, 0), reason="Direct reference installation is supported in pip starting 19.3")
 def test_install_pip_tools_direct_reference(venv):
     """Test installation of a direct reference.
 
