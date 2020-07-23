@@ -1,5 +1,14 @@
 # Changelog for Thoth's micropipenv
 
+## [0.5.0] - 2020-Jul-23 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Add support for a direct reference install using Pipenv and requirements.txt file
+  thanks to Tomáš Coufal <tcoufal@redhat.com> for Pipenv support
+
+* More descriptive warning message in the unpinned warning message
+
 ## [0.4.0] - 2020-Jul-07 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
