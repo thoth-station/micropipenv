@@ -20,7 +20,11 @@ import pytest
 import os
 from tempfile import TemporaryDirectory
 
-from pytest_venv import VirtualEnvironment
+try:
+    from pytest_venv import VirtualEnvironment
+except ImportError:
+    VirtualEnvironment = None
+
 from packaging.version import Version
 
 # Version of pip to test micropipenv with
@@ -43,6 +47,10 @@ def _venv_install_pip(venv):
 def pytest_configure(config):
     """Configure tests before pytest collects tests."""
     global PIP_VERSION
+
+    if VirtualEnvironment is None:
+        # No pip version detection.
+        return
 
     with TemporaryDirectory() as tmp_dir:
         venv = VirtualEnvironment(str(tmp_dir))
