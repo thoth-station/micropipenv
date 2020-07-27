@@ -60,12 +60,18 @@ def pytest_configure(config):
 
 
 @pytest.fixture(name="venv")
-def venv_with_pip(venv):
+def venv_with_pip():
     """Fixture for virtual environment with specific version of pip.
 
     Fixture uses the original one from pytest_venv,
     installs pip if MICROPIPENV_TEST_PIP_VERSION is given
     and overwrites the original fixture name
     """
-    _venv_install_pip(venv)
-    yield venv
+    if VirtualEnvironment is None:
+        return pytest.skip("pytest-venv not installed")
+
+    with TemporaryDirectory() as tmp_dir:
+        venv = VirtualEnvironment(str(tmp_dir))
+        venv.create()
+        _venv_install_pip(venv)
+        yield venv
