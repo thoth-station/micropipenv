@@ -49,6 +49,7 @@ def pytest_configure(config):
         venv.create()
         _venv_install_pip(venv)
         PIP_VERSION = Version(str(venv.get_version("pip")))
+        print("The tests will be executed with pip in version: ", PIP_VERSION)
 
 
 @pytest.fixture(name="venv")
