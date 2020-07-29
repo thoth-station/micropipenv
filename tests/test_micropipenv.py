@@ -91,6 +91,7 @@ def check_generated_pipfile_lock(pipfile_lock_path, pipfile_lock_path_expected):
     os.remove(pipfile_lock_path)
 
 
+@pytest.mark.online
 def test_install_pipenv(venv):
     """Test invoking installation using information in Pipfile.lock."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
@@ -100,6 +101,7 @@ def test_install_pipenv(venv):
         assert str(venv.get_version("python-json-logger")) == "0.1.11"
 
 
+@pytest.mark.online
 def test_install_pipenv_vcs(venv):
     """Test invoking installation using information in Pipfile.lock, a git version is used."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
@@ -108,6 +110,7 @@ def test_install_pipenv_vcs(venv):
         assert str(venv.get_version("daiquiri")) == "2.0.0"
 
 
+@pytest.mark.online
 def test_install_pipenv_file(venv):
     """Test invoking installation using information in Pipfile.lock, a file mode is used."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
@@ -117,6 +120,7 @@ def test_install_pipenv_file(venv):
         assert str(venv.get_version("python-json-logger")) == "0.1.11"
 
 
+@pytest.mark.online
 def test_install_pipenv_editable(venv):
     """Test invoking installation using information in Pipfile.lock, an editable mode is used."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
@@ -139,6 +143,7 @@ def test_install_pipenv_editable(venv):
             shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
 
 
+@pytest.mark.online
 def test_install_pipenv_vcs_editable(venv):
     """Test invoking installation using information in Pipfile.lock, a git version in editable mode is used."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "pipenv"]
@@ -150,6 +155,7 @@ def test_install_pipenv_vcs_editable(venv):
         ), "No egg-link found for editable install"
 
 
+@pytest.mark.online
 def test_install_poetry(venv):
     """Test invoking installation using information from a Poetry project."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "poetry"]
@@ -163,6 +169,7 @@ def test_install_poetry(venv):
         check_generated_pipfile_lock(os.path.join(work_dir, "Pipfile.lock"), os.path.join(work_dir, "_Pipfile.lock"))
 
 
+@pytest.mark.online
 def test_install_poetry_vcs(venv):
     """Test invoking installation using information from a Poetry project, a git version is used."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "poetry"]
@@ -176,6 +183,7 @@ def test_install_poetry_vcs(venv):
         check_generated_pipfile_lock(os.path.join(work_dir, "Pipfile.lock"), os.path.join(work_dir, "_Pipfile.lock"))
 
 
+@pytest.mark.online
 def test_install_pip_tools_print_lock(venv):
     """Test invoking installation when pip-tools style requirements.txt are used.
 
@@ -189,6 +197,7 @@ def test_install_pip_tools_print_lock(venv):
         assert str(venv.get_version("python-json-logger")) == "0.1.11"
 
 
+@pytest.mark.online
 def test_install_pip(venv):
     """Test invoking installation when raw requirements.txt are used."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
@@ -198,6 +207,7 @@ def test_install_pip(venv):
         assert str(venv.get_version("requests")) == "1.0.0"
 
 
+@pytest.mark.online
 def test_install_pip_vcs(venv):
     """Test installation of a package from VCS (git)."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
@@ -208,6 +218,7 @@ def test_install_pip_vcs(venv):
         assert str(venv.get_version("python-json-logger")) is not None
 
 
+@pytest.mark.online
 def test_install_pip_editable(venv):
     """Test installation of an editable package which is not treated as a lock file."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
@@ -230,6 +241,7 @@ def test_install_pip_editable(venv):
             shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
 
 
+@pytest.mark.online
 def test_install_pip_tools_editable(venv):
     """Test installation of an editable package."""
     cmd = [os.path.join(venv.path, "bin", "python3"), micropipenv.__file__, "install", "--method", "requirements"]
@@ -253,7 +265,8 @@ def test_install_pip_tools_editable(venv):
             shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
 
 
-@pytest.mark.skipif(PIP_VERSION.release < (19, 3, 0), reason="Direct reference installation is supported in pip starting 19.3")
+@pytest.mark.online
+@pytest.mark.skipif(PIP_VERSION is not None and PIP_VERSION.release < (19, 3, 0), reason="Direct reference installation is supported in pip starting 19.3")
 def test_install_pip_tools_direct_reference(venv):
     """Test installation of a direct reference.
 
@@ -272,6 +285,7 @@ def test_install_pip_tools_direct_reference(venv):
         assert str(venv.get_version("micropipenv")) == "0.0.0"
 
 
+@pytest.mark.online
 def test_install_pip_print_freeze(venv):
     """Test invoking installation when raw requirements.txt are used.
 
@@ -356,6 +370,7 @@ def test_install_pipenv_deploy_error_hash(venv):
             micropipenv.install_pipenv(get_pip_path(venv), deploy=True)
 
 
+@pytest.mark.online
 def test_install_pipenv_iter_index(venv):
     """Test triggering multiple installations if index is not explicitly set to one."""
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_iter_index")):
@@ -798,6 +813,7 @@ def test_iter_index_entry_str(sections):
         next(result)
 
 
+@pytest.mark.online
 def test_import_toml(venv):
     """Test the correct order of toml modules."""
     # cmd to run the function inside the venv
