@@ -1,5 +1,12 @@
 # Changelog for Thoth's micropipenv
 
+## [0.5.1] - 2020-Jul-30 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Improvements in the test suite for online tests and different environments
+  setup
+
 ## [0.5.0] - 2020-Jul-23 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
