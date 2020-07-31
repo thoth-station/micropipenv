@@ -833,3 +833,14 @@ def test_import_toml(venv):
     venv.install("toml")
     output = subprocess.check_output(cmd, universal_newlines=True)
     assert "<module 'toml'" in output
+
+
+def test_check_pip_version(venv):
+    """Test checking tested pip version.
+
+    Test checking pip compatibility. micropipenv is tested against different
+    pip versions and the warning message produced should help users clarify
+    which pip versions are supported. If this test fails with newer pip
+    releases, adjust the supported pip version requirement in sources.
+    """
+    assert micropipenv._check_pip_version(raise_on_incompatible=True) is True

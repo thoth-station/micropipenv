@@ -46,7 +46,10 @@ from importlib import import_module
 from pathlib import Path
 from urllib.parse import urlparse
 
+from pip import __version__ as pip_version
 from pip._vendor.packaging.requirements import Requirement
+from pip._vendor.packaging.version import Version
+from pip._vendor.packaging.specifiers import SpecifierSet
 
 try:
     from pip._internal.req import parse_requirements
@@ -84,11 +87,11 @@ if TYPE_CHECKING:
     from typing import Union
     from pip._internal.req.req_file import ParsedRequirement
 
-
 _LOGGER = logging.getLogger(__title__)
 _DEFAULT_INDEX_URLS = ("https://pypi.org/simple",)
 _MAX_DIR_TRAVERSAL = 42  # Avoid any symlinks that would loop.
 _PIP_BIN = os.getenv("MICROPIPENV_PIP_BIN", "pip")
+_SUPPORTED_PIP = SpecifierSet(">=9,<=20.2")  # Respects requirement in setup.py and latest pip to release date.
 _DEBUG = int(os.getenv("MICROPIPENV_DEBUG", 0))
 _NO_LOCKFILE_PRINT = int(os.getenv("MICROPIPENV_NO_LOCKFILE_PRINT", 0))
 _NO_LOCKFILE_WRITE = int(os.getenv("MICROPIPENV_NO_LOCKFILE_WRITE", 0))
@@ -149,6 +152,18 @@ class CompatibilityError(MicropipenvException):
 
 class NotSupportedError(MicropipenvException):
     """Raised when the given feature is not supported by micropipenv."""
+
+
+def _check_pip_version(raise_on_incompatible=False):  # type: (bool) -> bool
+    """Check pip version running."""
+    if Version(pip_version) not in _SUPPORTED_PIP:
+        msg = "pip in version {!r} not tested, tested versions: {!r}".format(pip_version, str(_SUPPORTED_PIP))
+        if raise_on_incompatible:
+            raise CompatibilityError(msg)
+        _LOGGER.warning(msg)
+        return False
+
+    return True
 
 
 def _import_toml():  # type: () -> Any
@@ -1032,6 +1047,7 @@ def requirements(
 
 def main(argv=None):  # type: (Optional[List[str]]) -> int
     """Main for micropipenv."""
+    _check_pip_version(raise_on_incompatible=False)
     argv = argv or sys.argv[1:]
 
     parser = argparse.ArgumentParser(prog=__title__, description=__doc__)
