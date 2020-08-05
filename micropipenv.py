@@ -91,7 +91,7 @@ _LOGGER = logging.getLogger(__title__)
 _DEFAULT_INDEX_URLS = ("https://pypi.org/simple",)
 _MAX_DIR_TRAVERSAL = 42  # Avoid any symlinks that would loop.
 _PIP_BIN = os.getenv("MICROPIPENV_PIP_BIN", "pip")
-_SUPPORTED_PIP = SpecifierSet(">=9,<=20.2")  # Respects requirement in setup.py and latest pip to release date.
+_SUPPORTED_PIP = SpecifierSet(">=9,<=20.2.1")  # Respects requirement in setup.py and latest pip to release date.
 _DEBUG = int(os.getenv("MICROPIPENV_DEBUG", 0))
 _NO_LOCKFILE_PRINT = int(os.getenv("MICROPIPENV_NO_LOCKFILE_PRINT", 0))
 _NO_LOCKFILE_WRITE = int(os.getenv("MICROPIPENV_NO_LOCKFILE_WRITE", 0))
