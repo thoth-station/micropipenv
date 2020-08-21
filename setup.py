@@ -1,10 +1,7 @@
-from setuptools.command.test import test as TestCommand
 from setuptools import setup
 import os
-import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-
 
 
 def get_version():
@@ -18,6 +15,7 @@ def get_version():
             return line.split(" = ")[1][1:-2]
 
     raise ValueError("No version identifier found")
+
 
 setup(
     name="micropipenv",
