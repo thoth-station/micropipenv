@@ -40,6 +40,8 @@ def _venv_install_pip(venv):
         if MICROPIPENV_TEST_PIP_VERSION == "latest":
             # This special value always forces the most recent pip version.
             venv.install("pip", upgrade=True)
+        elif MICROPIPENV_TEST_PIP_VERSION == "git":
+            venv.install("git+https://github.com/pypa/pip.git")
         else:
             venv.install(f"pip{MICROPIPENV_TEST_PIP_VERSION}")
 
