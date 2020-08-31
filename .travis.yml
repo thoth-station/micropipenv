@@ -23,6 +23,7 @@ matrix:
   - env: TOXENV=py36-pip200-toml
   - env: TOXENV=py36-pip201-toml
   - env: TOXENV=py36-piplatest-toml
+  - env: TOXENV=py36-pipgit-toml
   - env: TOXENV=py37-pip90-toml
   - env: TOXENV=py37-pip191-toml
   - env: TOXENV=py37-pip192-toml
@@ -30,6 +31,7 @@ matrix:
   - env: TOXENV=py37-pip200-toml
   - env: TOXENV=py37-pip201-toml
   - env: TOXENV=py37-piplatest-toml
+  - env: TOXENV=py37-pipgit-toml
   - env: TOXENV=py38-pip90-toml
   - env: TOXENV=py38-pip191-toml
   - env: TOXENV=py38-pip192-toml
@@ -37,6 +39,7 @@ matrix:
   - env: TOXENV=py38-pip200-toml
   - env: TOXENV=py38-pip201-toml
   - env: TOXENV=py38-piplatest-toml
+  - env: TOXENV=py38-pipgit-toml
   - env: TOXENV=py39-pip90-toml
   - env: TOXENV=py39-pip191-toml
   - env: TOXENV=py39-pip192-toml
@@ -44,9 +47,13 @@ matrix:
   - env: TOXENV=py39-pip200-toml
   - env: TOXENV=py39-pip201-toml
   - env: TOXENV=py39-piplatest-toml
+  - env: TOXENV=py39-pipgit-toml
   - env: TOXENV=py36-pip90-pytoml
   - env: TOXENV=py36-piplatest-pytoml
+  - env: TOXENV=py36-pipgit-pytoml
   - env: TOXENV=py38-pip90-pytoml
   - env: TOXENV=py38-piplatest-pytoml
+  - env: TOXENV=py38-pipgit-pytoml
   - env: TOXENV=py39-pip90-pytoml
   - env: TOXENV=py39-piplatest-pytoml
+  - env: TOXENV=py39-pipgit-pytoml
