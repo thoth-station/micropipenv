@@ -46,30 +46,37 @@ from importlib import import_module
 from pathlib import Path
 from urllib.parse import urlparse
 
-from pip import __version__ as pip_version
-from pip._vendor.packaging.requirements import Requirement
-from pip._vendor.packaging.version import Version
-from pip._vendor.packaging.specifiers import SpecifierSet
+_LOGGER = logging.getLogger(__title__)
+_SUPPORTED_PIP_STR = ">=9,<=20.2.2"  # Respects requirement in setup.py and latest pip to release date.
 
 try:
-    from pip._internal.req import parse_requirements
-except ImportError:  # for pip<10
-    from pip.req import parse_requirements
+    from pip import __version__ as pip_version
+    from pip._vendor.packaging.requirements import Requirement
+    from pip._vendor.packaging.version import Version
+    from pip._vendor.packaging.specifiers import SpecifierSet
 
-try:
     try:
-        from pip._internal.network.session import PipSession
-    except ImportError:
-        from pip._internal.download import PipSession
-except ImportError:
-    from pip.download import PipSession
-try:
-    from pip._internal.index.package_finder import PackageFinder
-except ImportError:
+        from pip._internal.req import parse_requirements
+    except ImportError:  # for pip<10
+        from pip.req import parse_requirements
+
     try:
-        from pip._internal.index import PackageFinder
+        try:
+            from pip._internal.network.session import PipSession
+        except ImportError:
+            from pip._internal.download import PipSession
     except ImportError:
-        from pip.index import PackageFinder
+        from pip.download import PipSession
+    try:
+        from pip._internal.index.package_finder import PackageFinder
+    except ImportError:
+        try:
+            from pip._internal.index import PackageFinder
+        except ImportError:
+            from pip.index import PackageFinder
+except Exception:
+    _LOGGER.error(f"Check you pip version, supported pip versions: {_SUPPORTED_PIP_STR}")
+    raise
 
 try:
     from typing import TYPE_CHECKING
@@ -87,11 +94,10 @@ if TYPE_CHECKING:
     from typing import Union
     from pip._internal.req.req_file import ParsedRequirement
 
-_LOGGER = logging.getLogger(__title__)
 _DEFAULT_INDEX_URLS = ("https://pypi.org/simple",)
 _MAX_DIR_TRAVERSAL = 42  # Avoid any symlinks that would loop.
 _PIP_BIN = os.getenv("MICROPIPENV_PIP_BIN", "pip")
-_SUPPORTED_PIP = SpecifierSet(">=9,<=20.2.2")  # Respects requirement in setup.py and latest pip to release date.
+_SUPPORTED_PIP = SpecifierSet(_SUPPORTED_PIP_STR)
 _DEBUG = int(os.getenv("MICROPIPENV_DEBUG", 0))
 _NO_LOCKFILE_PRINT = int(os.getenv("MICROPIPENV_NO_LOCKFILE_PRINT", 0))
 _NO_LOCKFILE_WRITE = int(os.getenv("MICROPIPENV_NO_LOCKFILE_WRITE", 0))
@@ -157,7 +163,7 @@ class NotSupportedError(MicropipenvException):
 def _check_pip_version(raise_on_incompatible=False):  # type: (bool) -> bool
     """Check pip version running."""
     if Version(pip_version) not in _SUPPORTED_PIP:
-        msg = "pip in version {!r} not tested, tested versions: {!r}".format(pip_version, str(_SUPPORTED_PIP))
+        msg = "pip in version {!r} not tested, tested versions: {!r}".format(pip_version, _SUPPORTED_PIP_STR)
         if raise_on_incompatible:
             raise CompatibilityError(msg)
         _LOGGER.warning(msg)
