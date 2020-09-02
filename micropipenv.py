@@ -1047,7 +1047,6 @@ def requirements(
 
 def main(argv=None):  # type: (Optional[List[str]]) -> int
     """Main for micropipenv."""
-    _check_pip_version(raise_on_incompatible=False)
     argv = argv or sys.argv[1:]
 
     parser = argparse.ArgumentParser(prog=__title__, description=__doc__)
@@ -1177,4 +1176,10 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
 
 if __name__ == "__main__":
     logging.basicConfig(format="%(asctime)s %(name)-12s %(levelname)-6s %(message)s", datefmt="%m-%d-%y %H:%M:%S")
-    sys.exit(main())
+    try:
+        return_code = main()
+    except Exception:
+        _check_pip_version(raise_on_incompatible=False)
+        raise
+    else:
+        sys.exit(return_code)
