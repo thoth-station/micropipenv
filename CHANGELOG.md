@@ -1,5 +1,17 @@
 # Changelog for Thoth's micropipenv
 
+## [0.6.0] - 2020-September-03 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Produce error message if any issue is raised during pip imports (#124)
+* Produce pip compatibility warning only on issues (#121)
+* Test micropipenv against pip from the master branch (#122)
+
+### Other
+
+* Drop Python 3.5 support (#128)
+
 ## [0.5.3] - 2020-August-18 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
