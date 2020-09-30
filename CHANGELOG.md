@@ -1,5 +1,12 @@
 # Changelog for Thoth's micropipenv
 
+## [1.0.0] - 2020-October-01 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* First major release
+* Tested with pip==20.2.3
+
 ## [0.6.0] - 2020-September-03 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
