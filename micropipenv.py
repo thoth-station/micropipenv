@@ -327,7 +327,7 @@ def install_pipenv(
                     f.write(index_config_str)
                     f.write(package_entry_str)
 
-                _LOGGER.info("Installing %r", package_entry_str)
+                _LOGGER.info("Installing %r", package_name)
                 called_process = subprocess.run(cmd)
 
                 if called_process.returncode == 0:
