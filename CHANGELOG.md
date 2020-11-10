@@ -1,5 +1,12 @@
 # Changelog for Thoth's micropipenv
 
+## [1.0.1] - 2020-November-09 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Make the installation log prettier
+* Test with pip==20.2.4
+
 ## [1.0.0] - 2020-October-01 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
