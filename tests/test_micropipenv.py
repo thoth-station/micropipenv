@@ -352,7 +352,7 @@ def test_install_pipenv_deploy_error_python(venv):
     """Test installation error on --deploy set, error because Python version."""
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_error_python")):
         flexmock(micropipenv).should_receive("_maybe_print_pipfile_lock").once()
-        err_msg = r"Running Python version \d.\d, but Pipfile.lock requires Python version 5.9"
+        err_msg = r"Running Python version \d+.\d+, but Pipfile.lock requires Python version 5.9"
         with pytest.raises(micropipenv.PythonVersionMismatch, match=err_msg):
             micropipenv.install_pipenv(get_pip_path(venv), deploy=True)
 
