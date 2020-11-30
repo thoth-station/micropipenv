@@ -7,7 +7,7 @@ runtime_environments:
     operating_system:
       name: ubi
       version: '8'
-    python_version: '3.6'
+    python_version: '3.8'
     cuda_version: null
     recommendation_type: latest
     platform: linux-x86_64
