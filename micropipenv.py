@@ -47,7 +47,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 _LOGGER = logging.getLogger(__title__)
-_SUPPORTED_PIP_STR = ">=9,<=20.2.4"  # Respects requirement in setup.py and latest pip to release date.
+_SUPPORTED_PIP_STR = ">=9,<=20.3"  # Respects requirement in setup.py and latest pip to release date.
 
 try:
     from pip import __version__ as pip_version
