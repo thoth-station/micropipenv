@@ -101,11 +101,13 @@ _SUPPORTED_PIP = SpecifierSet(_SUPPORTED_PIP_STR)
 _DEBUG = int(os.getenv("MICROPIPENV_DEBUG", 0))
 _NO_LOCKFILE_PRINT = int(os.getenv("MICROPIPENV_NO_LOCKFILE_PRINT", 0))
 _NO_LOCKFILE_WRITE = int(os.getenv("MICROPIPENV_NO_LOCKFILE_WRITE", 0))
-_FILE_METHOD_MAP = OrderedDict([  # The order here defines priorities
-    ("Pipfile.lock", "pipenv"),
-    ("poetry.lock", "poetry"),
-    ("requirements.txt", "requirements"),
-])
+_FILE_METHOD_MAP = OrderedDict(
+    [  # The order here defines priorities
+        ("Pipfile.lock", "pipenv"),
+        ("poetry.lock", "poetry"),
+        ("requirements.txt", "requirements"),
+    ]
+)
 
 
 class MicropipenvException(Exception):
@@ -304,7 +306,10 @@ def install_pipenv(
     cmd = [pip_bin, "install", "--no-deps", "--disable-pip-version-check", "-r", tmp_file.name, *(pip_args or [])]
     _LOGGER.debug("Requirements will be installed using %r", cmd)
 
-    packages = chain(sections.get("default", {}).items(), sections.get("develop", {}).items() if dev else [],)
+    packages = chain(
+        sections.get("default", {}).items(),
+        sections.get("develop", {}).items() if dev else [],
+    )
 
     # We maintain an integer assigned to each package - this integer holds a value - how
     # many times the given package failed to install. If a package fails to install, it is
@@ -360,7 +365,9 @@ def _instantiate_package_finder(pip_session):  # type: (PipSession) -> PackageFi
         from pip._internal.models.search_scope import SearchScope
         from pip._internal.models.selection_prefs import SelectionPreferences
 
-        selection_prefs = SelectionPreferences(allow_yanked=True,)
+        selection_prefs = SelectionPreferences(
+            allow_yanked=True,
+        )
         search_scope = SearchScope([], [])
 
         try:
@@ -370,13 +377,14 @@ def _instantiate_package_finder(pip_session):  # type: (PipSession) -> PackageFi
                 from pip._internal.collector import LinkCollector
             except ModuleNotFoundError:  # pip>=19.2<20
                 return PackageFinder.create(
-                    session=pip_session,
-                    selection_prefs=selection_prefs,
-                    search_scope=search_scope
+                    session=pip_session, selection_prefs=selection_prefs, search_scope=search_scope
                 )
 
         link_collector = LinkCollector(session=pip_session, search_scope=search_scope)
-        return PackageFinder.create(link_collector=link_collector, selection_prefs=selection_prefs,)
+        return PackageFinder.create(
+            link_collector=link_collector,
+            selection_prefs=selection_prefs,
+        )
 
 
 def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str, Any]
@@ -391,9 +399,7 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
     # Check for unsupported VCS.
     link_url = getattr(requirement, "requirement", None) or getattr(requirement, "link", None)
     if link_url and str(link_url).startswith(("hg+", "svn+", "bzr+")):
-        raise NotSupportedError(
-            "Non-Git VCS requirement {!r} is not supported yet".format(str(link_url))
-        )
+        raise NotSupportedError("Non-Git VCS requirement {!r} is not supported yet".format(str(link_url)))
 
     is_url = False
     req = None
@@ -679,9 +685,7 @@ def _poetry2pipfile_lock(
 
         if "source" in entry:
             if entry["source"]["type"] != "git":
-                raise NotSupportedError(
-                    "micropipenv supports Git VCS, got {} instead".format(entry["source"]["type"])
-                )
+                raise NotSupportedError("micropipenv supports Git VCS, got {} instead".format(entry["source"]["type"]))
 
             requirement["git"] = entry["source"]["url"]
             requirement["ref"] = entry["source"]["reference"]
@@ -792,7 +796,8 @@ def install(
         if not paths:
             raise FileNotFound(
                 "Failed to find Pipfile.lock, poetry.lock or requirements.txt "
-                "in the current directory or any of its parent: {}".format(os.getcwd()))
+                "in the current directory or any of its parent: {}".format(os.getcwd())
+            )
 
         _LOGGER.debug("Dependencies definitions found: %s", paths)
         # The longest path means that we are as close to CWD as possible.
@@ -909,8 +914,8 @@ def _get_package_entry_str(
         result = "--editable {}".format(info.get("path", "."))
     else:
         result = package_name
-    
-    if info.get('file'):
+
+    if info.get("file"):
         result = "{}#egg{}".format(info.get("file"), package_name)
 
     if info.get("extras"):
@@ -1052,7 +1057,7 @@ def requirements(
 
 
 def main(argv=None):  # type: (Optional[List[str]]) -> int
-    """Main for micropipenv."""
+    """Micropipenv Main Function."""
     argv = argv or sys.argv[1:]
 
     parser = argparse.ArgumentParser(prog=__title__, description=__doc__)

@@ -1,0 +1,5 @@
+check:
+  - thoth-tox
+  - thoth-precommit
+release:
+  - upload-pypi-sesheta
