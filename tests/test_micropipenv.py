@@ -56,7 +56,7 @@ def get_pip_path(venv):
 
 
 def setup_module():
-    """A dirty hack for mypy that does not accept collisions in file names."""
+    """Dirty hack for mypy that does not accept collisions in file names."""
     for item in glob.glob(os.path.join(_DATA_DIR, "**", "setup"), recursive=True):
         shutil.copyfile(item, "{}.py".format(item))
 
@@ -266,7 +266,10 @@ def test_install_pip_tools_editable(venv):
 
 
 @pytest.mark.online
-@pytest.mark.skipif(PIP_VERSION is not None and PIP_VERSION.release < (19, 3, 0), reason="Direct reference installation is supported in pip starting 19.3")
+@pytest.mark.skipif(
+    PIP_VERSION is not None and PIP_VERSION.release < (19, 3, 0),
+    reason="Direct reference installation is supported in pip starting 19.3",
+)
 def test_install_pip_tools_direct_reference(venv):
     """Test installation of a direct reference.
 
@@ -278,7 +281,9 @@ def test_install_pip_tools_direct_reference(venv):
         with open("requirements.txt", "w") as requirements_file:
             artifact_path = os.path.join(os.getcwd(), "micropipenv-0.0.0.tar.gz")
             requirements_file.write(
-                "micropipenv @ file://{} --hash=sha256:03b3f06d0e3c403337c73d8d95b1976449af8985e40a6aabfd9620c282c8d060\n".format(artifact_path)
+                "micropipenv @ file://{} --hash=sha256:03b3f06d0e3c403337c73d8d95b1976449af8985e40a6aabfd9620c282c8d060\n".format(
+                    artifact_path
+                )
             )
 
         subprocess.run(cmd, check=True, env={"MICROPIPENV_PIP_BIN": get_pip_path(venv), "MICROPIPENV_DEBUG": "1"})
@@ -436,7 +441,9 @@ def test_parse_pipenv2pipfile_lock_no_default():
     """Test parsing Pipfile and obtaining only dev dependencies."""
     work_dir = os.path.join(_DATA_DIR, "parse", "pipenv")
     with cwd(work_dir):
-        pipfile_lock = micropipenv.get_requirements_sections(no_default=True,)
+        pipfile_lock = micropipenv.get_requirements_sections(
+            no_default=True,
+        )
 
         assert pipfile_lock == {
             "default": {},
@@ -455,7 +462,9 @@ def test_parse_pipenv2pipfile_lock_no_dev():
     """Test parsing Pipfile.lock and obtaining only default dependencies."""
     work_dir = os.path.join(_DATA_DIR, "parse", "pipenv")
     with cwd(work_dir):
-        pipfile_lock = micropipenv.get_requirements_sections(no_dev=True,)
+        pipfile_lock = micropipenv.get_requirements_sections(
+            no_dev=True,
+        )
 
         assert pipfile_lock == {
             "default": {
@@ -817,8 +826,11 @@ def test_iter_index_entry_str(sections):
 def test_import_toml(venv):
     """Test the correct order of toml modules."""
     # cmd to run the function inside the venv
-    cmd = [os.path.join(venv.path, "bin", "python3"), "-c",
-           "from micropipenv import _import_toml; print(_import_toml())"]
+    cmd = [
+        os.path.join(venv.path, "bin", "python3"),
+        "-c",
+        "from micropipenv import _import_toml; print(_import_toml())",
+    ]
 
     # no toml package should raise an exception
     with pytest.raises(subprocess.CalledProcessError) as exc:
