@@ -384,7 +384,7 @@ If you wish to install ``micropipenv`` on your Fedora system:
 
   dnf install -y micropipenv
 
-See available `rpm packages in Koshei <https://koschei.fedoraproject.org/package/micropipenv>`_.
+See available `RPM packages <https://src.fedoraproject.org/rpms/micropipenv>`_.
 
 No installation
 ===============
