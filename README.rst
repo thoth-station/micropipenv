@@ -406,6 +406,16 @@ Anything after ``python3 -`` will be passed as an argument to
 
 All arguments after -- will be passed to ``pip`` as options.
 
+OpenShift s2i (Source-To-Image)
+===============================
+
+micropipenv is available in UBI, Fedora and RHEL based container images. To
+enable micropipenv and benefit from its features, you need to export
+``ENABLE_MICROPIPENV=1`` environment variable in more recent Python 3 container
+images. See `sclorg/s2i-python-container
+<https://github.com/sclorg/s2i-python-container/tree/master/3.8>`__ repo for
+more information.
+
 License and copying
 ===================
 
