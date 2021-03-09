@@ -782,8 +782,8 @@ def install_requirements(pip_bin=_PIP_BIN, *, pip_args=None):  # type: (str, Opt
 
 
 def install(
-    method=None, *, deploy=False, dev=False, pip_args=None
-):  # type: (Optional[str], bool, bool, Optional[List[str]]) -> None
+    method=None, *, pip_bin=_PIP_BIN, deploy=False, dev=False, pip_args=None
+):  # type: (Optional[str], str, bool, bool, Optional[List[str]]) -> None
     """Perform installation of requirements based on the method used."""
     if method is None:
         paths = []
@@ -815,16 +815,16 @@ def install(
         if dev:
             _LOGGER.debug("Discarding dev flag when requirements.txt are used")
 
-        install_requirements(pip_args=pip_args)
+        install_requirements(pip_bin, pip_args=pip_args)
         return
     elif method == "pipenv":
-        install_pipenv(deploy=deploy, dev=dev, pip_args=pip_args)
+        install_pipenv(pip_bin, deploy=deploy, dev=dev, pip_args=pip_args)
         return
     elif method == "poetry":
         if deploy:
             _LOGGER.debug("Discarding deploy flag when poetry.lock is used")
 
-        install_poetry(pip_args=pip_args, dev=dev)
+        install_poetry(pip_bin, pip_args=pip_args, dev=dev)
         return
 
     raise MicropipenvException("Unhandled method for installing requirements: {}".format(method))
