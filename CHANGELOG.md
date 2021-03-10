@@ -1,5 +1,13 @@
 # Changelog for Thoth's micropipenv
 
+## [1.0.3] - 2021-March-10 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Test with pip==20.0.1
+* Test with pip==20.0
+* Provide ability to pass pip path in install
+
 ## [1.0.2] - 2020-December-10 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
