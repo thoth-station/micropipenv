@@ -354,6 +354,7 @@ def install_pipenv(
                 to_install.append({"package_name": package_name, "info": info, "error": had_error + 1})
 
     finally:
+        tmp_file.close()
         os.remove(tmp_file.name)
 
 
