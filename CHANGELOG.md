@@ -1,5 +1,12 @@
 # Changelog for Thoth's micropipenv
 
+## [1.0.4] - 2021-April-29 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Fix permission error on Windows
+  thanks to Julien Rottenberg (@jrottenberg)
+
 ## [1.0.3] - 2021-March-10 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
