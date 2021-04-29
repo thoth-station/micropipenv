@@ -328,6 +328,12 @@ def install_pipenv(
 
             package_entry_str = _get_package_entry_str(package_name, info)
             for index_config_str in _iter_index_entry_str(sections, info):
+                # We are opening the tmp_file for the second time here.
+                # The purpose of this is to make sure that the content is always
+                # flushed from buffers and that we start from the beggining
+                # of the file every time. All of that to make sure that there is
+                # only one package written in the tmp_file and pip is able to
+                # read the package name from the file.
                 with open(tmp_file.name, "w") as f:
                     f.write(index_config_str)
                     f.write(package_entry_str)
