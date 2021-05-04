@@ -7,13 +7,14 @@ on:
     branches:
     - master
 
-name: Run Tox tests
+name: Run Tox tests on Linux
 
 jobs:
   tox_test:
     name: Tox test
     steps:
-    - uses: actions/checkout@v2
+    - name: Checkout micropipenv
+      uses: actions/checkout@v2
     - name: Run Tox tests
       id: test
       uses: fedora-python/tox-github-action@master

@@ -1,0 +1,117 @@
+on:
+  push:
+    branches:
+    - master
+    - ci-test
+  pull_request:
+    branches:
+    - master
+
+name: Run Tox tests on Windows
+
+jobs:
+  tox_test:
+    name: Tox test
+    steps:
+    - name: Checkout micropipenv
+      uses: actions/checkout@v2
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: ${{ matrix.python_version }}
+    - name: Install tox
+      run: python -m pip install tox
+    - name: Run Tox tests
+      id: test
+      run: tox -e ${{ matrix.tox_env }}
+
+    runs-on: windows-latest
+    strategy:
+      matrix:
+        # This has to be manually configured because Windows images contains
+        # more than just the main Python and there is no easy way how to tell
+        # tox to ignore the non-main interpreters.
+        # The list can be obtained by `tox -l | .github/workflows/prep_windows_matrix.py`
+        include:
+          - python_version: "3.6"
+            tox_env: "py36-pip90-toml"
+          - python_version: "3.6"
+            tox_env: "py36-pip191-toml"
+          - python_version: "3.6"
+            tox_env: "py36-pip192-toml"
+          - python_version: "3.6"
+            tox_env: "py36-pip193-toml"
+          - python_version: "3.6"
+            tox_env: "py36-pip200-toml"
+          - python_version: "3.6"
+            tox_env: "py36-pip201-toml"
+          - python_version: "3.6"
+            tox_env: "py36-piplatest-toml"
+          - python_version: "3.6"
+            tox_env: "py36-pipgit-toml"
+          - python_version: "3.7"
+            tox_env: "py37-pip90-toml"
+          - python_version: "3.7"
+            tox_env: "py37-pip191-toml"
+          - python_version: "3.7"
+            tox_env: "py37-pip192-toml"
+          - python_version: "3.7"
+            tox_env: "py37-pip193-toml"
+          - python_version: "3.7"
+            tox_env: "py37-pip200-toml"
+          - python_version: "3.7"
+            tox_env: "py37-pip201-toml"
+          - python_version: "3.7"
+            tox_env: "py37-piplatest-toml"
+          - python_version: "3.7"
+            tox_env: "py37-pipgit-toml"
+          - python_version: "3.8"
+            tox_env: "py38-pip90-toml"
+          - python_version: "3.8"
+            tox_env: "py38-pip191-toml"
+          - python_version: "3.8"
+            tox_env: "py38-pip192-toml"
+          - python_version: "3.8"
+            tox_env: "py38-pip193-toml"
+          - python_version: "3.8"
+            tox_env: "py38-pip200-toml"
+          - python_version: "3.8"
+            tox_env: "py38-pip201-toml"
+          - python_version: "3.8"
+            tox_env: "py38-piplatest-toml"
+          - python_version: "3.8"
+            tox_env: "py38-pipgit-toml"
+          - python_version: "3.9"
+            tox_env: "py39-pip90-toml"
+          - python_version: "3.9"
+            tox_env: "py39-pip191-toml"
+          - python_version: "3.9"
+            tox_env: "py39-pip192-toml"
+          - python_version: "3.9"
+            tox_env: "py39-pip193-toml"
+          - python_version: "3.9"
+            tox_env: "py39-pip200-toml"
+          - python_version: "3.9"
+            tox_env: "py39-pip201-toml"
+          - python_version: "3.9"
+            tox_env: "py39-piplatest-toml"
+          - python_version: "3.9"
+            tox_env: "py39-pipgit-toml"
+          - python_version: "3.6"
+            tox_env: "py36-pip90-pytoml"
+          - python_version: "3.6"
+            tox_env: "py36-piplatest-pytoml"
+          - python_version: "3.6"
+            tox_env: "py36-pipgit-pytoml"
+          - python_version: "3.8"
+            tox_env: "py38-pip90-pytoml"
+          - python_version: "3.8"
+            tox_env: "py38-piplatest-pytoml"
+          - python_version: "3.8"
+            tox_env: "py38-pipgit-pytoml"
+          - python_version: "3.9"
+            tox_env: "py39-pip90-pytoml"
+          - python_version: "3.9"
+            tox_env: "py39-piplatest-pytoml"
+          - python_version: "3.9"
+            tox_env: "py39-pipgit-pytoml"
