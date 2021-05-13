@@ -31,7 +31,7 @@ import json
 
 import micropipenv
 
-from conftest import PIP_VERSION
+from conftest import MICROPIPENV_TEST_PIP_VERSION, PIP_VERSION
 
 
 _DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.relpath(__file__)), "data"))
@@ -849,7 +849,9 @@ def test_import_toml(venv):
     assert "<module 'toml'" in output
 
 
-def test_check_pip_version(venv):
+@pytest.mark.skipif(MICROPIPENV_TEST_PIP_VERSION == "git", reason="Unsuitable pip version")
+@pytest.mark.parametrize("raise_on_incompatible", (True, False))
+def test_check_pip_version_compatible(raise_on_incompatible):
     """Test checking tested pip version.
 
     Test checking pip compatibility. micropipenv is tested against different
@@ -857,4 +859,23 @@ def test_check_pip_version(venv):
     which pip versions are supported. If this test fails with newer pip
     releases, adjust the supported pip version requirement in sources.
     """
-    assert micropipenv._check_pip_version(raise_on_incompatible=True) is True
+    micropipenv.pip_version = str(PIP_VERSION)
+    assert micropipenv._check_pip_version(raise_on_incompatible=raise_on_incompatible) is True
+
+
+@pytest.mark.skipif(MICROPIPENV_TEST_PIP_VERSION != "git", reason="Unsuitable pip version")
+@pytest.mark.parametrize("raise_on_incompatible", (True, False))
+def test_check_pip_version_incompatible(raise_on_incompatible):
+    """Test checking tested pip version.
+
+    Test checking pip compatibility. micropipenv is tested against different
+    pip versions and the warning message produced should help users clarify
+    which pip versions are supported. If this test fails with newer pip
+    releases, adjust the supported pip version requirement in sources.
+    """
+    micropipenv.pip_version = str(PIP_VERSION)
+    if raise_on_incompatible:
+        with pytest.raises(micropipenv.CompatibilityError):
+            micropipenv._check_pip_version(raise_on_incompatible=raise_on_incompatible)
+    else:
+        assert micropipenv._check_pip_version(raise_on_incompatible=raise_on_incompatible) is False
