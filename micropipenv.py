@@ -58,22 +58,22 @@ try:
     try:
         from pip._internal.req import parse_requirements
     except ImportError:  # for pip<10
-        from pip.req import parse_requirements
+        from pip.req import parse_requirements  # type: ignore
 
     try:
         try:
             from pip._internal.network.session import PipSession
         except ImportError:
-            from pip._internal.download import PipSession
+            from pip._internal.download import PipSession  # type: ignore
     except ImportError:
-        from pip.download import PipSession
+        from pip.download import PipSession  # type: ignore
     try:
         from pip._internal.index.package_finder import PackageFinder
     except ImportError:
         try:
-            from pip._internal.index import PackageFinder
+            from pip._internal.index import PackageFinder  # type: ignore
         except ImportError:
-            from pip.index import PackageFinder
+            from pip.index import PackageFinder  # type: ignore
 except Exception:
     _LOGGER.error(f"Check you pip version, supported pip versions: {_SUPPORTED_PIP_STR}")
     raise
@@ -367,7 +367,7 @@ def install_pipenv(
 def _instantiate_package_finder(pip_session):  # type: (PipSession) -> PackageFinder
     """Instantiate package finder, in a pip>=10 and pip<10 compatible way."""
     try:
-        return PackageFinder(find_links=[], session=pip_session, index_urls=_DEFAULT_INDEX_URLS)
+        return PackageFinder(find_links=[], session=pip_session, index_urls=_DEFAULT_INDEX_URLS)  # type: ignore
     except TypeError:  # API changed in pip>=10
         from pip._internal.models.search_scope import SearchScope
         from pip._internal.models.selection_prefs import SelectionPreferences
@@ -381,9 +381,9 @@ def _instantiate_package_finder(pip_session):  # type: (PipSession) -> PackageFi
             from pip._internal.index.collector import LinkCollector
         except ModuleNotFoundError:
             try:
-                from pip._internal.collector import LinkCollector
+                from pip._internal.collector import LinkCollector  # type: ignore
             except ModuleNotFoundError:  # pip>=19.2<20
-                return PackageFinder.create(
+                return PackageFinder.create(  # type: ignore
                     session=pip_session, selection_prefs=selection_prefs, search_scope=search_scope
                 )
 
@@ -411,7 +411,7 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
     is_url = False
     req = None
     if hasattr(requirement, "req"):
-        req = requirement.req
+        req = requirement.req  # type: ignore
     elif hasattr(requirement, "requirement") and not editable:
         if not requirement.requirement.startswith("git+"):
             req = Requirement(requirement.requirement)
@@ -422,7 +422,7 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
     link = None
     if editable:
         if hasattr(requirement, "link"):
-            link = str(requirement.link)
+            link = str(requirement.link)  # type: ignore
         elif req is not None:
             link = req.url
         elif hasattr(requirement, "requirement"):
@@ -434,7 +434,7 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
     if editable:
         name = str(link)
     elif hasattr(requirement, "name"):
-        name = requirement.name
+        name = requirement.name  # type: ignore
     elif req is not None:
         name = req.name
     elif hasattr(requirement, "requirement") and is_url:
@@ -447,8 +447,8 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
     version_specifier_length = None
     if not editable and not is_url:
         if hasattr(requirement, "specifier"):
-            version_specifier = str(requirement.specifier)
-            version_specifier_length = len(requirement.specifier)
+            version_specifier = str(requirement.specifier)  # type: ignore
+            version_specifier_length = len(requirement.specifier)  # type: ignore
         elif req is not None:
             # pip>=20
             version_specifier = str(req.specifier)
@@ -460,9 +460,9 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
     hash_options = None
     if not editable and not is_url:
         if hasattr(requirement, "options"):
-            hash_options = requirement.options.get("hashes")
+            hash_options = requirement.options.get("hashes")  # type: ignore
         else:
-            hash_options = requirement.hash_options  # More recent pip.
+            hash_options = requirement.hash_options  # type: ignore
 
     hashes = {}
     for hash_type, hashes_present in hash_options.items() if hash_options else []:
@@ -475,7 +475,7 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
     markers = None
     if not editable and not is_url:
         if hasattr(requirement, "markers"):
-            markers = requirement.markers
+            markers = requirement.markers  # type: ignore
         elif req is not None:
             markers = req.marker
         else:
@@ -485,7 +485,7 @@ def _get_requirement_info(requirement):  # type: (ParsedRequirement) -> Dict[str
     extras = None
     if not editable and not is_url:
         if hasattr(requirement, "extras"):
-            extras = requirement.extras
+            extras = requirement.extras  # type: ignore
         elif req is not None:
             extras = req.extras
         else:
@@ -549,7 +549,7 @@ def _requirements2pipfile_lock(requirements_txt_path=None):  # type: (Optional[s
         # We add all dependencies to default, develop should not be present in requirements.txt file, but rather
         # in dev-requirements.txt or similar.
         if requirement_name in result:
-            raise RequirementsError("Duplicate entry for requirement {}".format(requirement.name))
+            raise RequirementsError("Duplicate entry for requirement {}".format(requirement.name))  # type: ignore
 
         result[requirement_name] = entry
 
