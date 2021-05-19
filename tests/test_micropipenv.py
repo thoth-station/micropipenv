@@ -856,8 +856,10 @@ def test_check_pip_version_compatible(raise_on_incompatible):
 
     Test checking pip compatibility. micropipenv is tested against different
     pip versions and the warning message produced should help users clarify
-    which pip versions are supported. If this test fails with newer pip
-    releases, adjust the supported pip version requirement in sources.
+    which pip versions are supported.
+
+    This test runs for stable releases of pip and the function
+    should always return True.
     """
     micropipenv.pip_version = str(PIP_VERSION)
     assert micropipenv._check_pip_version(raise_on_incompatible=raise_on_incompatible) is True
@@ -870,8 +872,10 @@ def test_check_pip_version_incompatible(raise_on_incompatible):
 
     Test checking pip compatibility. micropipenv is tested against different
     pip versions and the warning message produced should help users clarify
-    which pip versions are supported. If this test fails with newer pip
-    releases, adjust the supported pip version requirement in sources.
+    which pip versions are supported.
+
+    This test runs for pip versions like "21.2.dev0" and the function
+    should therefore report the incompatibility.
     """
     micropipenv.pip_version = str(PIP_VERSION)
     if raise_on_incompatible:
