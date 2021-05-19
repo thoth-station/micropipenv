@@ -27,12 +27,13 @@ containerized Python applications but not limited to them.
 
 For a brief video preview, `check this demo
 <https://www.youtube.com/watch?v=I-QC83BcLuo&t=8m58s>`_ (the micropipenv
-part starts at 9:00) or this
-`blog post <https://medium.com/swlh/a-bridge-to-two-python-dependency-pinning-worlds-micropipenv-5da674f38e89>`_.
+part starts at 9:00).
 
-To `check S2I integration and best practices for managing Python dependencies
-see this blog post
-<https://towardsdatascience.com/micropipenv-best-practices-for-installing-python-dependencies-72203925eb0d>`__.
+See also `micropipenv: Installing Python dependencies in containerized
+applications
+<https://developers.redhat.com/articles/2021/05/19/micropipenv-installing-python-dependencies-containerized-applications>`__
+for more info about this tool and a `blog post published about it
+<https://dev.to/fridex/micropipenv-the-one-installation-tool-that-covers-pipenv-poetry-and-pip-tools-3ee7>`__.
 
 What's the difference in comparision to pip when using requirements.txt?
 =========================================================================
