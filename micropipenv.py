@@ -972,6 +972,12 @@ def _get_index_entry_str(sections, package_info=None):  # type: (Dict[str, Any],
 
     return result
 
+def resolve_nested_variables(url):
+    env_name = re.findall(r"\$\{[^}]*\}", url)
+    for name in env_name:
+        re.sub(r"\$\{[^}]*\}", os.getenv(name[2:-1]), url, count = 1)
+    return url
+
 
 def _iter_index_entry_str(
     sections, package_info
@@ -986,6 +992,7 @@ def _iter_index_entry_str(
         return None
 
     for source in sections["sources"]:
+        source["url"] = resolve_nested_variables(source["url"])
         result = "--index-url {}\n".format(source["url"])
         if not source["verify_ssl"]:
             result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
