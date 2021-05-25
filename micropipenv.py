@@ -108,6 +108,8 @@ _FILE_METHOD_MAP = OrderedDict(
         ("requirements.txt", "requirements"),
     ]
 )
+__re_nested_vars = re.compile(r"\$\{(?P<name>[^\}:]*)(?::-(?P<default>[^\}]*))?\}")
+__re_sub_vars = re.compile(r"\$\{[^}]*\}")
 
 
 class MicropipenvException(Exception):
@@ -972,10 +974,16 @@ def _get_index_entry_str(sections, package_info=None):  # type: (Dict[str, Any],
 
     return result
 
+
 def resolve_nested_variables(url):
-    env_name = re.findall(r"\$\{[^}]*\}", url)
-    for name in env_name:
-        re.sub(r"\$\{[^}]*\}", os.getenv(name[2:-1]), url, count = 1)
+    while 1:
+        env_name = __re_nested_vars.search(url)
+        if env_name is None:
+            break
+        name = os.getenv(env_name['name'])
+        if name is None:
+            name = env_name['default'] if env_name['default'] is not None else ""
+        url = __re_sub_vars.sub(name, url, count = 1)
     return url
 
 
