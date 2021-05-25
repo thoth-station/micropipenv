@@ -11,7 +11,8 @@ TEMPLATE = '''- python_version: "{}"
 for line in fileinput.input():
     line = line.strip()
     m = re.match(r"^py(\d)(\d+)-", line)
-    if not m:
-        raise ValueError(f"No Python version matched in {line!r}")
-    python_version = "{}.{}".format(*m.groups())
+    if m:
+        # Keeps the latest Python version for
+        # environments like mypy
+        python_version = "{}.{}".format(*m.groups())
     print(TEMPLATE.format(python_version, line))

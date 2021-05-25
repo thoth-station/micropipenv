@@ -67,6 +67,7 @@ jobs:
           py39-pip90-pytoml,
           py39-piplatest-pytoml,
           py39-pipgit-pytoml,
+          mypy,
         ]
 
     # Use GitHub's Linux Docker host

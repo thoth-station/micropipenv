@@ -27,12 +27,13 @@ containerized Python applications but not limited to them.
 
 For a brief video preview, `check this demo
 <https://www.youtube.com/watch?v=I-QC83BcLuo&t=8m58s>`_ (the micropipenv
-part starts at 9:00) or this
-`blog post <https://medium.com/swlh/a-bridge-to-two-python-dependency-pinning-worlds-micropipenv-5da674f38e89>`_.
+part starts at 9:00).
 
-To `check S2I integration and best practices for managing Python dependencies
-see this blog post
-<https://towardsdatascience.com/micropipenv-best-practices-for-installing-python-dependencies-72203925eb0d>`__.
+See also `micropipenv: Installing Python dependencies in containerized
+applications
+<https://developers.redhat.com/articles/2021/05/19/micropipenv-installing-python-dependencies-containerized-applications>`__
+for more info about this tool and a `blog post published about it
+<https://dev.to/fridex/micropipenv-the-one-installation-tool-that-covers-pipenv-poetry-and-pip-tools-3ee7>`__.
 
 What's the difference in comparision to pip when using requirements.txt?
 =========================================================================
@@ -101,7 +102,10 @@ or `Poetry <https://pypi.org/project/poetry>`_?
 * I would like to have a tool that "rules them all" - one lightweight tool to
   support all Python dependency lock file managers (pip-tools, Poetry, Pipenv)
   and lets users decide what they want to use when deploying Python applications
-  in containerized environments (e.g. Kubernetes, OpenShift, ...)
+  in containerized environments (e.g. Kubernetes, OpenShift, ...).
+
+* I would like to have a fast and minimalistic tool to install software
+  packages in CI.
 
 * I would like to have containerized Python applications as small as possible
   with minimum software shipped and required to build and run the Python
@@ -114,7 +118,7 @@ or `Poetry <https://pypi.org/project/poetry>`_?
   uses Pipenv/Poetry for dependency management (e.g. restricted environments).
 
 * My Pipenv installation is broken and `Pipenv upstream did not issue any new
-  Pipenv release <https://github.com/pypa/pipenv/issues/4058>`_
+  Pipenv release <https://github.com/pypa/pipenv/issues/4058>`_.
 
 * I would like to deploy my application into a production environment and my
   application dependencies are managed by Pipenv/Poetry (dependencies are

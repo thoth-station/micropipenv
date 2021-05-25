@@ -115,3 +115,5 @@ jobs:
             tox_env: "py39-piplatest-pytoml"
           - python_version: "3.9"
             tox_env: "py39-pipgit-pytoml"
+          - python_version: "3.9"
+            tox_env: "mypy"
