@@ -1002,7 +1002,7 @@ def _iter_index_entry_str(
         return None
 
     for source in sections["sources"]:
-        source["url"] = resolve_nested_variables(source["url"])
+        source["url"] = _resolve_nested_variables(source["url"])
         result = "--index-url {}\n".format(source["url"])
         if not source["verify_ssl"]:
             result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
