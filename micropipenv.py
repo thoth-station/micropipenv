@@ -976,7 +976,7 @@ def _get_index_entry_str(sections, package_info=None):  # type: (Dict[str, Any],
 
 
 def resolve_nested_variables(url):
-    while 1:
+    while True:
         env_name = __re_nested_vars.search(url)
         if env_name is None:
             break
