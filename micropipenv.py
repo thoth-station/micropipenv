@@ -976,7 +976,7 @@ def _get_index_entry_str(sections, package_info=None):  # type: (Dict[str, Any],
     return result
 
 
-def resolve_nested_variables(url):
+def _resolve_nested_variables(url):
     # type: (str) -> str
     while True:
         variable = __re_nested_vars.search(url)
