@@ -1,0 +1,7 @@
+[[source]]
+name = "pypi"
+url = "${URL}"
+verify_ssl = true
+
+[packages]
+daiquiri = "==2.0.0"
