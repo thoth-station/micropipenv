@@ -201,14 +201,14 @@ def test_install_pipenv_env_vars(venv):
     """Test installation using enviromental variables."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_env_vars")):
-        subprocess.run(cmd, check=True, env=get_updated_env(venv) + {"URL":"https://pypi.org/simple"})
+        subprocess.run(cmd, check=True, env=get_updated_env(venv).update({"URL":"https://pypi.org/simple"}))
         assert str(venv.get_version("daiquiri")) == "2.0.0"
         assert str(venv.get_version("python-json-logger")) == "0.1.11"
 
 
 @pytest.mark.online
-def test_install_pipenv_env_vars_negative(venv):
-    """Test installation using enviromental variables."""
+def test_install_pipenv_env_vars_undefined(venv):
+    """Test installation using enviromental variables without setting them."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_env_vars")):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
@@ -218,10 +218,10 @@ def test_install_pipenv_env_vars_negative(venv):
 
 @pytest.mark.online
 def test_install_pipenv_env_vars_default(venv):
-    """Test installation using enviromental variables."""
+    """Test installation using default values as URL."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_env_vars_default")):
-        subprocess.run(cmd, check=True, env=get_updated_env(venv))
+        subprocess.check_call(cmd, check=True, env=get_updated_env(venv))
         assert str(venv.get_version("daiquiri")) == "2.0.0"
         assert str(venv.get_version("python-json-logger")) == "0.1.11"
 
@@ -296,7 +296,6 @@ def test_install_pip_tools_editable(venv):
         finally:
             # Clean up this file, can cause issues across multiple test runs.
             shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
-
 
 
 @pytest.mark.online
