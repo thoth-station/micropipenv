@@ -218,7 +218,7 @@ def test_install_pipenv_env_vars_undefined(venv):
 
 @pytest.mark.online
 def test_install_pipenv_env_vars_default(venv):
-    """Test installation using default values as URL."""
+    """Test installation using default values of environment variables."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_env_vars_default")):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
