@@ -36,7 +36,7 @@ setup(
     install_requires=["pip>=9"],
     entry_points={"console_scripts": ["micropipenv=micropipenv:main"]},
     classifiers=[
-        "Development Status :: 4 - Beta",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "License :: OSI Approved :: GNU Lesser General Public License v3 or later (LGPLv3+)",
         "Programming Language :: Python",
