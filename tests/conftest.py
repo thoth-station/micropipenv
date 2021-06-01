@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 # micropipenv
-# Copyright(C) 2020 Red Hat, Inc.
+# Copyright(C) 2020-2021 Red Hat, Inc.
 #
 # This program is free software: you can redistribute it and / or modify
 # it under the terms of the GNU General Public License as published by

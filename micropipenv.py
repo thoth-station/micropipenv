@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 # micropipenv
 # Copyright(C) 2020 Fridolin Pokorny
+# Copyright(C) 2021 Lumir Balhar
 #
 # This program is free software: you can redistribute it and / or modify it
 # under the terms of the GNU Lesser General Public License as published by the
