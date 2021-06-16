@@ -201,7 +201,7 @@ def test_install_pipenv_env_vars(venv):
     """Test installation using enviroment variables in source URL."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_env_vars")):
-        subprocess.run(cmd, check=True, env={**get_updated_env(venv), **{"URL":"https://pypi.org/simple"}})
+        subprocess.run(cmd, check=True, env={**get_updated_env(venv), **{"URL": "https://pypi.org/simple"}})
         assert str(venv.get_version("daiquiri")) == "2.0.0"
         assert str(venv.get_version("python-json-logger")) == "0.1.11"
 

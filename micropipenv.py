@@ -983,9 +983,9 @@ def _resolve_nested_variables(url):
         variable = __re_nested_vars.search(url)
         if not variable:
             break
-        value = os.getenv(variable['name'])
+        value = os.getenv(variable["name"])
         if not value:
-            value = variable['default'] if variable['default'] else ""
+            value = variable["default"] if variable["default"] else ""
         url = __re_sub_vars.sub(value, url, count=1)
     return url
 
