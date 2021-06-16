@@ -951,20 +951,21 @@ def _get_index_entry_str(sections, package_info=None):  # type: (Dict[str, Any],
 
     result = ""
     for idx, source in enumerate(sections.get("sources", [])):
+        url = _resolve_nested_variables(source["url"])
         if index_name is None:
             if idx == 0:
-                result += "--index-url {}\n".format(source["url"])
+                result += "--index-url {}\n".format(url)
             else:
-                result += "--extra-index-url {}\n".format(source["url"])
+                result += "--extra-index-url {}\n".format(url)
 
             if not source["verify_ssl"]:
-                result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
+                result += "--trusted-host {}\n".format(urlparse(url).netloc)
         else:
             if index_name == source["name"]:
-                result += "--index-url {}\n".format(source["url"])
+                result += "--index-url {}\n".format(url)
 
                 if not source["verify_ssl"]:
-                    result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
+                    result += "--trusted-host {}\n".format(urlparse(url).netloc)
 
                 break
 
