@@ -109,6 +109,8 @@ _FILE_METHOD_MAP = OrderedDict(
         ("requirements.txt", "requirements"),
     ]
 )
+__re_nested_vars = re.compile(r"\$\{(?P<name>[^\}:]*)(?::-(?P<default>[^\}]*))?\}")
+__re_sub_vars = re.compile(r"\$\{[^}]*\}")
 
 
 class MicropipenvException(Exception):
@@ -949,20 +951,21 @@ def _get_index_entry_str(sections, package_info=None):  # type: (Dict[str, Any],
 
     result = ""
     for idx, source in enumerate(sections.get("sources", [])):
+        url = _resolve_nested_variables(source["url"])
         if index_name is None:
             if idx == 0:
-                result += "--index-url {}\n".format(source["url"])
+                result += "--index-url {}\n".format(url)
             else:
-                result += "--extra-index-url {}\n".format(source["url"])
+                result += "--extra-index-url {}\n".format(url)
 
             if not source["verify_ssl"]:
-                result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
+                result += "--trusted-host {}\n".format(urlparse(url).netloc)
         else:
             if index_name == source["name"]:
-                result += "--index-url {}\n".format(source["url"])
+                result += "--index-url {}\n".format(url)
 
                 if not source["verify_ssl"]:
-                    result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
+                    result += "--trusted-host {}\n".format(urlparse(url).netloc)
 
                 break
 
@@ -972,6 +975,19 @@ def _get_index_entry_str(sections, package_info=None):  # type: (Dict[str, Any],
         )
 
     return result
+
+
+def _resolve_nested_variables(url):
+    # type: (str) -> str
+    while True:
+        variable = __re_nested_vars.search(url)
+        if not variable:
+            break
+        value = os.getenv(variable["name"])
+        if not value:
+            value = variable["default"] if variable["default"] else ""
+        url = __re_sub_vars.sub(value, url, count=1)
+    return url
 
 
 def _iter_index_entry_str(
@@ -987,6 +1003,7 @@ def _iter_index_entry_str(
         return None
 
     for source in sections["sources"]:
+        source["url"] = _resolve_nested_variables(source["url"])
         result = "--index-url {}\n".format(source["url"])
         if not source["verify_ssl"]:
             result += "--trusted-host {}\n".format(urlparse(source["url"]).netloc)
