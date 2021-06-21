@@ -1,5 +1,15 @@
 # Changelog for Thoth's micropipenv
 
+## [1.1.0] - 2021-Jun-21 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Add resolving enviroment variables in Pipfile URL
+  thanks to @Misoslav and @frenzymadness
+* Test with pip<=21.1.2
+* Tests are now executed on Windows as well
+  thanks to @frenzymadness
+
 ## [1.0.4] - 2021-April-29 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
