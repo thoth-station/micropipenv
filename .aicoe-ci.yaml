@@ -1,3 +1,7 @@
 check: []
-release:
-  - upload-pypi-sesheta
+package-upload:
+- instance: pypi
+- instance: pulp
+  pulp-index: fpokorny-thoth
+  allow-sdist: true
+  allow-bdist: true
