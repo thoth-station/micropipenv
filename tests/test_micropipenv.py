@@ -879,7 +879,7 @@ def test_import_toml(venv):
     assert "<module 'toml'" in output
 
 
-@pytest.mark.skipif(MICROPIPENV_TEST_PIP_VERSION == "git", reason="Unsuitable pip version")
+@pytest.mark.skipif(not MICROPIPENV_TEST_PIP_VERSION or MICROPIPENV_TEST_PIP_VERSION == "git", reason="Unsuitable pip version")
 @pytest.mark.parametrize("raise_on_incompatible", (True, False))
 def test_check_pip_version_compatible(raise_on_incompatible):
     """Test checking tested pip version.
@@ -895,7 +895,7 @@ def test_check_pip_version_compatible(raise_on_incompatible):
     assert micropipenv._check_pip_version(raise_on_incompatible=raise_on_incompatible) is True
 
 
-@pytest.mark.skipif(MICROPIPENV_TEST_PIP_VERSION != "git", reason="Unsuitable pip version")
+@pytest.mark.skipif(not MICROPIPENV_TEST_PIP_VERSION or MICROPIPENV_TEST_PIP_VERSION != "git", reason="Unsuitable pip version")
 @pytest.mark.parametrize("raise_on_incompatible", (True, False))
 def test_check_pip_version_incompatible(raise_on_incompatible):
     """Test checking tested pip version.
