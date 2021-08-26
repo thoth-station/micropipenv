@@ -681,10 +681,10 @@ def test_parse_requirements2pipfile_lock_not_locked():
         with pytest.raises(micropipenv.PipRequirementsNotLocked):
             micropipenv._requirements2pipfile_lock()
 
-
-def test_parse_poetry2pipfile_lock():
+@pytest.mark.parametrize("directory", ("poetry", "poetry_markers_direct", "poetry_markers_indirect", "poetry_markers_order"))
+def test_parse_poetry2pipfile_lock(directory):
     """Test parsing Poetry specific files into Pipfile.lock representation."""
-    work_dir = os.path.join(_DATA_DIR, "parse", "poetry")
+    work_dir = os.path.join(_DATA_DIR, "parse", directory)
     with cwd(work_dir):
         pipfile_lock = micropipenv._poetry2pipfile_lock()
         with open("Pipfile.lock") as f:

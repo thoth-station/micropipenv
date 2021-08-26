@@ -41,7 +41,7 @@ import re
 import subprocess
 import sys
 import tempfile
-from collections import deque, OrderedDict
+from collections import defaultdict, deque, OrderedDict
 from itertools import chain
 from importlib import import_module
 from pathlib import Path
@@ -685,6 +685,8 @@ def _poetry2pipfile_lock(
             "develop": develop,
         }
 
+    additional_markers = defaultdict(list)
+
     for entry in poetry_lock["package"]:
         hashes = []
         for file_entry in poetry_lock["metadata"]["files"][entry["name"]]:
@@ -714,8 +716,16 @@ def _poetry2pipfile_lock(
         extra_dependencies = set()
 
         for dependency_name, dependency_info in entry.get("dependencies", {}).items():
-            if isinstance(dependency_info, dict) and dependency_info.get("optional", False):
-                extra_dependencies.add(dependency_name)
+            if isinstance(dependency_info, dict):
+                if dependency_info.get("optional", False):
+                    extra_dependencies.add(dependency_name)
+
+                # If the dependency has some markers and it's not specified
+                # as a direct dependency, we should move the markers to the
+                # main dependency definition.
+                if "markers" in dependency_info:
+                    if dependency_name not in pyproject_poetry_section["dependencies"]:
+                        additional_markers[normalize_package_name(dependency_name)].append(dependency_info["markers"])
 
         for extra_name, extras_listed in entry.get("extras", {}).items():
             # Turn requirement specification into the actual requirement name.
@@ -738,6 +748,19 @@ def _poetry2pipfile_lock(
                 develop[entry["name"]] = requirement
         else:
             raise PoetryError("Unknown category for package {}: {}".format(entry["name"], entry["category"]))
+
+    for dependency_name, markers in additional_markers.items():
+        for name in dependency_name, normalize_package_name(dependency_name):
+            if dependency_name in default:
+                category = default
+                break
+            elif dependency_name in develop:
+                category = develop
+                break
+
+        all_markers = [category[name].get("markers", None), *markers]
+        all_markers.remove(None)
+        category[name]["markers"] = "(" + ") or (".join(all_markers) + ")"
 
     if len(sources) == 1:
         # Explicitly assign index if there is just one.
