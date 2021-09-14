@@ -662,8 +662,8 @@ def _poetry2pipfile_lock(
         }  # type: Any
         sources.insert(0, entry)
 
-    default = {}
-    develop = {}
+    default: Dict[str, Any] = {}
+    develop: Dict[str, Any] = {}
 
     if only_direct:
         if not no_default:
@@ -692,7 +692,7 @@ def _poetry2pipfile_lock(
         for file_entry in poetry_lock["metadata"]["files"][entry["name"]]:
             hashes.append(file_entry["hash"])
 
-        requirement = {"version": "=={}".format(entry["version"])}  # type: Any
+        requirement: Dict[str, Any] = {"version": "=={}".format(entry["version"])}
 
         if hashes:
             requirement["hashes"] = hashes
