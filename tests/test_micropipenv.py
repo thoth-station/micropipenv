@@ -681,7 +681,10 @@ def test_parse_requirements2pipfile_lock_not_locked():
         with pytest.raises(micropipenv.PipRequirementsNotLocked):
             micropipenv._requirements2pipfile_lock()
 
-@pytest.mark.parametrize("directory", ("poetry", "poetry_markers_direct", "poetry_markers_indirect", "poetry_markers_order"))
+
+@pytest.mark.parametrize(
+    "directory", ("poetry", "poetry_markers_direct", "poetry_markers_indirect", "poetry_markers_order")
+)
 def test_parse_poetry2pipfile_lock(directory):
     """Test parsing Poetry specific files into Pipfile.lock representation."""
     work_dir = os.path.join(_DATA_DIR, "parse", directory)
@@ -879,7 +882,9 @@ def test_import_toml(venv):
     assert "<module 'toml'" in output
 
 
-@pytest.mark.skipif(not MICROPIPENV_TEST_PIP_VERSION or MICROPIPENV_TEST_PIP_VERSION == "git", reason="Unsuitable pip version")
+@pytest.mark.skipif(
+    not MICROPIPENV_TEST_PIP_VERSION or MICROPIPENV_TEST_PIP_VERSION == "git", reason="Unsuitable pip version"
+)
 @pytest.mark.parametrize("raise_on_incompatible", (True, False))
 def test_check_pip_version_compatible(raise_on_incompatible):
     """Test checking tested pip version.
@@ -895,7 +900,9 @@ def test_check_pip_version_compatible(raise_on_incompatible):
     assert micropipenv._check_pip_version(raise_on_incompatible=raise_on_incompatible) is True
 
 
-@pytest.mark.skipif(not MICROPIPENV_TEST_PIP_VERSION or MICROPIPENV_TEST_PIP_VERSION != "git", reason="Unsuitable pip version")
+@pytest.mark.skipif(
+    not MICROPIPENV_TEST_PIP_VERSION or MICROPIPENV_TEST_PIP_VERSION != "git", reason="Unsuitable pip version"
+)
 @pytest.mark.parametrize("raise_on_incompatible", (True, False))
 def test_check_pip_version_incompatible(raise_on_incompatible):
     """Test checking tested pip version.
