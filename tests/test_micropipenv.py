@@ -913,3 +913,19 @@ def test_check_pip_version_incompatible(raise_on_incompatible):
             micropipenv._check_pip_version(raise_on_incompatible=raise_on_incompatible)
     else:
         assert micropipenv._check_pip_version(raise_on_incompatible=raise_on_incompatible) is False
+
+
+@pytest.mark.parametrize(
+    ("name", "expected"),
+    (
+        ("importlib_metadata", "importlib-metadata"),
+        ("Django", "django"),
+        ("jaraco.packaging", "jaraco-packaging"),
+        ("foo_bar.baz", "foo-bar-baz"),
+        ("foo---bar", "foo-bar"),
+        ("foo___bar...baz", "foo-bar-baz"),
+    ),
+)
+def test_normalize_package_name(name, expected):
+    """Test package name normalization."""
+    assert micropipenv.normalize_package_name(name) == expected

@@ -165,6 +165,11 @@ class NotSupportedError(MicropipenvException):
     """Raised when the given feature is not supported by micropipenv."""
 
 
+def normalize_package_name(package_name):  # type: (str) -> str
+    """Implement package name normalization as decribed in PEP 503."""
+    return re.sub(r"[-_.]+", "-", package_name).lower()
+
+
 def _check_pip_version(raise_on_incompatible=False):  # type: (bool) -> bool
     """Check pip version running."""
     if Version(pip_version) not in _SUPPORTED_PIP:
