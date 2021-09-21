@@ -1,5 +1,13 @@
 # Changelog for Thoth's micropipenv
 
+## [1.1.1] - 2021-September-21 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Test with pip<=21.2.4
+* Fix Poetry environment markers handling #188
+  Fix thanks to @frenzymadness, issue reported by @wjhrdy
+
 ## [1.1.0] - 2021-Jun-21 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
