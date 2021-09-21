@@ -41,14 +41,14 @@ import re
 import subprocess
 import sys
 import tempfile
-from collections import deque, OrderedDict
+from collections import defaultdict, deque, OrderedDict
 from itertools import chain
 from importlib import import_module
 from pathlib import Path
 from urllib.parse import urlparse
 
 _LOGGER = logging.getLogger(__title__)
-_SUPPORTED_PIP_STR = ">=9,<=21.1.3"  # Respects requirement in setup.py and latest pip to release date.
+_SUPPORTED_PIP_STR = ">=9,<=21.2.4"  # Respects requirement in setup.py and latest pip to release date.
 
 try:
     from pip import __version__ as pip_version
@@ -163,6 +163,11 @@ class CompatibilityError(MicropipenvException):
 
 class NotSupportedError(MicropipenvException):
     """Raised when the given feature is not supported by micropipenv."""
+
+
+def normalize_package_name(package_name):  # type: (str) -> str
+    """Implement package name normalization as decribed in PEP 503."""
+    return re.sub(r"[-_.]+", "-", package_name).lower()
 
 
 def _check_pip_version(raise_on_incompatible=False):  # type: (bool) -> bool
@@ -657,8 +662,8 @@ def _poetry2pipfile_lock(
         }  # type: Any
         sources.insert(0, entry)
 
-    default = {}
-    develop = {}
+    default: Dict[str, Any] = {}
+    develop: Dict[str, Any] = {}
 
     if only_direct:
         if not no_default:
@@ -680,12 +685,14 @@ def _poetry2pipfile_lock(
             "develop": develop,
         }
 
+    additional_markers = defaultdict(list)
+
     for entry in poetry_lock["package"]:
         hashes = []
         for file_entry in poetry_lock["metadata"]["files"][entry["name"]]:
             hashes.append(file_entry["hash"])
 
-        requirement = {"version": "=={}".format(entry["version"])}  # type: Any
+        requirement: Dict[str, Any] = {"version": "=={}".format(entry["version"])}
 
         if hashes:
             requirement["hashes"] = hashes
@@ -709,8 +716,16 @@ def _poetry2pipfile_lock(
         extra_dependencies = set()
 
         for dependency_name, dependency_info in entry.get("dependencies", {}).items():
-            if isinstance(dependency_info, dict) and dependency_info.get("optional", False):
-                extra_dependencies.add(dependency_name)
+            if isinstance(dependency_info, dict):
+                if dependency_info.get("optional", False):
+                    extra_dependencies.add(dependency_name)
+
+                # If the dependency has some markers and it's not specified
+                # as a direct dependency, we should move the markers to the
+                # main dependency definition.
+                if "markers" in dependency_info:
+                    if dependency_name not in pyproject_poetry_section["dependencies"]:
+                        additional_markers[normalize_package_name(dependency_name)].append(dependency_info["markers"])
 
         for extra_name, extras_listed in entry.get("extras", {}).items():
             # Turn requirement specification into the actual requirement name.
@@ -733,6 +748,19 @@ def _poetry2pipfile_lock(
                 develop[entry["name"]] = requirement
         else:
             raise PoetryError("Unknown category for package {}: {}".format(entry["name"], entry["category"]))
+
+    for dependency_name, markers in additional_markers.items():
+        for name in dependency_name, normalize_package_name(dependency_name):
+            if dependency_name in default:
+                category = default
+                break
+            elif dependency_name in develop:
+                category = develop
+                break
+
+        all_markers = [category[name].get("markers", None), *markers]
+        all_markers.remove(None)
+        category[name]["markers"] = "(" + ") or (".join(all_markers) + ")"
 
     if len(sources) == 1:
         # Explicitly assign index if there is just one.
