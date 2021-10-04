@@ -686,6 +686,7 @@ def _poetry2pipfile_lock(
         }
 
     additional_markers = defaultdict(list)
+    skip_all_markers = object()
 
     for entry in poetry_lock["package"]:
         hashes = []
@@ -720,12 +721,16 @@ def _poetry2pipfile_lock(
                 if dependency_info.get("optional", False):
                     extra_dependencies.add(dependency_name)
 
-                # If the dependency has some markers and it's not specified
-                # as a direct dependency, we should move the markers to the
-                # main dependency definition.
-                if "markers" in dependency_info:
-                    if dependency_name not in pyproject_poetry_section["dependencies"]:
-                        additional_markers[normalize_package_name(dependency_name)].append(dependency_info["markers"])
+            # If the dependency is not direct and has some markers,
+            # we should move the markers to the main dependency definition.
+            # If there are no additional markers, we have to have a record
+            # that the dependency has to be installed unconditionaly and that
+            # we have to skip all other additional markers.
+            if dependency_name not in pyproject_poetry_section["dependencies"]:
+                if isinstance(dependency_info, dict) and "markers" in dependency_info:
+                    additional_markers[normalize_package_name(dependency_name)].append(dependency_info["markers"])
+                else:
+                    additional_markers[normalize_package_name(dependency_name)].append(skip_all_markers)
 
         for extra_name, extras_listed in entry.get("extras", {}).items():
             # Turn requirement specification into the actual requirement name.
@@ -750,6 +755,11 @@ def _poetry2pipfile_lock(
             raise PoetryError("Unknown category for package {}: {}".format(entry["name"], entry["category"]))
 
     for dependency_name, markers in additional_markers.items():
+        # If a package depends on another package unconditionaly
+        # we should skip all the markers for it.
+        if skip_all_markers in markers:
+            continue
+
         for name in dependency_name, normalize_package_name(dependency_name):
             if dependency_name in default:
                 category = default
