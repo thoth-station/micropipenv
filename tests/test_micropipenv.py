@@ -683,7 +683,14 @@ def test_parse_requirements2pipfile_lock_not_locked():
 
 
 @pytest.mark.parametrize(
-    "directory", ("poetry", "poetry_markers_direct", "poetry_markers_indirect", "poetry_markers_order")
+    "directory",
+    (
+        "poetry",
+        "poetry_markers_direct",
+        "poetry_markers_indirect",
+        "poetry_markers_order",
+        "poetry_markers_transitive_deps",
+    ),
 )
 def test_parse_poetry2pipfile_lock(directory):
     """Test parsing Poetry specific files into Pipfile.lock representation."""
