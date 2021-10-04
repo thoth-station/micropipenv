@@ -760,6 +760,8 @@ def _poetry2pipfile_lock(
         if skip_all_markers in markers:
             continue
 
+        category: Optional[Dict[str, Any]]
+
         for name in dependency_name, normalize_package_name(dependency_name):
             if dependency_name in default:
                 category = default
