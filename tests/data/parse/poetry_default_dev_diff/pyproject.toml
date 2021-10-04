@@ -1,0 +1,27 @@
+[tool.poetry]
+name = ""
+version = "0.1.0"
+description = ""
+authors = [""]
+
+[tool.poetry.dependencies]
+python = "3.8.10"
+flask-restx = "^0.4"
+webargs = "^7.0"
+gunicorn = "^19.9"
+Flask-PyMongo = "^2.3.0"
+py-healthcheck = "^1.2"
+invoke = "^1.6"
+pyyaml = "^5.4"
+
+[tool.poetry.dev-dependencies]
+pytest = "*"
+pytest-mock = "*"
+pytest-flask = "*"
+requests = "*"
+requests-mock = "*"
+responses = "*"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

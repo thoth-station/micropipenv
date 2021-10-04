@@ -683,9 +683,18 @@ def test_parse_requirements2pipfile_lock_not_locked():
 
 
 @pytest.mark.parametrize(
+    "options, expected_file",
+    (
+        ({"no_dev": False, "no_default": False}, "Pipfile.lock"),
+        ({"no_dev": True, "no_default": False}, "Pipfile_no_dev.lock"),
+        ({"no_dev": False, "no_default": True}, "Pipfile_no_default.lock"),
+    ),
+)
+@pytest.mark.parametrize(
     "directory",
     (
         "poetry",
+        "poetry_default_dev_diff",
         "poetry_markers_direct",
         "poetry_markers_indirect",
         "poetry_markers_order",
@@ -693,12 +702,12 @@ def test_parse_requirements2pipfile_lock_not_locked():
         "poetry_markers_skip",
     ),
 )
-def test_parse_poetry2pipfile_lock(directory):
+def test_parse_poetry2pipfile_lock(directory, options, expected_file):
     """Test parsing Poetry specific files into Pipfile.lock representation."""
     work_dir = os.path.join(_DATA_DIR, "parse", directory)
     with cwd(work_dir):
-        pipfile_lock = micropipenv._poetry2pipfile_lock()
-        with open("Pipfile.lock") as f:
+        pipfile_lock = micropipenv._poetry2pipfile_lock(**options)
+        with open(expected_file) as f:
             expected_pipfile_lock = json.load(f)
 
         python_version = pipfile_lock["_meta"]["requires"].pop("python_version")
