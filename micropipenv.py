@@ -767,10 +767,13 @@ def _poetry2pipfile_lock(
             elif dependency_name in develop:
                 category = develop
                 break
+        else:
+            category = None
 
-        all_markers = [category[name].get("markers", None), *markers]
-        all_markers.remove(None)
-        category[name]["markers"] = "(" + ") or (".join(all_markers) + ")"
+        if category:
+            all_markers = [category[name].get("markers", None), *markers]
+            all_markers.remove(None)
+            category[name]["markers"] = "(" + ") or (".join(all_markers) + ")"
 
     if len(sources) == 1:
         # Explicitly assign index if there is just one.
