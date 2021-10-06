@@ -1,5 +1,14 @@
 # Changelog for Thoth's micropipenv
 
+## [1.1.2] - 2021-October-05 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Fix handling Poetry environment markers for direct dependencies #192
+  Fix thanks to @frenzymadness, issue reported by @abompard
+* Fix handling Poetry environment markers for `--no-default` and `--no-dev` options #193
+  Fix thanks to @frenzymadness, issue reported by @macarr
+
 ## [1.1.1] - 2021-September-21 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
