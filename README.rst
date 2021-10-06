@@ -322,7 +322,7 @@ only if necessary):
   Pipfile Pipfile.lock src/
   $ python3 -m venv venv/
   $ . venv/bin/activate
-  (venv) $ micropipenv --deploy
+  (venv) $ micropipenv install --deploy
 
 Generate `pip-tools <https://pypi.org/project/pip-tools/>`_ compliant
 ``requirements.in``, ``dev-requirements.in``, ``requirements.txt`` and
