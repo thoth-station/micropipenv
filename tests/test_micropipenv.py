@@ -773,6 +773,25 @@ def test_requirements(tmp_path, test, options, expected_file):
             assert f.read() == expected
 
 
+def test_requirements_autodiscovery_not_found(tmp_path):
+    """Test raising an exception if auto-discovery is not able to locate requirements files."""
+    with cwd(tmp_path):
+        with pytest.raises(micropipenv.FileNotFound):
+            micropipenv._traverse_up_find_file("Pipfile")
+
+        with pytest.raises(micropipenv.FileNotFound):
+            micropipenv._traverse_up_find_file("Pipfile.lock")
+
+        with pytest.raises(micropipenv.FileNotFound):
+            micropipenv._traverse_up_find_file("poetry.lock")
+
+        with pytest.raises(micropipenv.FileNotFound):
+            micropipenv._traverse_up_find_file("pyproject.toml")
+
+        with pytest.raises(micropipenv.FileNotFound, match=f"No Pipenv or Poetry files found in {str(tmp_path)!r}"):
+            micropipenv.requirements()
+
+
 def test_main_install_params_default():
     """Test running install from main with default parameters set."""
     flexmock(micropipenv).should_receive("install").with_args(deploy=True, dev=True, pip_args=[], method=None).once()
