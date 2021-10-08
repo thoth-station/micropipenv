@@ -1088,7 +1088,7 @@ def requirements_str(
 
 
 def requirements(
-    method="pipenv",
+    method=None,
     sections=None,
     *,
     no_hashes=False,
@@ -1098,12 +1098,23 @@ def requirements(
     no_default=False,
     no_dev=False,
     no_comments=False,
-):  # type: (str, Optional[Dict[str, Any]], bool, bool, bool, bool, bool, bool, bool) -> None
+):  # type: (Optional[str], Optional[Dict[str, Any]], bool, bool, bool, bool, bool, bool, bool) -> None
     """Show requirements of an application, the output generated is compatible with pip-tools."""
-    if method == "pipenv":
-        sections = sections or get_requirements_sections(
-            no_indexes=no_indexes, only_direct=only_direct, no_default=no_default, no_dev=no_dev
-        )
+    if method is None or method == "pipenv":
+        try:
+            sections = sections or get_requirements_sections(
+                no_indexes=no_indexes, only_direct=only_direct, no_default=no_default, no_dev=no_dev
+            )
+        except FileNotFound:
+            if method is not None:
+                raise
+
+            try:
+                sections = _poetry2pipfile_lock(only_direct=only_direct, no_default=no_default, no_dev=no_dev)
+            except FileNotFound:
+                raise FileNotFound(
+                    "No Pipenv or Poetry files found in {!r} or any parent directory".format(os.getcwd())
+                )
     elif method == "poetry":
         sections = _poetry2pipfile_lock(only_direct=only_direct, no_default=no_default, no_dev=no_dev)
     else:
