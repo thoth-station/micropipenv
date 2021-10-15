@@ -91,6 +91,7 @@ if TYPE_CHECKING:
     from typing import List
     from typing import MutableMapping
     from typing import Optional
+    from typing import Sequence
     from typing import Tuple
     from typing import Union
     from pip._internal.req.req_file import ParsedRequirement
@@ -834,32 +835,40 @@ def install_requirements(pip_bin=_PIP_BIN, *, pip_args=None):  # type: (str, Opt
         _maybe_print_pip_freeze(pip_bin)
 
 
+def method_discovery(ignore_files=None):  # type: (Optional[Sequence[str]]) -> str
+    """Find the best method to use according to dependencies definition."""
+    ignore_files = ignore_files if ignore_files else tuple()
+    files = [f for f in _FILE_METHOD_MAP.keys() if f not in ignore_files]
+    paths = []
+    for file_name in files:
+        try:
+            paths.append(Path(_traverse_up_find_file(file_name)))
+        except FileNotFound:
+            pass
+
+    if not paths:
+        raise FileNotFound(
+            "Failed to find {} "
+            "in the current directory or any of its parent: {!r}".format(" or ".join(files), os.getcwd())
+        )
+
+    _LOGGER.debug("Dependencies definitions found: %s", paths)
+    # The longest path means that we are as close to CWD as possible.
+    # Sorting is also stable which means that two paths with the same
+    # lenght will have the same order when sorted which keeps priorities
+    # from _FILE_METHOS_MAP.
+    longest_path = sorted(paths, key=lambda p: len(p.parts), reverse=True)[0]
+    _LOGGER.debug("Choosen definition: %s", str(longest_path))
+
+    return _FILE_METHOD_MAP[longest_path.name]
+
+
 def install(
     method=None, *, pip_bin=_PIP_BIN, deploy=False, dev=False, pip_args=None
 ):  # type: (Optional[str], str, bool, bool, Optional[List[str]]) -> None
     """Perform installation of requirements based on the method used."""
     if method is None:
-        paths = []
-        for file_name in _FILE_METHOD_MAP.keys():
-            try:
-                paths.append(Path(_traverse_up_find_file(file_name)))
-            except FileNotFound:
-                pass
-
-        if not paths:
-            raise FileNotFound(
-                "Failed to find Pipfile.lock, poetry.lock or requirements.txt "
-                "in the current directory or any of its parent: {}".format(os.getcwd())
-            )
-
-        _LOGGER.debug("Dependencies definitions found: %s", paths)
-        # The longest path means that we are as close to CWD as possible.
-        # Sorting is also stable which means that two paths with the same
-        # lenght will have the same order when sorted which keeps priorities
-        # from _FILE_METHOS_MAP.
-        longest_path = sorted(paths, key=lambda p: len(p.parts), reverse=True)[0]
-        _LOGGER.debug("Choosen definition: %s", str(longest_path))
-        method = _FILE_METHOD_MAP[longest_path.name]
+        method = method_discovery()
 
     if method == "requirements":
         if deploy:
@@ -1100,21 +1109,13 @@ def requirements(
     no_comments=False,
 ):  # type: (Optional[str], Optional[Dict[str, Any]], bool, bool, bool, bool, bool, bool, bool) -> None
     """Show requirements of an application, the output generated is compatible with pip-tools."""
-    if method is None or method == "pipenv":
-        try:
-            sections = sections or get_requirements_sections(
-                no_indexes=no_indexes, only_direct=only_direct, no_default=no_default, no_dev=no_dev
-            )
-        except FileNotFound:
-            if method is not None:
-                raise
+    if method is None:
+        method = method_discovery(ignore_files=("requirements.txt",))
 
-            try:
-                sections = _poetry2pipfile_lock(only_direct=only_direct, no_default=no_default, no_dev=no_dev)
-            except FileNotFound:
-                raise FileNotFound(
-                    "No Pipenv or Poetry files found in {!r} or any parent directory".format(os.getcwd())
-                )
+    if method == "pipenv":
+        sections = sections or get_requirements_sections(
+            no_indexes=no_indexes, only_direct=only_direct, no_default=no_default, no_dev=no_dev
+        )
     elif method == "poetry":
         sections = _poetry2pipfile_lock(only_direct=only_direct, no_default=no_default, no_dev=no_dev)
     else:

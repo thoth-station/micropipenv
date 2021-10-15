@@ -26,6 +26,7 @@ from contextlib import redirect_stdout
 import flexmock
 import os
 import pytest
+import re
 import shutil
 import subprocess
 import json
@@ -788,7 +789,12 @@ def test_requirements_autodiscovery_not_found(tmp_path):
         with pytest.raises(micropipenv.FileNotFound):
             micropipenv._traverse_up_find_file("pyproject.toml")
 
-        with pytest.raises(micropipenv.FileNotFound, match=f"No Pipenv or Poetry files found in {str(tmp_path)!r}"):
+        with pytest.raises(
+            micropipenv.FileNotFound,
+            match=re.escape(
+                f"Failed to find Pipfile.lock or poetry.lock in the current directory or any of its parent: {str(tmp_path)!r}"
+            ),
+        ):
             micropipenv.requirements()
 
 
