@@ -246,7 +246,7 @@ def test_install_pip(venv):
     work_dir = os.path.join(_DATA_DIR, "install", "requirements")
     with cwd(work_dir):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
-        assert str(venv.get_version("requests")) == "1.0.0"
+        assert str(venv.get_version("requests")) == "2.22.0"
 
 
 @pytest.mark.online
@@ -332,7 +332,7 @@ def test_install_pip_print_freeze(venv):
     with cwd(work_dir):
         flexmock(micropipenv).should_receive("_maybe_print_pip_freeze").once()
         micropipenv.install_requirements(get_pip_path(venv))
-        assert str(venv.get_version("requests")) == "1.0.0"
+        assert str(venv.get_version("requests")) == "2.22.0"
 
 
 def test_install_pip_svn(venv):
@@ -412,7 +412,7 @@ def test_install_pipenv_iter_index(venv):
     """Test triggering multiple installations if index is not explicitly set to one."""
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_iter_index")):
         micropipenv.install_pipenv(get_pip_path(venv), deploy=False)
-        assert str(venv.get_version("requests")) == "1.0.0"
+        assert str(venv.get_version("requests")) == "2.22.0"
 
 
 def test_parse_requirements2pipfile_lock():
