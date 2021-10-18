@@ -2,4 +2,4 @@
 --extra-index-url https //pypi.python.org/simple
 
 # No hashes, raw pip method is used.
-requests==1.0.0
+requests==2.22.0
