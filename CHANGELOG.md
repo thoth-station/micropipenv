@@ -1,5 +1,12 @@
 # Changelog for Thoth's micropipenv
 
+## [1.1.3] - 2021-October-20 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Perform method discovery for requirements sub-command as documented
+  Fix thanks to @frenzymadness, issue reported by @hanjos
+
 ## [1.1.2] - 2021-October-05 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
