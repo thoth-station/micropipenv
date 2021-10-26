@@ -701,6 +701,7 @@ def test_parse_requirements2pipfile_lock_not_locked():
         "poetry_markers_order",
         "poetry_markers_transitive_deps",
         "poetry_markers_skip",
+        "poetry_source_directory",
     ),
 )
 def test_parse_poetry2pipfile_lock(directory, options, expected_file):
