@@ -703,11 +703,15 @@ def _poetry2pipfile_lock(
             requirement["markers"] = entry["marker"]
 
         if "source" in entry:
-            if entry["source"]["type"] != "git":
-                raise NotSupportedError("micropipenv supports Git VCS, got {} instead".format(entry["source"]["type"]))
-
-            requirement["git"] = entry["source"]["url"]
-            requirement["ref"] = entry["source"]["reference"]
+            if entry["source"]["type"] == "git":
+                requirement["git"] = entry["source"]["url"]
+                requirement["ref"] = entry["source"]["reference"]
+            elif entry["source"]["type"] == "directory":
+                requirement["path"] = entry["source"]["url"]
+            else:
+                raise NotSupportedError(
+                    "micropipenv supports Git VCS or directories, got {} instead".format(entry["source"]["type"])
+                )
 
         # Poetry does not store information about extras in poetry.lock
         # (directly).  It stores extras used for direct dependencies in
