@@ -731,7 +731,7 @@ def _poetry2pipfile_lock(
             # If there are no additional markers, we have to have a record
             # that the dependency has to be installed unconditionaly and that
             # we have to skip all other additional markers.
-            if dependency_name not in pyproject_poetry_section["dependencies"]:
+            if dependency_name not in pyproject_poetry_section.get("dependencies", {}):
                 if isinstance(dependency_info, dict) and "markers" in dependency_info:
                     additional_markers[normalize_package_name(dependency_name)].append(dependency_info["markers"])
                 else:
@@ -975,9 +975,15 @@ def _get_package_entry_str(
             result += "@{}".format(info["ref"])
         result += "#egg={}\n".format(package_name)
         return result
+    if "path" in info:
+        if "/" not in info["path"] and not info["path"].startswith("."):
+            # Assume a relative path
+            info["path"] = "./{}".format(info["path"])
 
     if info.get("editable", False):
         result = "--editable {}".format(info.get("path", "."))
+    elif info.get("path", False):
+        result = info["path"]
     else:
         result = package_name
 
@@ -987,7 +993,7 @@ def _get_package_entry_str(
     if info.get("extras"):
         result += "[{}]".format(",".join(info["extras"]))
 
-    if not no_versions and info.get("version") and info["version"] != "*":
+    if not no_versions and info.get("version") and info["version"] != "*" and not info.get("path"):
         result += info["version"]
 
     if info.get("markers"):
