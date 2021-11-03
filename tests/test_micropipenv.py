@@ -198,6 +198,42 @@ def test_install_poetry_vcs(venv):
 
 
 @pytest.mark.online
+def test_install_poetry_directory(venv):
+    """Test invoking installation using information from a Poetry project, a directory source is used."""
+    cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
+    venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    work_dir = os.path.join(_DATA_DIR, "install", "poetry_directory")
+    with cwd(work_dir):
+        if PIP_VERSION is not None and PIP_VERSION.release < (19, 0, 0):
+            # Older versions of pip need a setup.py file. Newer versions will remove it if found.
+            with open("testproject/setup.py", "w") as setupfile:
+                setupfile.write("from setuptools import setup; setup()\n")
+        subprocess.run(cmd, check=True, env=get_updated_env(venv))
+        assert str(venv.get_version("testproject")) == "0.1.0"
+        assert str(venv.get_version("python-json-logger")) == "0.1.11"
+
+        check_generated_pipfile_lock(os.path.join(work_dir, "Pipfile.lock"), os.path.join(work_dir, "_Pipfile.lock"))
+
+
+@pytest.mark.online
+@pytest.mark.skipif(
+    PIP_VERSION is not None and PIP_VERSION.release < (19, 0, 0),
+    reason="PEP 517 support was added in pip 19",
+)
+def test_install_poetry_directory_poetry(venv):
+    """Test invoking installation using information from a Poetry project, a Poetry project is used as a directory source."""
+    cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
+    venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    work_dir = os.path.join(_DATA_DIR, "install", "poetry_directory_poetry")
+    with cwd(work_dir):
+        subprocess.run(cmd, check=True, env=get_updated_env(venv))
+        assert str(venv.get_version("testproject")) == "0.1.0"
+        assert str(venv.get_version("python-json-logger")) == "0.1.11"
+
+        check_generated_pipfile_lock(os.path.join(work_dir, "Pipfile.lock"), os.path.join(work_dir, "_Pipfile.lock"))
+
+
+@pytest.mark.online
 def test_install_pipenv_env_vars(venv):
     """Test installation using enviroment variables in source URL."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
