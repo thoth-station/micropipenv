@@ -23,7 +23,7 @@ import glob
 import sys
 from contextlib import contextmanager
 from contextlib import redirect_stdout
-import flexmock
+from flexmock import flexmock
 import os
 import pytest
 import re
