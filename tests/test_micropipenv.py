@@ -1015,3 +1015,19 @@ def test_check_pip_version_incompatible(raise_on_incompatible):
 def test_normalize_package_name(name, expected):
     """Test package name normalization."""
     assert micropipenv.normalize_package_name(name) == expected
+
+
+@pytest.mark.parametrize(
+    ("info", "expected"),
+    (
+        ({"path": "."}, "."),
+        ({"path": "file:///path/to/package"}, "file:///path/to/package"),
+        ({"path": "/path/to/package"}, "/path/to/package"),
+        ({"path": "./path/to/package"}, "./path/to/package"),
+        ({"path": "package"}, "./package"),
+    ),
+)
+def test_get_package_entry_str(info, expected):
+    """Test possible formats of the "path" option."""
+    result = micropipenv._get_package_entry_str("testpackage", info).strip()
+    assert result == expected

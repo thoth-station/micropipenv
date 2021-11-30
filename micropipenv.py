@@ -976,6 +976,12 @@ def _get_package_entry_str(
         result += "#egg={}\n".format(package_name)
         return result
     if "path" in info:
+        # Path formats we want to support:
+        # - "file:///path/to/project"
+        # - "/path/to/project"
+        # - "./path/to/project"
+        # - "project" (== "./project")
+        # - "."
         if "/" not in info["path"] and not info["path"].startswith("."):
             # Assume a relative path
             info["path"] = "./{}".format(info["path"])
