@@ -76,7 +76,7 @@ try:
         except ImportError:
             from pip.index import PackageFinder  # type: ignore
 except Exception:
-    _LOGGER.error(f"Check you pip version, supported pip versions: {_SUPPORTED_PIP_STR}")
+    _LOGGER.error("Check your pip version, supported pip versions: %s", _SUPPORTED_PIP_STR)
     raise
 
 try:
