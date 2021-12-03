@@ -658,7 +658,7 @@ def _poetry2pipfile_lock(
         "Warning: Currently, Micropipenv is not able to parse complex Python version specifications used by Poetry. "
         f"Desired version: {wanted_python_version}, current version: {current_python_version}."
     )
-    level = "warn" if deploy else "debug"
+    level = "warning" if deploy else "debug"
     getattr(_LOGGER, level)(message)
 
     pyproject_poetry_section = pyproject_toml.get("tool", {}).get("poetry", {})
