@@ -640,10 +640,26 @@ def _translate_poetry_dependency(info):  # type: (str) -> str
 
 
 def _poetry2pipfile_lock(
-    only_direct=False, no_default=False, no_dev=False
-):  # type: (bool, bool, bool) -> Dict[str, Any]
+    only_direct=False,
+    no_default=False,
+    no_dev=False,
+    deploy=False,
+):  # type: (bool, bool, bool, bool) -> Dict[str, Any]
     """Convert Poetry files to Pipfile.lock as Pipenv would produce."""
     poetry_lock, pyproject_toml = _read_poetry()
+
+    # If deploy is specified, show a message about the lack of Python versions
+    # parsing capabilities in Micropipenv.
+    # TODO: Implement or use external parser for Python versions in Poetry specification.
+    # See for details: https://github.com/thoth-station/micropipenv/issues/187
+    current_python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+    wanted_python_version = poetry_lock["metadata"]["python-versions"]
+    message = (
+        "Warning: Currently, Micropipenv is not able to parse complex Python version specifications used by Poetry. "
+        f"Desired version: {wanted_python_version}, current version: {current_python_version}."
+    )
+    level = "warn" if deploy else "debug"
+    getattr(_LOGGER, level)(message)
 
     pyproject_poetry_section = pyproject_toml.get("tool", {}).get("poetry", {})
 
@@ -680,7 +696,7 @@ def _poetry2pipfile_lock(
                 "hash": {"sha256": poetry_lock["metadata"]["content-hash"]},
                 "pipfile-spec": 6,
                 "sources": sources,
-                "requires": {"python_version": "{}.{}".format(sys.version_info.major, sys.version_info.minor)},
+                "requires": {"python_version": current_python_version},
             },
             "default": default,
             "develop": develop,
@@ -800,10 +816,12 @@ def _poetry2pipfile_lock(
     }
 
 
-def install_poetry(pip_bin=_PIP_BIN, *, dev=False, pip_args=None):  # type: (str, bool, Optional[List[str]]) -> None
+def install_poetry(
+    pip_bin=_PIP_BIN, *, deploy=False, dev=False, pip_args=None
+):  # type: (str, bool, bool, Optional[List[str]]) -> None
     """Install requirements from poetry.lock."""
     try:
-        pipfile_lock = _poetry2pipfile_lock()
+        pipfile_lock = _poetry2pipfile_lock(deploy=deploy)
     except KeyError as exc:
         raise PoetryError("Failed to parse poetry.lock and pyproject.toml: {}".format(str(exc))) from exc
     install_pipenv(pip_bin, pipfile_lock=pipfile_lock, pip_args=pip_args, dev=dev, deploy=False)
@@ -887,10 +905,7 @@ def install(
         install_pipenv(pip_bin, deploy=deploy, dev=dev, pip_args=pip_args)
         return
     elif method == "poetry":
-        if deploy:
-            _LOGGER.debug("Discarding deploy flag when poetry.lock is used")
-
-        install_poetry(pip_bin, pip_args=pip_args, dev=dev)
+        install_poetry(pip_bin, pip_args=pip_args, deploy=deploy, dev=dev)
         return
 
     raise MicropipenvException("Unhandled method for installing requirements: {}".format(method))
