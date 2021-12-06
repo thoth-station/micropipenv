@@ -31,9 +31,7 @@ jobs:
           py36-pip193-toml,
           py36-pip203-toml,
           py36-pip213-toml,
-          py36-piplatest-toml,
           py36-pip90-pytoml,
-          py36-piplatest-pytoml,
           py37-pip90-toml,
           py37-pip192-toml,
           py37-pip193-toml,
@@ -71,6 +69,12 @@ jobs:
           py310-pipgit-pytoml,
           py310-piplatest-tomli,
           py310-pipgit-tomli,
+          py311-pip192,
+          py311-pip193,
+          py311-pip203,
+          py311-pip213,
+          py311-piplatest,
+          py311-pipgit,
           mypy,
         ]
 
