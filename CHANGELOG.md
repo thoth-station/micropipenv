@@ -1,5 +1,19 @@
 # Changelog for Thoth's micropipenv
 
+## [1.2.0] - 2021-December-06 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* micropipenv is no longer tested with Python 3.6 and development pip
+  Contribution thanks to @frenzymadness
+
+* Support directory-based dependencies
+  Contribution thanks to @abompard
+
+* micropipenv warns users if they use Poetry lockfiles and Python
+  version is not checked by micropipenv
+  Contribution thanks to @frenzymadness
+
 ## [1.1.3] - 2021-October-20 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
