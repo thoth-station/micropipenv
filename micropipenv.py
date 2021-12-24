@@ -28,7 +28,7 @@ dependencies using raw pip. The virtual environment is not created, but one can
 issue `python3 -m venv venv/ && . venv/bin/activate` to create one.
 """
 
-__version__ = "1.2.0"
+__version__ = "1.1.3"
 __author__ = "Fridolin Pokorny <fridex.devel@gmail.com>"
 __title__ = "micropipenv"
 
@@ -76,7 +76,7 @@ try:
         except ImportError:
             from pip.index import PackageFinder  # type: ignore
 except Exception:
-    _LOGGER.error("Check your pip version, supported pip versions: %s", _SUPPORTED_PIP_STR)
+    _LOGGER.error(f"Check you pip version, supported pip versions: {_SUPPORTED_PIP_STR}")
     raise
 
 try:
@@ -640,34 +640,19 @@ def _translate_poetry_dependency(info):  # type: (str) -> str
 
 
 def _poetry2pipfile_lock(
-    only_direct=False,
-    no_default=False,
-    no_dev=False,
-    deploy=False,
-):  # type: (bool, bool, bool, bool) -> Dict[str, Any]
+    only_direct=False, no_default=False, no_dev=False
+):  # type: (bool, bool, bool) -> Dict[str, Any]
     """Convert Poetry files to Pipfile.lock as Pipenv would produce."""
     poetry_lock, pyproject_toml = _read_poetry()
 
-    # If deploy is specified, show a message about the lack of Python versions
-    # parsing capabilities in Micropipenv.
-    # TODO: Implement or use external parser for Python versions in Poetry specification.
-    # See for details: https://github.com/thoth-station/micropipenv/issues/187
-    current_python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
-    wanted_python_version = poetry_lock["metadata"]["python-versions"]
-    message = (
-        "Warning: Currently, Micropipenv is not able to parse complex Python version specifications used by Poetry. "
-        f"Desired version: {wanted_python_version}, current version: {current_python_version}."
-    )
-    level = "warning" if deploy else "debug"
-    getattr(_LOGGER, level)(message)
-
     pyproject_poetry_section = pyproject_toml.get("tool", {}).get("poetry", {})
+
+    pyproject_poetry_groups =  pyproject_toml.get("tool", {}).get("poetry", {}).get("group", {})
 
     sources = []
     has_default = False  # If default flag is set, it disallows PyPI.
-    for item in pyproject_poetry_section.get("source", []):
+    for item in pyproject_poetry_section.get("source", []): # This works for any private packages
         sources.append({"name": item["name"], "url": item["url"], "verify_ssl": True})
-
         has_default = has_default or item.get("default", False)
 
     for index_url in reversed(_DEFAULT_INDEX_URLS) if not has_default else []:
@@ -686,17 +671,31 @@ def _poetry2pipfile_lock(
         if not no_default:
             for dependency_name, info in pyproject_poetry_section.get("dependencies", {}).items():
                 default[dependency_name] = _translate_poetry_dependency(info)
+            if pyproject_poetry_groups.items():
+                for group, group_value in pyproject_poetry_groups.items():
+                    if group != "dev":
+                        for dependency_name, info in group_value.get("dependencies", {}).items():
+                            default[dependency_name] = _translate_poetry_dependency(info)
 
         if not no_dev:
             for dependency_name, info in pyproject_poetry_section.get("dev-dependencies", {}).items():
                 develop[dependency_name] = _translate_poetry_dependency(info)
+            if pyproject_poetry_groups.items():
+                for group, group_value in pyproject_poetry_groups.items():
+                    if group == "dev":
+                        for dependency_name, info in group_value.get("dependencies", {}).items():
+                            develop[dependency_name] = _translate_poetry_dependency(info)
+                    if group.get("dev-dependencies", {}).items():
+                        for dependency_name, info in group_value.get("dev-dependencies", {}).items():
+                                develop[dependency_name] = _translate_poetry_dependency(info)
+
 
         return {
             "_meta": {
                 "hash": {"sha256": poetry_lock["metadata"]["content-hash"]},
                 "pipfile-spec": 6,
                 "sources": sources,
-                "requires": {"python_version": current_python_version},
+                "requires": {"python_version": "{}.{}".format(sys.version_info.major, sys.version_info.minor)},
             },
             "default": default,
             "develop": develop,
@@ -719,15 +718,11 @@ def _poetry2pipfile_lock(
             requirement["markers"] = entry["marker"]
 
         if "source" in entry:
-            if entry["source"]["type"] == "git":
-                requirement["git"] = entry["source"]["url"]
-                requirement["ref"] = entry["source"]["reference"]
-            elif entry["source"]["type"] == "directory":
-                requirement["path"] = entry["source"]["url"]
-            else:
-                raise NotSupportedError(
-                    "micropipenv supports Git VCS or directories, got {} instead".format(entry["source"]["type"])
-                )
+            if entry["source"]["type"] != "git":
+                raise NotSupportedError("micropipenv supports Git VCS, got {} instead".format(entry["source"]["type"]))
+
+            requirement["git"] = entry["source"]["url"]
+            requirement["ref"] = entry["source"]["reference"]
 
         # Poetry does not store information about extras in poetry.lock
         # (directly).  It stores extras used for direct dependencies in
@@ -747,7 +742,7 @@ def _poetry2pipfile_lock(
             # If there are no additional markers, we have to have a record
             # that the dependency has to be installed unconditionaly and that
             # we have to skip all other additional markers.
-            if dependency_name not in pyproject_poetry_section.get("dependencies", {}):
+            if dependency_name not in pyproject_poetry_section["dependencies"] and dependency_name not in pyproject_poetry_groups.items():
                 if isinstance(dependency_info, dict) and "markers" in dependency_info:
                     additional_markers[normalize_package_name(dependency_name)].append(dependency_info["markers"])
                 else:
@@ -816,12 +811,10 @@ def _poetry2pipfile_lock(
     }
 
 
-def install_poetry(
-    pip_bin=_PIP_BIN, *, deploy=False, dev=False, pip_args=None
-):  # type: (str, bool, bool, Optional[List[str]]) -> None
+def install_poetry(pip_bin=_PIP_BIN, *, dev=False, pip_args=None):  # type: (str, bool, Optional[List[str]]) -> None
     """Install requirements from poetry.lock."""
     try:
-        pipfile_lock = _poetry2pipfile_lock(deploy=deploy)
+        pipfile_lock = _poetry2pipfile_lock()
     except KeyError as exc:
         raise PoetryError("Failed to parse poetry.lock and pyproject.toml: {}".format(str(exc))) from exc
     install_pipenv(pip_bin, pipfile_lock=pipfile_lock, pip_args=pip_args, dev=dev, deploy=False)
@@ -905,7 +898,10 @@ def install(
         install_pipenv(pip_bin, deploy=deploy, dev=dev, pip_args=pip_args)
         return
     elif method == "poetry":
-        install_poetry(pip_bin, pip_args=pip_args, deploy=deploy, dev=dev)
+        if deploy:
+            _LOGGER.debug("Discarding deploy flag when poetry.lock is used")
+
+        install_poetry(pip_bin, pip_args=pip_args, dev=dev)
         return
 
     raise MicropipenvException("Unhandled method for installing requirements: {}".format(method))
@@ -990,21 +986,9 @@ def _get_package_entry_str(
             result += "@{}".format(info["ref"])
         result += "#egg={}\n".format(package_name)
         return result
-    if "path" in info:
-        # Path formats we want to support:
-        # - "file:///path/to/project"
-        # - "/path/to/project"
-        # - "./path/to/project"
-        # - "project" (== "./project")
-        # - "."
-        if "/" not in info["path"] and not info["path"].startswith("."):
-            # Assume a relative path
-            info["path"] = "./{}".format(info["path"])
 
     if info.get("editable", False):
         result = "--editable {}".format(info.get("path", "."))
-    elif info.get("path", False):
-        result = info["path"]
     else:
         result = package_name
 
@@ -1014,7 +998,7 @@ def _get_package_entry_str(
     if info.get("extras"):
         result += "[{}]".format(",".join(info["extras"]))
 
-    if not no_versions and info.get("version") and info["version"] != "*" and not info.get("path"):
+    if not no_versions and info.get("version") and info["version"] != "*":
         result += info["version"]
 
     if info.get("markers"):
