@@ -676,6 +676,8 @@ def _poetry2pipfile_lock(
 
     pyproject_poetry_section = pyproject_toml.get("tool", {}).get("poetry", {})
 
+    pyproject_poetry_groups = pyproject_toml.get("tool", {}).get("poetry", {}).get("group", {})
+
     sources = []
     has_default = False  # If default flag is set, it disallows PyPI.
     for item in pyproject_poetry_section.get("source", []):
@@ -695,14 +697,26 @@ def _poetry2pipfile_lock(
     default: Dict[str, Any] = {}
     develop: Dict[str, Any] = {}
 
-    if only_direct:
-        if not no_default:
-            for dependency_name, info in pyproject_poetry_section.get("dependencies", {}).items():
-                default[dependency_name] = _translate_poetry_dependency(info)
+    if not no_default:
+        for dependency_name, info in pyproject_poetry_section.get("dependencies", {}).items():
+            default[dependency_name] = _translate_poetry_dependency(info)
+        if pyproject_poetry_groups.items():
+            for group, group_value in pyproject_poetry_groups.items():
+                if group != "dev":
+                    for dependency_name, info in group_value.get("dependencies", {}).items():
+                        default[dependency_name] = _translate_poetry_dependency(info)
 
-        if not no_dev:
-            for dependency_name, info in pyproject_poetry_section.get("dev-dependencies", {}).items():
-                develop[dependency_name] = _translate_poetry_dependency(info)
+    if not no_dev:
+        for dependency_name, info in pyproject_poetry_section.get("dev-dependencies", {}).items():
+            develop[dependency_name] = _translate_poetry_dependency(info)
+        if pyproject_poetry_groups.items():
+            for group, group_value in pyproject_poetry_groups.items():
+                if group == "dev":
+                    for dependency_name, info in group_value.get("dependencies", {}).items():
+                        develop[dependency_name] = _translate_poetry_dependency(info)
+                if group.get("dev-dependencies", {}).items():
+                    for dependency_name, info in group_value.get("dev-dependencies", {}).items():
+                        develop[dependency_name] = _translate_poetry_dependency(info)
 
         return {
             "_meta": {
