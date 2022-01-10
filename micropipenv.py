@@ -185,7 +185,7 @@ def _check_pip_version(raise_on_incompatible=False):  # type: (bool) -> bool
 
 def _import_toml():  # type: () -> Any
     """Import and return toml or pytoml module (in this order)."""
-    for module in "toml", "pytoml":
+    for module in "toml", "pytoml", "tomli":
         try:
             return import_module(module)
         except ImportError:
