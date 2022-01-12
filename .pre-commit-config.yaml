@@ -29,6 +29,7 @@ repos:
     rev: v3.3.0
     hooks:
       - id: check-toml
+        exclude: 'tests/data/install/invalid_*'
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace

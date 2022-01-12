@@ -452,6 +452,26 @@ def test_install_pipenv_iter_index(venv):
         assert str(venv.get_version("requests")) == "2.22.0"
 
 
+@pytest.mark.parametrize(
+    "directory, filename, method",
+    [
+        ["invalid_pipfile", "Pipfile", "pipenv"],
+        ["invalid_poetry_lock", "poetry.lock", "poetry"],
+        ["invalid_pyproject_toml", "pyproject.toml", "poetry"],
+    ],
+)
+def test_install_invalid_toml_file(venv, directory, filename, method):
+    """Test exception when a Pipfile is not a valid TOML."""
+    venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--deploy", "--method", method]
+    work_dir = os.path.join(_DATA_DIR, "install", directory)
+    with cwd(work_dir):
+        with pytest.raises(subprocess.CalledProcessError) as exception:
+            subprocess.check_output(cmd, env=get_updated_env(venv), stderr=subprocess.PIPE, universal_newlines=True)
+
+    assert f"FileReadError: Failed to parse {filename}: " in exception.value.stderr
+
+
 def test_parse_requirements2pipfile_lock():
     """Test parsing of requirements.txt into their Pipfile.lock representation."""
     work_dir = os.path.join(_DATA_DIR, "parse", "pip-tools")
