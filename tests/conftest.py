@@ -31,6 +31,8 @@ from packaging.version import Version
 # Version of pip to test micropipenv with
 # the default is the pip wheel bundled in virtualenv package
 MICROPIPENV_TEST_PIP_VERSION = os.getenv("MICROPIPENV_TEST_PIP_VERSION")
+# For some very old pips, we have to limit also setuptools version
+MICROPIPENV_TEST_SETUPTOOLS_VERSION = os.getenv("MICROPIPENV_TEST_SETUPTOOLS_VERSION")
 # pip version used in tests, assigned using pytest_configure
 PIP_VERSION = None
 
@@ -45,6 +47,9 @@ def _venv_install_pip(venv):
             venv.install("git+https://github.com/pypa/pip.git")
         else:
             venv.install(f"pip{MICROPIPENV_TEST_PIP_VERSION}")
+
+    if MICROPIPENV_TEST_SETUPTOOLS_VERSION is not None:
+        venv.install(f"setuptools{MICROPIPENV_TEST_SETUPTOOLS_VERSION}")
 
 
 def pytest_configure(config):
