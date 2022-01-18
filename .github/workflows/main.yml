@@ -69,6 +69,8 @@ jobs:
           py310-pipgit-toml,
           py310-piplatest-pytoml,
           py310-pipgit-pytoml,
+          py310-piplatest-tomli,
+          py310-pipgit-tomli,
           mypy,
         ]
 

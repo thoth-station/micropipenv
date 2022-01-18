@@ -185,9 +185,22 @@ def _check_pip_version(raise_on_incompatible=False):  # type: (bool) -> bool
 
 def _import_toml():  # type: () -> Any
     """Import and return toml or pytoml module (in this order)."""
-    for module in "toml", "pytoml":
+    exception_names = {
+        "toml": "TomlDecodeError",
+        "pytoml": "TomlError",
+        "tomli": "TOMLDecodeError",
+    }
+
+    # Only tomli requires TOML files to be opened
+    # in binary mode: https://github.com/hukkin/tomli#parse-a-toml-file
+    open_kwargs = defaultdict(dict)  # type: Dict[str, Dict[str, str]]
+    open_kwargs["tomli"] = {"mode": "rb"}
+
+    for module_name in "toml", "pytoml", "tomli":
         try:
-            return import_module(module)
+            module = import_module(module_name)
+            exception = getattr(module, exception_names[module_name])
+            return module, exception, open_kwargs[module_name]
         except ImportError:
             pass
     else:
@@ -232,14 +245,14 @@ def _read_pipfile_lock():  # type: () -> Any
 
 def _read_pipfile():  # type: () -> Any
     """Find and read Pipfile."""
-    toml = _import_toml()
+    toml, toml_exception, open_kwargs = _import_toml()
 
     pipfile_path = _traverse_up_find_file("Pipfile")
 
     try:
-        with open(pipfile_path) as input_file:
+        with open(pipfile_path, **open_kwargs) as input_file:
             return toml.load(input_file)
-    except toml.TomlDecodeError as exc:
+    except toml_exception as exc:
         raise FileReadError("Failed to parse Pipfile: {}".format(str(exc))) from exc
     except Exception as exc:
         raise FileReadError(str(exc)) from exc
@@ -247,23 +260,23 @@ def _read_pipfile():  # type: () -> Any
 
 def _read_poetry():  # type: () -> Tuple[MutableMapping[str, Any], MutableMapping[str, Any]]
     """Find and read poetry.lock and pyproject.toml."""
-    toml = _import_toml()
+    toml, toml_exception, open_kwargs = _import_toml()
 
     poetry_lock_path = _traverse_up_find_file("poetry.lock")
     pyproject_toml_path = _traverse_up_find_file("pyproject.toml")
 
     try:
-        with open(poetry_lock_path) as input_file:
+        with open(poetry_lock_path, **open_kwargs) as input_file:
             poetry_lock = toml.load(input_file)
-    except toml.TomlDecodeError as exc:
+    except toml_exception as exc:
         raise FileReadError("Failed to parse poetry.lock: {}".format(str(exc))) from exc
     except Exception as exc:
         raise FileReadError(str(exc)) from exc
 
     try:
-        with open(pyproject_toml_path) as input_file:
+        with open(pyproject_toml_path, **open_kwargs) as input_file:
             pyproject_toml = toml.load(input_file)
-    except toml.TomlDecodeError as exc:
+    except toml_exception as exc:
         raise FileReadError("Failed to parse pyproject.toml: {}".format(str(exc))) from exc
     except Exception as exc:
         raise FileReadError(str(exc)) from exc

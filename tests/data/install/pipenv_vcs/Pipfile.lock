@@ -15,7 +15,7 @@
     },
     "default": {
         "daiquiri": {
-            "git": "git://github.com/jd/daiquiri",
+            "git": "https://github.com/jd/daiquiri",
             "ref": "66933d792171e2c1362ce036b797da56c9b0ea45",
             "version": "==2.0.0"
         }
