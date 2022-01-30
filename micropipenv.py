@@ -48,7 +48,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 _LOGGER = logging.getLogger(__title__)
-_SUPPORTED_PIP_STR = ">=9,<=21.3.1"  # Respects requirement in setup.py and latest pip to release date.
+_SUPPORTED_PIP_STR = ">=9,<=22.0.3"  # Respects requirement in setup.py and latest pip to release date.
 
 try:
     from pip import __version__ as pip_version
@@ -410,9 +410,15 @@ def _instantiate_package_finder(pip_session):  # type: (PipSession) -> PackageFi
                 )
 
         link_collector = LinkCollector(session=pip_session, search_scope=search_scope)
+        additional_kwargs = {}
+        # pip 22 deprecates vendored html5lib and uses stdlib html.parser
+        # https://pip.pypa.io/en/latest/news/#id19
+        if Version(pip_version).release >= (22,):
+            additional_kwargs["use_deprecated_html5lib"] = False
         return PackageFinder.create(
             link_collector=link_collector,
             selection_prefs=selection_prefs,
+            **additional_kwargs,  # type: ignore
         )
 
 
