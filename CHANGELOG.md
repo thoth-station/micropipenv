@@ -1,5 +1,14 @@
 # Changelog for Thoth's micropipenv
 
+## [1.2.1] - 2022-February-21 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Test with pip==22.0.3
+
+* Add tomli support
+  Contribution thanks to @frenzymadness
+
 ## [1.2.0] - 2021-December-06 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
