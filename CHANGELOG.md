@@ -4,7 +4,7 @@
 
 ### Added
 
-* Test with pip==20.0.3
+* Test with pip==22.0.3
 
 * Add tomli support
   Contribution thanks to @frenzymadness
