@@ -452,6 +452,7 @@ def test_install_pipenv_iter_index(venv):
         assert str(venv.get_version("requests")) == "2.22.0"
 
 
+@pytest.mark.online
 @pytest.mark.parametrize(
     "directory, filename, method",
     [
