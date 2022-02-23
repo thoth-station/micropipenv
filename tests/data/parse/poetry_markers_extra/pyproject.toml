@@ -1,0 +1,15 @@
+[tool.poetry]
+name = ""
+version = "0.1.0"
+description = ""
+authors = [""]
+
+[tool.poetry.dependencies]
+python = "3.6"
+requests = {version = "==2.27.1", extras = ["use_chardet_on_py3"]}
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

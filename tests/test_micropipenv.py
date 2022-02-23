@@ -234,6 +234,23 @@ def test_install_poetry_directory_poetry(venv):
 
 
 @pytest.mark.online
+def test_install_poetry_complex_example(venv):
+    """Test invoking installation using information from a Poetry project. Involves complex dependencies, extras and markers."""
+    cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
+    venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    work_dir = os.path.join(_DATA_DIR, "install", "poetry_markers_extra")
+    with cwd(work_dir):
+        subprocess.run(cmd, check=True, env=get_updated_env(venv))
+        assert str(venv.get_version("requests")) == "2.27.1"
+        # Dependency defined as requests[use_chardet_on_py3] extra
+        assert venv.get_version_or_none("chardet") is not None
+        # unicodedata2 is provided as charset-normalizer[unicode_backport] but is not specified for installation
+        assert venv.get_version_or_none("unicodedata2") is None
+        # also, requests[socks] or urllib3[socks] should not be installed
+        assert venv.get_version_or_none("PySocks") is None
+
+
+@pytest.mark.online
 def test_install_pipenv_env_vars(venv):
     """Test installation using enviroment variables in source URL."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
@@ -754,6 +771,7 @@ def test_parse_requirements2pipfile_lock_not_locked():
         "poetry",
         "poetry_default_dev_diff",
         "poetry_markers_direct",
+        "poetry_markers_extra",
         "poetry_markers_indirect",
         "poetry_markers_order",
         "poetry_markers_transitive_deps",
