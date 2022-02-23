@@ -71,7 +71,6 @@
     "sha256:14475042e284991034cb48e06f6851428fb14c4dc953acd9be9a5e95c7b6dd7a",
     "sha256:467fbad99067910785144ce333826c71fb0e63a425657295239737f7ecd125f3"
    ],
-   "markers": "(extra == \"format\") or (python_version >= \"3\")",
    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706"
   },
   "importlib-metadata": {
@@ -89,7 +88,6 @@
     "sha256:150f80c5badd02c757da6644852f612f88e8b4bc2f9852dcbf557c8738919686",
     "sha256:5a34b698db1eb79ceac454159d3f7c12a451a91f6334a4f638454327b7a89962"
    ],
-   "markers": "(extra == \"format\")",
    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706"
   },
   "jsonref": {
@@ -245,7 +243,6 @@
     "sha256:10702b1e51e5658843460b189b185c0366d2cf4cff716f13111b0ea9fd2dce53",
     "sha256:d3c4d257a560d544e9826b38bc81db676890c79ab9d7ac92b39c7a253d5ca733"
    ],
-   "markers": "(extra == \"format\")",
    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706"
   },
   "simplejson": {
@@ -313,7 +310,6 @@
    "hashes": [
     "sha256:5cad17bedfc3af57b399db0fed32771f18fc54bbd917e85546088607ac5e1277"
    ],
-   "markers": "(extra == \"format\")",
    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706"
   },
   "swagger-spec-validator": {
@@ -347,7 +343,6 @@
     "sha256:b8cd5d865a25c51ff1218f0c90d0c0781fc64312a49b746b320cf50de1648f6e",
     "sha256:76f360636957d1c976db7466bc71dcb713bb95ac8911944dffc55c01cb516de6"
    ],
-   "markers": "(extra == \"format\")",
    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706"
   },
   "zipp": {
