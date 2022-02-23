@@ -766,8 +766,14 @@ def _poetry2pipfile_lock(
             # If there are no additional markers, we have to have a record
             # that the dependency has to be installed unconditionaly and that
             # we have to skip all other additional markers.
+            # Also, we don't care about "extra" markers which are computed separatedly
+            # and are usually not combined with other markers.
             if dependency_name not in pyproject_poetry_section.get("dependencies", {}):
-                if isinstance(dependency_info, dict) and "markers" in dependency_info:
+                if (
+                    isinstance(dependency_info, dict)
+                    and "markers" in dependency_info
+                    and not dependency_info["markers"].startswith("extra")
+                ):
                     additional_markers[normalize_package_name(dependency_name)].append(dependency_info["markers"])
                 else:
                     additional_markers[normalize_package_name(dependency_name)].append(skip_all_markers)
