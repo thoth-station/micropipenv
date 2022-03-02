@@ -295,6 +295,65 @@ def _compute_pipfile_hash(pipfile):  # type: (Dict[str, Any]) -> str
     return hashlib.sha256(content.encode("utf8")).hexdigest()
 
 
+def _compute_poetry_hash(pyproject):  # type: (MutableMapping[str, Any]) -> str
+    """Compute pyproject.toml hash based on poetry content."""
+    poetry_data = pyproject["tool"]["poetry"]
+    relevant_keys = ["dependencies", "dev-dependencies", "source", "extras"]
+    relevant_content = {key: poetry_data.get(key) for key in relevant_keys}
+
+    return hashlib.sha256(json.dumps(relevant_content, sort_keys=True).encode()).hexdigest()
+
+
+def check_poetry_lockfile(
+    pyproject=None, poetry_lock=None
+):  # type: (Optional[MutableMapping[str, Any]], Optional[MutableMapping[str, Any]]) -> None
+    """Validate that Poetry.lock is up to date with pyproject.toml."""
+    if pyproject is None or poetry_lock is None:
+        poetry_lock, pyproject = _read_poetry()
+    # TODO: Implement or use external parser for Python versions in Poetry specification.
+    # See for details: https://github.com/thoth-station/micropipenv/issues/187
+    current_python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+    wanted_python_version = poetry_lock["metadata"]["python-versions"]
+    message = (
+        "Warning: Currently, Micropipenv is not able to parse complex Python version specifications used by Poetry. "
+        f"Desired version: {wanted_python_version}, current version: {current_python_version}."
+    )
+    _LOGGER.warning(message)
+
+    pyproject_hash = _compute_poetry_hash(pyproject)
+    poetry_lock_hash = poetry_lock["metadata"]["content-hash"]
+
+    if pyproject_hash != poetry_lock_hash:
+        raise HashMismatch(
+            "Poetry.lock hash {!r} does not correspond to hash computed based on "
+            "pyproject.toml {!r}, aborting deployment".format(poetry_lock_hash, pyproject_hash)
+        )
+
+
+def check_pipenv_lockfile(
+    pipfile=None, pipfile_lock=None
+):  # type: (Optional[Dict[str, Any]], Optional[Dict[str, Any]]) -> None
+    """Validate that Pipfile.lock is up to date with Pipfile."""
+    pipfile_lock = pipfile_lock or _read_pipfile_lock()
+    python_version = pipfile_lock["_meta"].get("requires", {}).get("python_version")
+    if python_version is not None:
+        if python_version != "{}.{}".format(sys.version_info.major, sys.version_info.minor):
+            raise PythonVersionMismatch(
+                "Running Python version {}.{}, but Pipfile.lock requires "
+                "Python version {}".format(sys.version_info.major, sys.version_info.minor, python_version)
+            )
+    else:
+        _LOGGER.warning("No Python version requirement in Pipfile.lock found, no Python version check is performed")
+
+    pipfile_lock_hash = pipfile_lock.get("_meta", {}).get("hash", {}).get("sha256")
+    pipfile_hash = _compute_pipfile_hash(pipfile or _read_pipfile())
+    if pipfile_hash != pipfile_lock_hash:
+        raise HashMismatch(
+            "Pipfile.lock hash {!r} does not correspond to hash computed based on "
+            "Pipfile {!r}, aborting deployment".format(pipfile_lock_hash, pipfile_hash)
+        )
+
+
 def install_pipenv(
     pip_bin=_PIP_BIN, pipfile=None, pipfile_lock=None, *, deploy=False, dev=False, pip_args=None
 ):  # type: (str, Optional[Dict[str, Any]], Optional[Dict[str, Any]], bool, bool, Optional[List[str]]) -> None
@@ -304,23 +363,7 @@ def install_pipenv(
 
     sections = get_requirements_sections(pipfile_lock=pipfile_lock, no_dev=not dev)
     if deploy:
-        python_version = pipfile_lock["_meta"].get("requires", {}).get("python_version")
-        if python_version is not None:
-            if python_version != "{}.{}".format(sys.version_info.major, sys.version_info.minor):
-                raise PythonVersionMismatch(
-                    "Running Python version {}.{}, but Pipfile.lock requires "
-                    "Python version {}".format(sys.version_info.major, sys.version_info.minor, python_version)
-                )
-        else:
-            _LOGGER.warning("No Python version requirement in Pipfile.lock found, no Python version check is performed")
-
-        pipfile_lock_hash = pipfile_lock.get("_meta", {}).get("hash", {}).get("sha256")
-        pipfile_hash = _compute_pipfile_hash(pipfile or _read_pipfile())
-        if pipfile_hash != pipfile_lock_hash:
-            raise HashMismatch(
-                "Pipfile.lock hash {!r} does not correspond to hash computed based on "
-                "Pipfile {!r}, aborting deployment".format(pipfile_lock_hash, pipfile_hash)
-            )
+        check_pipenv_lockfile(pipfile, pipfile_lock)
 
     tmp_file = tempfile.NamedTemporaryFile("w", prefix="requirements_micropipenv-", suffix=".txt", delete=False)
     _LOGGER.debug("Using temporary file for storing requirements: %r", tmp_file.name)
@@ -667,18 +710,18 @@ def _poetry2pipfile_lock(
     """Convert Poetry files to Pipfile.lock as Pipenv would produce."""
     poetry_lock, pyproject_toml = _read_poetry()
 
-    # If deploy is specified, show a message about the lack of Python versions
-    # parsing capabilities in Micropipenv.
-    # TODO: Implement or use external parser for Python versions in Poetry specification.
-    # See for details: https://github.com/thoth-station/micropipenv/issues/187
-    current_python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
-    wanted_python_version = poetry_lock["metadata"]["python-versions"]
-    message = (
-        "Warning: Currently, Micropipenv is not able to parse complex Python version specifications used by Poetry. "
-        f"Desired version: {wanted_python_version}, current version: {current_python_version}."
-    )
-    level = "warning" if deploy else "debug"
-    getattr(_LOGGER, level)(message)
+    if deploy:
+        check_poetry_lockfile(pyproject_toml, poetry_lock)
+    else:
+        # TODO: Implement or use external parser for Python versions in Poetry specification.
+        # See for details: https://github.com/thoth-station/micropipenv/issues/187
+        current_python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+        wanted_python_version = poetry_lock["metadata"]["python-versions"]
+        message = (
+            "Warning: Currently, Micropipenv is not able to parse complex Python version specifications used by Poetry. "
+            f"Desired version: {wanted_python_version}, current version: {current_python_version}."
+        )
+        _LOGGER.debug(message)
 
     pyproject_poetry_section = pyproject_toml.get("tool", {}).get("poetry", {})
 
@@ -908,6 +951,24 @@ def method_discovery(ignore_files=None):  # type: (Optional[Sequence[str]]) -> s
     _LOGGER.debug("Choosen definition: %s", str(longest_path))
 
     return _FILE_METHOD_MAP[longest_path.name]
+
+
+def check(method=None):  # type: (Optional[str]) -> None
+    """Check the lockfile to ensure it is up to date with the requirements file."""
+    if method is None:
+        method = method_discovery()
+
+    if method == "pipenv":
+        pipfile = _read_pipfile()
+        pipfile_lock = _read_pipfile_lock()
+        check_pipenv_lockfile(pipfile, pipfile_lock)
+        return
+    elif method == "poetry":
+        poetry_lock, pyproject = _read_poetry()
+        check_poetry_lockfile(pyproject, poetry_lock)
+        return
+
+    raise MicropipenvException("Unhandled method for checking lockfile: {}".format(method))
 
 
 def install(
@@ -1201,6 +1262,15 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
     parser.add_argument("--verbose", action="count", help="Increase verbosity, can be supplied multiple times.")
 
     subparsers = parser.add_subparsers()
+
+    parser_check = subparsers.add_parser("check", help=check.__doc__)
+    parser_check.add_argument(
+        "--method",
+        help="Source of packages for the installation, perform detection if not provided.",
+        choices=["pipenv", "requirements", "poetry"],
+        default=os.getenv("MICROPIPENV_METHOD"),
+    )
+    parser_check.set_defaults(func=check)
 
     parser_install = subparsers.add_parser("install", help=install.__doc__)
     parser_install.add_argument(
