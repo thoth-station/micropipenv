@@ -1072,45 +1072,45 @@ def test_get_package_entry_str(info, expected):
     assert result == expected
 
 
-def test_poetry_lockfile_check():
-    """Test checking poetry lockfile."""
-    with cwd(os.path.join(_DATA_DIR, "check", "poetry")):
-        micropipenv.check_poetry_lockfile()
+def test_poetry_lockfile_verify():
+    """Test verifying poetry lockfile."""
+    with cwd(os.path.join(_DATA_DIR, "verify", "poetry")):
+        micropipenv.verify_poetry_lockfile()
 
 
-def test_poetry_lockfile_check_error_hash():
-    """Test checking poetry lockfile with an out-of-date content hash."""
-    with cwd(os.path.join(_DATA_DIR, "check", "poetry_error_hash")):
+def test_poetry_lockfile_verify_error_hash():
+    """Test verifying poetry lockfile with an out-of-date content hash."""
+    with cwd(os.path.join(_DATA_DIR, "verify", "poetry_error_hash")):
         err_msg = (
             "Poetry.lock hash 'foobar' does not correspond to hash computed based "
             "on pyproject.toml '46444b08fe9dc1a5b346aa11e455aaa41feffd77a377d86037fe55cffb0ec682', "
             "aborting deployment"
         )
         with pytest.raises(micropipenv.HashMismatch, match=err_msg):
-            micropipenv.check_poetry_lockfile()
+            micropipenv.verify_poetry_lockfile()
 
 
-def test_pipenv_lockfile_check(venv):
-    """Test checking Pipenv lockfile."""
-    with cwd(os.path.join(_DATA_DIR, "check", "pipenv")):
-        micropipenv.check_pipenv_lockfile()
+def test_pipenv_lockfile_verify(venv):
+    """Test verifying Pipenv lockfile."""
+    with cwd(os.path.join(_DATA_DIR, "verify", "pipenv")):
+        micropipenv.verify_pipenv_lockfile()
 
 
-def test_pipenv_lockfile_check_error_hash(venv):
-    """Test checking pipenv lockfile with an out-of-date content hash."""
-    with cwd(os.path.join(_DATA_DIR, "check", "pipenv_error_hash")):
+def test_pipenv_lockfile_verify_error_hash(venv):
+    """Test verifying pipenv lockfile with an out-of-date content hash."""
+    with cwd(os.path.join(_DATA_DIR, "verify", "pipenv_error_hash")):
         err_msg = (
             "Pipfile.lock hash 'foobar' does not correspond to hash computed based "
             "on Pipfile '8b8dfe383cda8e22d95623518c911b7d5cf28acb8fccd4b7d8dc67fce444b6d3', "
             "aborting deployment"
         )
         with pytest.raises(micropipenv.HashMismatch, match=err_msg):
-            micropipenv.check_pipenv_lockfile()
+            micropipenv.verify_pipenv_lockfile()
 
 
-def test_pipenv_lockfile_check_error_python():
-    """Test checking pipenv lockfile with a mismatched python version."""
-    with cwd(os.path.join(_DATA_DIR, "check", "pipenv_error_python")):
+def test_pipenv_lockfile_verify_error_python():
+    """Test verifying pipenv lockfile with a mismatched python version."""
+    with cwd(os.path.join(_DATA_DIR, "verify", "pipenv_error_python")):
         err_msg = r"Running Python version \d+.\d+, but Pipfile.lock requires Python version 5.9"
         with pytest.raises(micropipenv.PythonVersionMismatch, match=err_msg):
-            micropipenv.check_pipenv_lockfile()
+            micropipenv.verify_pipenv_lockfile()

@@ -304,7 +304,7 @@ def _compute_poetry_hash(pyproject):  # type: (MutableMapping[str, Any]) -> str
     return hashlib.sha256(json.dumps(relevant_content, sort_keys=True).encode()).hexdigest()
 
 
-def check_poetry_lockfile(
+def verify_poetry_lockfile(
     pyproject=None, poetry_lock=None
 ):  # type: (Optional[MutableMapping[str, Any]], Optional[MutableMapping[str, Any]]) -> None
     """Validate that Poetry.lock is up to date with pyproject.toml."""
@@ -330,7 +330,7 @@ def check_poetry_lockfile(
         )
 
 
-def check_pipenv_lockfile(
+def verify_pipenv_lockfile(
     pipfile=None, pipfile_lock=None
 ):  # type: (Optional[Dict[str, Any]], Optional[Dict[str, Any]]) -> None
     """Validate that Pipfile.lock is up to date with Pipfile."""
@@ -363,7 +363,7 @@ def install_pipenv(
 
     sections = get_requirements_sections(pipfile_lock=pipfile_lock, no_dev=not dev)
     if deploy:
-        check_pipenv_lockfile(pipfile, pipfile_lock)
+        verify_pipenv_lockfile(pipfile, pipfile_lock)
 
     tmp_file = tempfile.NamedTemporaryFile("w", prefix="requirements_micropipenv-", suffix=".txt", delete=False)
     _LOGGER.debug("Using temporary file for storing requirements: %r", tmp_file.name)
@@ -711,7 +711,7 @@ def _poetry2pipfile_lock(
     poetry_lock, pyproject_toml = _read_poetry()
 
     if deploy:
-        check_poetry_lockfile(pyproject_toml, poetry_lock)
+        verify_poetry_lockfile(pyproject_toml, poetry_lock)
     else:
         # TODO: Implement or use external parser for Python versions in Poetry specification.
         # See for details: https://github.com/thoth-station/micropipenv/issues/187
@@ -953,7 +953,7 @@ def method_discovery(ignore_files=None):  # type: (Optional[Sequence[str]]) -> s
     return _FILE_METHOD_MAP[longest_path.name]
 
 
-def check(method=None):  # type: (Optional[str]) -> None
+def verify(method=None):  # type: (Optional[str]) -> None
     """Check the lockfile to ensure it is up to date with the requirements file."""
     if method is None:
         method = method_discovery()
@@ -961,11 +961,11 @@ def check(method=None):  # type: (Optional[str]) -> None
     if method == "pipenv":
         pipfile = _read_pipfile()
         pipfile_lock = _read_pipfile_lock()
-        check_pipenv_lockfile(pipfile, pipfile_lock)
+        verify_pipenv_lockfile(pipfile, pipfile_lock)
         return
     elif method == "poetry":
         poetry_lock, pyproject = _read_poetry()
-        check_poetry_lockfile(pyproject, poetry_lock)
+        verify_poetry_lockfile(pyproject, poetry_lock)
         return
 
     raise MicropipenvException("Unhandled method for checking lockfile: {}".format(method))
@@ -1263,14 +1263,14 @@ def main(argv=None):  # type: (Optional[List[str]]) -> int
 
     subparsers = parser.add_subparsers()
 
-    parser_check = subparsers.add_parser("check", help=check.__doc__)
-    parser_check.add_argument(
+    parser_verify = subparsers.add_parser("verify", help=verify.__doc__)
+    parser_verify.add_argument(
         "--method",
         help="Source of packages for the installation, perform detection if not provided.",
-        choices=["pipenv", "requirements", "poetry"],
+        choices=["pipenv", "poetry"],
         default=os.getenv("MICROPIPENV_METHOD"),
     )
-    parser_check.set_defaults(func=check)
+    parser_verify.set_defaults(func=verify)
 
     parser_install = subparsers.add_parser("install", help=install.__doc__)
     parser_install.add_argument(
