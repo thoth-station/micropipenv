@@ -304,22 +304,33 @@ def _compute_poetry_hash(pyproject):  # type: (MutableMapping[str, Any]) -> str
     return hashlib.sha256(json.dumps(relevant_content, sort_keys=True).encode()).hexdigest()
 
 
-def verify_poetry_lockfile(
-    pyproject=None, poetry_lock=None
-):  # type: (Optional[MutableMapping[str, Any]], Optional[MutableMapping[str, Any]]) -> None
-    """Validate that Poetry.lock is up to date with pyproject.toml."""
-    if pyproject is None or poetry_lock is None:
-        poetry_lock, pyproject = _read_poetry()
+def _get_installed_python_version():  # type: () -> str
+    return "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+
+
+def _validate_poetry_python_version(
+    poetry_lock, current_python, debug=False
+):  # type: (MutableMapping[str, Any], str, bool) -> None
     # TODO: Implement or use external parser for Python versions in Poetry specification.
     # See for details: https://github.com/thoth-station/micropipenv/issues/187
-    current_python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
     wanted_python_version = poetry_lock["metadata"]["python-versions"]
     message = (
         "Warning: Currently, Micropipenv is not able to parse complex Python version specifications used by Poetry. "
-        f"Desired version: {wanted_python_version}, current version: {current_python_version}."
+        f"Desired version: {wanted_python_version}, current version: {current_python}."
     )
-    _LOGGER.warning(message)
+    level = "debug" if debug else "warning"
+    getattr(_LOGGER, level)(message)
 
+
+def verify_poetry_lockfile(
+    pyproject=None, poetry_lock=None, current_python_version=None
+):  # type: (Optional[MutableMapping[str, Any]], Optional[MutableMapping[str, Any]], Optional[str]) -> None
+    """Validate that Poetry.lock is up to date with pyproject.toml."""
+    if pyproject is None or poetry_lock is None:
+        poetry_lock, pyproject = _read_poetry()
+    if current_python_version is None:
+        current_python_version = _get_installed_python_version()
+    _validate_poetry_python_version(poetry_lock, current_python_version)
     pyproject_hash = _compute_poetry_hash(pyproject)
     poetry_lock_hash = poetry_lock["metadata"]["content-hash"]
 
@@ -337,7 +348,7 @@ def verify_pipenv_lockfile(
     pipfile_lock = pipfile_lock or _read_pipfile_lock()
     python_version = pipfile_lock["_meta"].get("requires", {}).get("python_version")
     if python_version is not None:
-        if python_version != "{}.{}".format(sys.version_info.major, sys.version_info.minor):
+        if python_version != _get_installed_python_version():
             raise PythonVersionMismatch(
                 "Running Python version {}.{}, but Pipfile.lock requires "
                 "Python version {}".format(sys.version_info.major, sys.version_info.minor, python_version)
@@ -652,7 +663,7 @@ def _requirements2pipfile_lock(requirements_txt_path=None):  # type: (Optional[s
             "hash": {"sha256": requirements_hash},
             "pipfile-spec": 6,
             "sources": sources,
-            "requires": {"python_version": "{}.{}".format(sys.version_info.major, sys.version_info.minor)},
+            "requires": {"python_version": _get_installed_python_version()},
         },
         "default": result,
         "develop": {},
@@ -710,18 +721,11 @@ def _poetry2pipfile_lock(
     """Convert Poetry files to Pipfile.lock as Pipenv would produce."""
     poetry_lock, pyproject_toml = _read_poetry()
 
+    current_python_version = _get_installed_python_version()
     if deploy:
-        verify_poetry_lockfile(pyproject_toml, poetry_lock)
+        verify_poetry_lockfile(pyproject_toml, poetry_lock, current_python_version)
     else:
-        # TODO: Implement or use external parser for Python versions in Poetry specification.
-        # See for details: https://github.com/thoth-station/micropipenv/issues/187
-        current_python_version = "{}.{}".format(sys.version_info.major, sys.version_info.minor)
-        wanted_python_version = poetry_lock["metadata"]["python-versions"]
-        message = (
-            "Warning: Currently, Micropipenv is not able to parse complex Python version specifications used by Poetry. "
-            f"Desired version: {wanted_python_version}, current version: {current_python_version}."
-        )
-        _LOGGER.debug(message)
+        _validate_poetry_python_version(poetry_lock, current_python_version, debug=True)
 
     pyproject_poetry_section = pyproject_toml.get("tool", {}).get("poetry", {})
 
@@ -877,7 +881,7 @@ def _poetry2pipfile_lock(
             "hash": {"sha256": poetry_lock["metadata"]["content-hash"]},
             "pipfile-spec": 6,
             "sources": sources,
-            "requires": {"python_version": "{}.{}".format(sys.version_info.major, sys.version_info.minor)},
+            "requires": {"python_version": _get_installed_python_version()},
         },
         "default": default,
         "develop": develop,
