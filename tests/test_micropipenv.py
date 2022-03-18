@@ -831,14 +831,21 @@ def test_parse_poetry2pipfile_lock(directory, options, expected_file):
         ("extras_marker", {"no_indexes": True}, "requirements_no_indexes.txt"),
         ("extras_marker", {"no_versions": True}, "requirements_no_versions.txt"),
         ("extras_marker", {"only_direct": True}, "requirements_only_direct.txt"),
+        ("poetry_complex", {"no_comments": True}, "requirements_no_comments.txt"),
+        ("poetry_complex", {"no_default": True}, "requirements_no_default.txt"),
+        ("poetry_complex", {"no_dev": True}, "requirements_no_dev.txt"),
+        ("poetry_complex", {"no_hashes": True}, "requirements_no_hashes.txt"),
+        ("poetry_complex", {"no_indexes": True}, "requirements_no_indexes.txt"),
+        ("poetry_complex", {"no_versions": True}, "requirements_no_versions.txt"),
+        ("poetry_complex", {"only_direct": True}, "requirements_only_direct.txt"),
     ],
 )
 def test_requirements(tmp_path, test, options, expected_file):
     """Test generating requirements out of Pipfile and Pipfile.lock."""
-    shutil.copyfile(os.path.join(_DATA_DIR, "requirements", test, "Pipfile"), os.path.join(tmp_path, "Pipfile"))
-    shutil.copyfile(
-        os.path.join(_DATA_DIR, "requirements", test, "Pipfile.lock"), os.path.join(tmp_path, "Pipfile.lock")
-    )
+    source_path = os.path.join(_DATA_DIR, "requirements", test)
+    for f in glob.glob(os.path.join(source_path, "*")):
+        shutil.copy(f, tmp_path)
+
     expected_output_file_path = os.path.join(_DATA_DIR, "requirements", test, expected_file)
     with open(expected_output_file_path, "r") as f:
         expected = f.read()

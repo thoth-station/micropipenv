@@ -772,8 +772,13 @@ def _poetry2pipfile_lock(
 
     additional_markers = defaultdict(list)
     skip_all_markers = object()
+    add_to_dev = list()
 
     for entry in poetry_lock["package"]:
+
+        if entry["category"] not in ("dev", "main"):
+            raise PoetryError("Unknown category for package {}: {}".format(entry["name"], entry["category"]))
+
         hashes = []
         for file_entry in poetry_lock["metadata"]["files"][entry["name"]]:
             hashes.append(file_entry["hash"])
@@ -827,6 +832,24 @@ def _poetry2pipfile_lock(
                 else:
                     additional_markers[normalize_package_name(dependency_name)].append(skip_all_markers)
 
+            # If package fits into both main and dev categories, poetry add it to the main one.
+            # This might be a problem in the following scenario:
+            # Let's say our project looks like this:
+            # dependencies:
+            # - A
+            # dev-dependencies:
+            # - B
+            #   - A (A is also a dependency of B)
+            # Package A is therefore in the main category so if we use "--do-default" we get
+            # only package B but no package A. But using requirements file requires to have
+            # all dependencies with their hashes and pinned versions.
+            # So, if a package is in dev and has a dependency in main, add the dependency also to dev or
+            # if a package is already in "add_to_dev", add there also all its dependencies.
+            if (
+                entry["category"] == "dev" and dependency_name in pyproject_poetry_section.get("dependencies", ())
+            ) or entry["name"] in add_to_dev:
+                add_to_dev.append(dependency_name)
+
         for extra_name, extras_listed in entry.get("extras", {}).items():
             # Turn requirement specification into the actual requirement name.
             all_extra_dependencies = set(Requirement(r.split(" ", maxsplit=1)[0]).name for r in extras_listed)
@@ -840,14 +863,13 @@ def _poetry2pipfile_lock(
         if "extras" in requirement:
             requirement["extras"] = sorted(requirement["extras"])
 
-        if entry["category"] == "main":
-            if not no_default:
-                default[entry["name"]] = requirement
-        elif entry["category"] == "dev":
-            if not no_dev:
-                develop[entry["name"]] = requirement
-        else:
-            raise PoetryError("Unknown category for package {}: {}".format(entry["name"], entry["category"]))
+        if entry["category"] == "main" and not no_default:
+            default[entry["name"]] = requirement
+
+        if (entry["category"] == "dev" and not no_dev) or (
+            entry["name"] in add_to_dev and entry["name"] not in default
+        ):
+            develop[entry["name"]] = requirement
 
     for dependency_name, markers in additional_markers.items():
         # If a package depends on another package unconditionaly
