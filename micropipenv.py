@@ -346,12 +346,13 @@ def verify_pipenv_lockfile(
 ):  # type: (Optional[Dict[str, Any]], Optional[Dict[str, Any]]) -> None
     """Validate that Pipfile.lock is up to date with Pipfile."""
     pipfile_lock = pipfile_lock or _read_pipfile_lock()
-    python_version = pipfile_lock["_meta"].get("requires", {}).get("python_version")
-    if python_version is not None:
-        if python_version != _get_installed_python_version():
+    pipenv_python_version = pipfile_lock["_meta"].get("requires", {}).get("python_version")
+    if pipenv_python_version is not None:
+        installed_python_version = _get_installed_python_version()
+        if pipenv_python_version != installed_python_version:
             raise PythonVersionMismatch(
-                "Running Python version {}.{}, but Pipfile.lock requires "
-                "Python version {}".format(sys.version_info.major, sys.version_info.minor, python_version)
+                "Running Python version {}, but Pipfile.lock requires "
+                "Python version {}".format(installed_python_version, pipenv_python_version)
             )
     else:
         _LOGGER.warning("No Python version requirement in Pipfile.lock found, no Python version check is performed")
