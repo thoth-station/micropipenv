@@ -752,7 +752,8 @@ def _poetry2pipfile_lock(
     if only_direct:
         if not no_default:
             for dependency_name, info in pyproject_poetry_section.get("dependencies", {}).items():
-                default[dependency_name] = _translate_poetry_dependency(info)
+                if dependency_name != "python":
+                    default[dependency_name] = _translate_poetry_dependency(info)
 
         if not no_dev:
             for dependency_name, info in pyproject_poetry_section.get("dev-dependencies", {}).items():
@@ -1069,8 +1070,11 @@ def get_requirements_sections(
 
 def _get_package_entry_str(
     package_name, info, *, no_hashes=False, no_versions=False
-):  # type: (str, Dict[str, Any], bool, bool) -> str
+):  # type: (str, Union[Dict[str, Any], str], bool, bool) -> str
     """Print entry for the given package."""
+    if isinstance(info, str):
+        return package_name + info + "\n"
+
     if "git" in info:  # A special case for a VCS package
         if info.get("editable", False):
             result = "--editable git+{}".format(info["git"])
