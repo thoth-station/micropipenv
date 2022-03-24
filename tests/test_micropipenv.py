@@ -1121,3 +1121,13 @@ def test_pipenv_lockfile_verify_error_python():
         err_msg = r"Running Python version \d+.\d+, but Pipfile.lock requires Python version 5.9"
         with pytest.raises(micropipenv.PythonVersionMismatch, match=err_msg):
             micropipenv.verify_pipenv_lockfile()
+
+
+def test_poetry_invalid_category():
+    """Test error for invalid category in poetry.lock."""
+    work_dir = os.path.join(_DATA_DIR, "parse", "poetry_invalid_category")
+    with cwd(work_dir), pytest.raises(
+        micropipenv.PoetryError,
+        match=r"Unknown category for package 'daiquiri': 'INVALID'. Supported categories are 'dev' and 'main'.",
+    ):
+        micropipenv._poetry2pipfile_lock()

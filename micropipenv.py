@@ -777,7 +777,10 @@ def _poetry2pipfile_lock(
     for entry in poetry_lock["package"]:
 
         if entry["category"] not in ("dev", "main"):
-            raise PoetryError("Unknown category for package {}: {}".format(entry["name"], entry["category"]))
+            message = ("Unknown category for package '{}': '{}'. Supported categories are 'dev' and 'main'.").format(
+                entry["name"], entry["category"]
+            )
+            raise PoetryError(message)
 
         hashes = []
         for file_entry in poetry_lock["metadata"]["files"][entry["name"]]:
