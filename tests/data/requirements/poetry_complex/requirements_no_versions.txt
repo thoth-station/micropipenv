@@ -1,0 +1,9 @@
+#
+# Default dependencies
+#
+python-dateutil
+six
+#
+# Dev dependencies
+#
+freezegun
