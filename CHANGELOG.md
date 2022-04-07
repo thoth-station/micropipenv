@@ -1,5 +1,22 @@
 # Changelog for Thoth's micropipenv
 
+## [1.3.0] - 2022-May-09 - Fridolin Pokorny <fridolin@redhat.com>
+
+### Added
+
+* Improve poetry → requirements and handling of transitive deps
+  Contribution thanks to @frenzymadness
+
+* Add check subcommand to validate lockfiles
+  Contribution thanks to @matt-carr
+
+* Test with pip==22.0.4
+
+### Fixes
+
+* Implement correct handling for "extras" marker from poetry.lock
+  Contribution thanks to @frenzymadness
+
 ## [1.2.1] - 2022-February-21 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
