@@ -1,12 +1,12 @@
 ---
 repos:
   - repo: https://github.com/Lucas-C/pre-commit-hooks
-    rev: v1.1.9
+    rev: v1.1.13
     hooks:
       - id: remove-tabs
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.3.0
+    rev: v4.1.0
     hooks:
       - id: trailing-whitespace
       - id: check-merge-conflict
@@ -21,7 +21,7 @@ repos:
       - id: debug-statements
 
   - repo: https://github.com/pycqa/pydocstyle.git
-    rev: 5.1.1
+    rev: 6.1.1
     hooks:
       - id: pydocstyle
 
@@ -42,7 +42,7 @@ repos:
         args: [--ignore-missing-imports]
 
   - repo: https://github.com/psf/black
-    rev: 20.8b1
+    rev: 22.3.0
     hooks:
       - id: black
 
