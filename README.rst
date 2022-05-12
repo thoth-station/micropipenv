@@ -427,7 +427,7 @@ This project is licensed under the terms of the GNU Lesser General Public
 License v3 or later. See ``LICENSE-LGPL`` and ``LICENSE-GPL`` files for the
 license terms.
 
-Copyright (C) 2020-2021 AICoE `Project Thoth <http://thoth-station.ninja/>`__; Red Hat Inc.
+Copyright (C) 2020-2022 `Project Thoth <http://thoth-station.ninja/>`__; Red Hat Inc.
 
 Authors and maintainers:
  * Fridolín 'fridex' Pokorný <fridolin@redhat.com>
