@@ -123,6 +123,15 @@ def test_install_pipenv_vcs(venv):
 
 
 @pytest.mark.online
+def test_install_pipenv_vcs_subdir(venv):
+    """Test invoking installation using information in Pipfile.lock, a git version and &subdirectory is used."""
+    cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
+    with cwd(os.path.join(_DATA_DIR, "install", "pipenv_vcs_subdir")):
+        subprocess.run(cmd, check=True, env=get_updated_env(venv))
+        assert str(venv.get_version("pygstc")) == "0.2.1"
+
+
+@pytest.mark.online
 def test_install_pipenv_file(venv):
     """Test invoking installation using information in Pipfile.lock, a file mode is used."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]

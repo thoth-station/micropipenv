@@ -1108,8 +1108,14 @@ def _get_package_entry_str(
 
         if "ref" in info:
             result += "@{}".format(info["ref"])
-        result += "#egg={}\n".format(package_name)
-        return result
+        result += "#egg={}".format(package_name)
+
+        # The URL might contain a subdirectory like:
+        # git+ssh://git@github.com/RidgeRun/gstd-1.x.git@v0.13.2#egg=pygstc\&subdirectory=libgstc/python
+        if "subdirectory" in info:
+            result += "&subdirectory={}".format(info["subdirectory"])
+
+        return "\n" + result
     if "path" in info:
         # Path formats we want to support:
         # - "file:///path/to/project"
