@@ -224,10 +224,15 @@ def test_install_poetry_directory(venv):
         check_generated_pipfile_lock(os.path.join(work_dir, "Pipfile.lock"), os.path.join(work_dir, "_Pipfile.lock"))
 
 
+# PEP 517 is no longer enough for this test because cffi
+# produces manylinux_x_y wheels which are specified in PEP 600
+# and supported in pip 20.3+.
+# The current complete dependency chain is:
+#   cffi>=1.12->cryptography>=2.0->SecretStorage>=3.2->keyring>=21.2.0->poetry>=0.12
 @pytest.mark.online
 @pytest.mark.skipif(
-    PIP_VERSION is not None and PIP_VERSION.release < (19, 0, 0),
-    reason="PEP 517 support was added in pip 19",
+    PIP_VERSION is not None and PIP_VERSION.release < (20, 3, 0),
+    reason="Needs PEP 600 support introduced in pip 20.3",
 )
 def test_install_poetry_directory_poetry(venv):
     """Test invoking installation using information from a Poetry project, a Poetry project is used as a directory source."""
