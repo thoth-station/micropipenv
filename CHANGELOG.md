@@ -1,5 +1,15 @@
 # Changelog for Thoth's micropipenv
 
+## [1.3.1] - 2022-Jul-15 - Lumír Balhar <lbalhar@redhat.com>
+
+### Fixed
+
+* Fixed support for subdirectories in VCS requirements
+
+### Added
+
+* Test with pip==22.1.2
+
 ## [1.3.0] - 2022-May-09 - Fridolin Pokorny <fridolin@redhat.com>
 
 ### Added
