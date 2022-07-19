@@ -1,0 +1,12 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[packages]
+discord-py = {editable = true, ref = "87bc79e6e311da60b024ae61a2a3757e55606aa6", git = "https://github.com/Rapptz/discord.py"}
+
+[dev-packages]
+
+[requires]
+python_version = "3.10"

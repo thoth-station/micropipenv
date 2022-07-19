@@ -1115,7 +1115,7 @@ def _get_package_entry_str(
         if "subdirectory" in info:
             result += "&subdirectory={}".format(info["subdirectory"])
 
-        return "\n" + result
+        return result + "\n"
     if "path" in info:
         # Path formats we want to support:
         # - "file:///path/to/project"
