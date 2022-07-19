@@ -852,6 +852,12 @@ def test_parse_poetry2pipfile_lock(directory, options, expected_file):
         ("poetry_complex", {"no_indexes": True}, "requirements_no_indexes.txt"),
         ("poetry_complex", {"no_versions": True}, "requirements_no_versions.txt"),
         ("poetry_complex", {"only_direct": True}, "requirements_only_direct.txt"),
+        ("vcs_ref_editable", {"no_comments": True}, "requirements_no_comments.txt"),
+        ("vcs_ref_editable", {"no_default": True}, "requirements_no_default.txt"),
+        ("vcs_ref_editable", {"no_dev": True}, "requirements_no_dev.txt"),
+        ("vcs_ref_editable", {"no_hashes": True}, "requirements_no_hashes.txt"),
+        ("vcs_ref_editable", {"no_indexes": True}, "requirements_no_indexes.txt"),
+        ("vcs_ref_editable", {"no_versions": True}, "requirements_no_versions.txt"),
     ],
 )
 def test_requirements(tmp_path, test, options, expected_file):

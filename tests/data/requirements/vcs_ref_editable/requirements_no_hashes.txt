@@ -1,0 +1,14 @@
+--index-url https://pypi.org/simple
+#
+# Default dependencies
+#
+aiohttp==3.8.1; python_version >= '3.6'
+aiosignal==1.2.0; python_version >= '3.6'
+async-timeout==4.0.2; python_version >= '3.6'
+attrs==21.4.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+charset-normalizer==2.1.0; python_version >= '3.6'
+--editable git+https://github.com/Rapptz/discord.py@87bc79e6e311da60b024ae61a2a3757e55606aa6#egg=discord-py
+frozenlist==1.3.0; python_version >= '3.7'
+idna==3.3; python_version >= '3.5'
+multidict==6.0.2; python_version >= '3.7'
+yarl==1.7.2; python_version >= '3.6'
