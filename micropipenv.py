@@ -467,8 +467,10 @@ def _instantiate_package_finder(pip_session):  # type: (PipSession) -> PackageFi
         link_collector = LinkCollector(session=pip_session, search_scope=search_scope)
         additional_kwargs = {}
         # pip 22 deprecates vendored html5lib and uses stdlib html.parser
-        # https://pip.pypa.io/en/latest/news/#id19
-        if Version(pip_version).release >= (22,):
+        # https://github.com/pypa/pip/pull/10291
+        # pip 22.2 will remove that switch
+        # https://github.com/pypa/pip/issues/10825
+        if (22, 2) > Version(pip_version).release >= (22,):
             additional_kwargs["use_deprecated_html5lib"] = False
         return PackageFinder.create(
             link_collector=link_collector,
