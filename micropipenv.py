@@ -186,17 +186,18 @@ def _check_pip_version(raise_on_incompatible=False):  # type: (bool) -> bool
 def _import_toml():  # type: () -> Any
     """Import and return toml or pytoml module (in this order)."""
     exception_names = {
+        "tomllib": "TOMLDecodeError",
         "toml": "TomlDecodeError",
         "pytoml": "TomlError",
         "tomli": "TOMLDecodeError",
     }
 
-    # Only tomli requires TOML files to be opened
+    # Only tomli/tomllib requires TOML files to be opened
     # in binary mode: https://github.com/hukkin/tomli#parse-a-toml-file
     open_kwargs = defaultdict(dict)  # type: Dict[str, Dict[str, str]]
-    open_kwargs["tomli"] = {"mode": "rb"}
+    open_kwargs["tomli"] = open_kwargs["tomllib"] = {"mode": "rb"}
 
-    for module_name in "toml", "pytoml", "tomli":
+    for module_name in "tomllib", "toml", "pytoml", "tomli":
         try:
             module = import_module(module_name)
             exception = getattr(module, exception_names[module_name])
