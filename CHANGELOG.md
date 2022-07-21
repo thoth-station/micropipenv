@@ -1,5 +1,12 @@
 # Changelog for Thoth's micropipenv
 
+## [1.3.2] - 2022-Jul-21 - Lumír Balhar <lbalhar@redhat.com>
+
+### Fixed
+
+* Fixed regression caused by misplaced newline character in VCS requirement.
+* Preps for pip 22.2 where PackageFinder will no longer support deprecated html5lib.
+
 ## [1.3.1] - 2022-Jul-15 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Fixed
