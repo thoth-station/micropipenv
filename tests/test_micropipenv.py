@@ -38,7 +38,8 @@ from conftest import MICROPIPENV_TEST_PIP_VERSION, PIP_VERSION
 
 _DATA_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.relpath(__file__)), "data"))
 # Implementation of `toml` to test micropipenv with
-MICROPIPENV_TEST_TOML_MODULE = os.getenv("MICROPIPENV_TEST_TOML_MODULE", "toml")
+# not defined for Python 3.11+ where tomllib is available in stdlib
+MICROPIPENV_TEST_TOML_MODULE = os.getenv("MICROPIPENV_TEST_TOML_MODULE")
 WIN = sys.platform == "win32"
 BIN_DIR = "Scripts" if WIN else "bin"
 SP_DIR = ("lib", "site-packages") if WIN else ("lib", "python*", "site-packages")
@@ -182,7 +183,8 @@ def test_install_pipenv_vcs_editable(venv):
 def test_install_poetry(venv):
     """Test invoking installation using information from a Poetry project."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
-    venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    if MICROPIPENV_TEST_TOML_MODULE:
+        venv.install(MICROPIPENV_TEST_TOML_MODULE)
     work_dir = os.path.join(_DATA_DIR, "install", "poetry")
     with cwd(os.path.join(_DATA_DIR, "install", "poetry")):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
@@ -196,7 +198,8 @@ def test_install_poetry(venv):
 def test_install_poetry_vcs(venv):
     """Test invoking installation using information from a Poetry project, a git version is used."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
-    venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    if MICROPIPENV_TEST_TOML_MODULE:
+        venv.install(MICROPIPENV_TEST_TOML_MODULE)
     work_dir = os.path.join(_DATA_DIR, "install", "poetry_vcs")
     with cwd(work_dir):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
@@ -210,7 +213,8 @@ def test_install_poetry_vcs(venv):
 def test_install_poetry_directory(venv):
     """Test invoking installation using information from a Poetry project, a directory source is used."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
-    venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    if MICROPIPENV_TEST_TOML_MODULE:
+        venv.install(MICROPIPENV_TEST_TOML_MODULE)
     work_dir = os.path.join(_DATA_DIR, "install", "poetry_directory")
     with cwd(work_dir):
         if PIP_VERSION is not None and PIP_VERSION.release < (19, 0, 0):
@@ -237,7 +241,8 @@ def test_install_poetry_directory(venv):
 def test_install_poetry_directory_poetry(venv):
     """Test invoking installation using information from a Poetry project, a Poetry project is used as a directory source."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
-    venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    if MICROPIPENV_TEST_TOML_MODULE:
+        venv.install(MICROPIPENV_TEST_TOML_MODULE)
     work_dir = os.path.join(_DATA_DIR, "install", "poetry_directory_poetry")
     with cwd(work_dir):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
@@ -251,7 +256,8 @@ def test_install_poetry_directory_poetry(venv):
 def test_install_poetry_complex_example(venv):
     """Test invoking installation using information from a Poetry project. Involves complex dependencies, extras and markers."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
-    venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    if MICROPIPENV_TEST_TOML_MODULE:
+        venv.install(MICROPIPENV_TEST_TOML_MODULE)
     work_dir = os.path.join(_DATA_DIR, "install", "poetry_markers_extra")
     with cwd(work_dir):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
@@ -494,7 +500,8 @@ def test_install_pipenv_iter_index(venv):
 )
 def test_install_invalid_toml_file(venv, directory, filename, method):
     """Test exception when a Pipfile is not a valid TOML."""
-    venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    if MICROPIPENV_TEST_TOML_MODULE:
+        venv.install(MICROPIPENV_TEST_TOML_MODULE)
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--deploy", "--method", method]
     work_dir = os.path.join(_DATA_DIR, "install", directory)
     with cwd(work_dir):
@@ -1011,6 +1018,13 @@ def test_import_toml(venv):
         "-c",
         "from micropipenv import _import_toml; print(_import_toml())",
     ]
+
+    # Python 3.11 has tomllib in stdlib and it has the highest priority
+    # no matter what is or isn't installed in the virtual environment.
+    if sys.version_info >= (3, 11):
+        output = subprocess.check_output(cmd, universal_newlines=True)
+        assert "<module 'tomllib'" in output
+        return
 
     # no toml package should raise an exception
     with pytest.raises(subprocess.CalledProcessError) as exc:
