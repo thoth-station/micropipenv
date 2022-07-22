@@ -1,5 +1,14 @@
 # Changelog for Thoth's micropipenv
 
+## [1.4.0] - 2022-Jul-22 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Test with pip==22.2
+* Python 3.11 is now officially supported and tested
+* Use tomllib from standard libraty for Python 3.11+
+
+
 ## [1.3.2] - 2022-Jul-21 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Fixed
