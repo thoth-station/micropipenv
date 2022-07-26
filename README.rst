@@ -195,7 +195,7 @@ installation methods.
 ``micropipenv install --dev``
 ================================
 
-Installation of "development" dependnecies can be acomplished using the
+Installation of "development" dependencies can be acomplished using the
 ``--dev`` flag. This flag has no effect when ``requirements.txt`` file is used.
 
 
