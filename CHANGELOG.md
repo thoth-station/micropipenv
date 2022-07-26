@@ -1,5 +1,11 @@
 # Changelog for Thoth's micropipenv
 
+## [1.4.1] - 2022-Jul-26 - Lumír Balhar <lbalhar@redhat.com>
+
+### Fixed
+
+* Fixed installation of `micropipenv[toml]` see https://github.com/pypa/setuptools/issues/3467
+
 ## [1.4.0] - 2022-Jul-22 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
