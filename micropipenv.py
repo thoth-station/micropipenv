@@ -28,7 +28,7 @@ dependencies using raw pip. The virtual environment is not created, but one can
 issue `python3 -m venv venv/ && . venv/bin/activate` to create one.
 """
 
-__version__ = "1.4.1"
+__version__ = "1.4.2"
 __author__ = "Fridolin Pokorny <fridex.devel@gmail.com>"
 __title__ = "micropipenv"
 
@@ -48,7 +48,7 @@ from pathlib import Path
 from urllib.parse import urlparse
 
 _LOGGER = logging.getLogger(__title__)
-_SUPPORTED_PIP_STR = ">=9,<=22.2"  # Respects requirement in setup.py and latest pip to release date.
+_SUPPORTED_PIP_STR = ">=9,<=22.2.1"  # Respects requirement in setup.py and latest pip to release date.
 
 try:
     from pip import __version__ as pip_version

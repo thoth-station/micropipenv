@@ -1,5 +1,11 @@
 # Changelog for Thoth's micropipenv
 
+## [1.4.2] - 2022-Aug-01 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Test with pip==22.2.1
+
 ## [1.4.1] - 2022-Jul-26 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Fixed
