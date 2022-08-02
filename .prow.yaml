@@ -6,7 +6,7 @@ presubmits:
     context: aicoe-ci/prow/pre-commit
     spec:
       containers:
-        - image: quay.io/thoth-station/thoth-precommit-py38:v0.14.3
+        - image: quay.io/thoth-station/thoth-precommit-py38:v0.15.0
           command:
             - "pre-commit"
             - "run"
