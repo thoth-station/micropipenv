@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "aaa"
+version = "0.1.0"
+description = ""
+authors = ["Fridolin Pokorny <fridolin@redhat.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.6"
+Flask = "^2"
+
+[tool.poetry.dev-dependencies]
+pytest = "^6"
+
+[[tool.poetry.source]]
+name = "private_repo"
+url = "https://pypi.org/simple/"
+default = true
+secondary = false
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

@@ -1,0 +1,61 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "ef4b8e435e0d476fbc292f5b4fb2803e6782cf672e629a2af65c7dbe21ff2975"
+        },
+        "pipfile-spec": 6,
+        "sources": [
+            {
+                "url": "https://pypi.org/simple",
+                "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                "verify_ssl": true
+            },
+            {
+                "name": "private_repo",
+                "url": "https://testpypi.python.org/simple",
+                "verify_ssl": true
+            }
+        ],
+        "requires": {
+            "python_version": "3.10"
+        }
+    },
+    "default": {
+        "ada": {
+            "version": "==0.0.0",
+            "hashes": [
+                "sha256:974c37a321deb18d0ba4fd0d0d121e24126849216269fd0f5887f1241a0e8462",
+                "sha256:572d928f97a417aef1f239b45d3e331914b59b5d29724e605cec6dbb09a9f08b"
+            ],
+            "index": "private_repo"
+        },
+        "click": {
+            "version": "==7.0",
+            "hashes": [
+                "sha256:2335065e6395b9e67ca716de5f7526736bfa6ceead690adf616d925bdc622b13",
+                "sha256:5b94b49521f6456670fdb30cd82a4eca9412788a93fa6dd6df72c94d5a8ff2d7"
+            ]
+        },
+        "colorama": {
+            "version": "==0.4.1",
+            "hashes": [
+                "sha256:f8ac84de7840f5b9c4e3347b3c1eaa50f7e49c2b07596221daec5edaabbd7c48",
+                "sha256:05eed71e2e327246ad6b38c540c4a3117230b19679b875190486ddd2d721422d"
+            ]
+        },
+        "daiquiri": {
+            "version": "==2.0.0",
+            "hashes": [
+                "sha256:d57b9fd5432933c6e899054eb62cee22eab89f560c8493254d327ec27893c866",
+                "sha256:6b235ed15b73b87fd3cc2521aacbb727bf8443a0896dc534b07503841d03cfdb"
+            ]
+        },
+        "python-json-logger": {
+            "version": "==0.1.11",
+            "hashes": [
+                "sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"
+            ]
+        }
+    },
+    "develop": {}
+}

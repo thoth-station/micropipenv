@@ -803,6 +803,12 @@ def _poetry2pipfile_lock(
                 requirement["ref"] = entry["source"]["reference"]
             elif entry["source"]["type"] == "directory":
                 requirement["path"] = entry["source"]["url"]
+            elif entry["source"]["type"] == "legacy":
+                # Newer poetry marks packages using the old PyPI API as legacy.
+                # If we have only one source, we can ignore it.
+                # Otherwise, configure it explicitly.
+                if len(sources) > 1:
+                    requirement["index"] = entry["source"]["reference"]
             else:
                 raise NotSupportedError(
                     "micropipenv supports Git VCS or directories, got {} instead".format(entry["source"]["type"])

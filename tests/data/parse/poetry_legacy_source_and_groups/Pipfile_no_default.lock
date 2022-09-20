@@ -1,0 +1,93 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "babe4ef8f301e43d7377c6db42751a177d151812f993fdbad17560ab3f65e322"
+        },
+        "pipfile-spec": 6,
+        "sources": [
+            {
+                "name": "private_repo",
+                "url": "https://pypi.org/simple/",
+                "verify_ssl": true
+            }
+        ],
+        "requires": {
+            "python_version": "3.10"
+        }
+    },
+    "default": {},
+    "develop": {
+        "atomicwrites": {
+            "version": "==1.4.1",
+            "hashes": [
+                "sha256:81b2c9071a49367a7f770170e5eec8cb66567cfbbc8c73d20ce5ca4a8d71cf11"
+            ],
+            "markers": "(sys_platform == \"win32\")",
+            "index": "private_repo"
+        },
+        "attrs": {
+            "version": "==22.1.0",
+            "hashes": [
+                "sha256:86efa402f67bf2df34f51a335487cf46b1ec130d02b8d39fd248abfd30da551c",
+                "sha256:29adc2665447e5191d0e7c568fde78b21f9672d344281d0c6e1ab085429b22b6"
+            ],
+            "index": "private_repo"
+        },
+        "iniconfig": {
+            "version": "==1.1.1",
+            "hashes": [
+                "sha256:011e24c64b7f47f6ebd835bb12a743f2fbe9a26d4cecaa7f53bc4f35ee9da8b3",
+                "sha256:bc3af051d7d14b2ee5ef9969666def0cd1a000e121eaea580d4a313df4b37f32"
+            ],
+            "index": "private_repo"
+        },
+        "packaging": {
+            "version": "==21.3",
+            "hashes": [
+                "sha256:ef103e05f519cdc783ae24ea4e2e0f508a9c99b2d4969652eed6a2e1ea5bd522",
+                "sha256:dd47c42927d89ab911e606518907cc2d3a1f38bbd026385970643f9c5b8ecfeb"
+            ],
+            "index": "private_repo"
+        },
+        "pluggy": {
+            "version": "==1.0.0",
+            "hashes": [
+                "sha256:74134bbf457f031a36d68416e1509f34bd5ccc019f0bcc952c7b909d06b37bd3",
+                "sha256:4224373bacce55f955a878bf9cfa763c1e360858e330072059e10bad68531159"
+            ],
+            "index": "private_repo"
+        },
+        "py": {
+            "version": "==1.11.0",
+            "hashes": [
+                "sha256:607c53218732647dff4acdfcd50cb62615cedf612e72d1724fb1a0cc6405b378",
+                "sha256:51c75c4126074b472f746a24399ad32f6053d1b34b68d2fa41e558e6f4a98719"
+            ],
+            "index": "private_repo"
+        },
+        "pyparsing": {
+            "version": "==3.0.7",
+            "hashes": [
+                "sha256:a6c06a88f252e6c322f65faf8f418b16213b51bdfaece0524c1c1bc30c63c484",
+                "sha256:18ee9022775d270c55187733956460083db60b37d0d0fb357445f3094eed3eea"
+            ],
+            "index": "private_repo"
+        },
+        "pytest": {
+            "version": "==6.2.5",
+            "hashes": [
+                "sha256:7310f8d27bc79ced999e760ca304d69f6ba6c6649c0b60fb0e04a4a77cacc134",
+                "sha256:131b36680866a76e6781d13f101efb86cf674ebb9762eb70d3082b6f29889e89"
+            ],
+            "index": "private_repo"
+        },
+        "toml": {
+            "version": "==0.10.2",
+            "hashes": [
+                "sha256:806143ae5bfb6a3c6e736a764057db0e6a0e05e338b5630894a5f779cabb4f9b",
+                "sha256:b3bda1d108d5dd99f4a20d24d9c348e91c4db7ab1b749200bded2f839ccbe68f"
+            ],
+            "index": "private_repo"
+        }
+    }
+}

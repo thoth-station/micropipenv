@@ -271,6 +271,19 @@ def test_install_poetry_complex_example(venv):
 
 
 @pytest.mark.online
+def test_install_poetry_secondary_source(venv):
+    """Test invoking installation using information from a Poetry project with packages from different source indexes."""
+    cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
+    if MICROPIPENV_TEST_TOML_MODULE:
+        venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    work_dir = os.path.join(_DATA_DIR, "install", "poetry_secondary_source")
+    with cwd(work_dir):
+        subprocess.run(cmd, check=True, env=get_updated_env(venv))
+        assert str(venv.get_version("daiquiri")) == "2.0.0"  # Installs from standard default PyPI
+        assert str(venv.get_version("ada")) == "0.0.0"  # This package is available only on TestPyPI
+
+
+@pytest.mark.online
 def test_install_pipenv_env_vars(venv):
     """Test installation using enviroment variables in source URL."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
@@ -791,12 +804,15 @@ def test_parse_requirements2pipfile_lock_not_locked():
     (
         "poetry",
         "poetry_default_dev_diff",
+        "poetry_default_source_legacy",
+        "poetry_legacy_source_and_groups",
         "poetry_markers_direct",
         "poetry_markers_extra",
         "poetry_markers_indirect",
         "poetry_markers_order",
-        "poetry_markers_transitive_deps",
         "poetry_markers_skip",
+        "poetry_markers_transitive_deps",
+        "poetry_secondary_source",
         "poetry_source_directory",
     ),
 )
