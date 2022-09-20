@@ -453,7 +453,13 @@ def _instantiate_package_finder(pip_session):  # type: (PipSession) -> PackageFi
         selection_prefs = SelectionPreferences(
             allow_yanked=True,
         )
-        search_scope = SearchScope([], [])
+
+        additional_kwargs = {}
+        if Version(pip_version).release >= (22, 3):
+            # New argument in pip 22.3
+            # https://github.com/pypa/pip/commit/5d7a1a68c7feb75136a0fd120de54b85df105bac
+            additional_kwargs["no_index"] = False
+        search_scope = SearchScope([], [], **additional_kwargs)  # type: ignore
 
         try:
             from pip._internal.index.collector import LinkCollector
