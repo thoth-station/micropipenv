@@ -1,0 +1,46 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "abdec0560db25790b83d3472fccc85d0dcbc8cc7b6132da8adbf6edb0b3b1404"
+        },
+        "pipfile-spec": 6,
+        "sources": [
+            {
+                "url": "https://pypi.org/simple",
+                "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                "verify_ssl": true
+            },
+            {
+                "name": "private_repo",
+                "url": "https://testpypi.python.org/simple",
+                "verify_ssl": true
+            }
+        ],
+        "requires": {
+            "python_version": "3.10"
+        }
+    },
+    "default": {
+        "daiquiri": {
+            "version": "==2.0.0",
+            "hashes": [
+                "sha256:d57b9fd5432933c6e899054eb62cee22eab89f560c8493254d327ec27893c866",
+                "sha256:6b235ed15b73b87fd3cc2521aacbb727bf8443a0896dc534b07503841d03cfdb"
+            ]
+        },
+        "flexmock": {
+            "version": "==0.10.5",
+            "hashes": [
+                "sha256:003422fdbcf5d6570e60a0eafeb54c0af624c6cddab5fc3bfe026e52dd0f9c5a"
+            ],
+            "index": "private_repo"
+        },
+        "python-json-logger": {
+            "version": "==0.1.11",
+            "hashes": [
+                "sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"
+            ]
+        }
+    },
+    "develop": {}
+}

@@ -1,0 +1,25 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "abdec0560db25790b83d3472fccc85d0dcbc8cc7b6132da8adbf6edb0b3b1404"
+        },
+        "pipfile-spec": 6,
+        "sources": [
+            {
+                "url": "https://pypi.org/simple",
+                "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                "verify_ssl": true
+            },
+            {
+                "name": "private_repo",
+                "url": "https://testpypi.python.org/simple",
+                "verify_ssl": true
+            }
+        ],
+        "requires": {
+            "python_version": "3.10"
+        }
+    },
+    "default": {},
+    "develop": {}
+}

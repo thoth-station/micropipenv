@@ -1,0 +1,52 @@
+[[package]]
+name = "daiquiri"
+version = "2.0.0"
+description = "Library to configure Python logging easily"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+python-json-logger = "*"
+
+[package.extras]
+systemd = ["systemd-python (>=234)"]
+test = ["mock", "pytest", "six"]
+
+[[package]]
+name = "flexmock"
+version = "0.10.5"
+description = "flexmock is a testing library for Python that makes it easy to create mocks,stubs and fakes."
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.source]
+type = "legacy"
+url = "https://testpypi.python.org/simple"
+reference = "private_repo"
+
+[[package]]
+name = "python-json-logger"
+version = "0.1.11"
+description = "A python library adding a json log formatter"
+category = "main"
+optional = false
+python-versions = ">=2.7"
+
+[metadata]
+lock-version = "1.1"
+python-versions = "*"
+content-hash = "abdec0560db25790b83d3472fccc85d0dcbc8cc7b6132da8adbf6edb0b3b1404"
+
+[metadata.files]
+daiquiri = [
+    {file = "daiquiri-2.0.0-py2.py3-none-any.whl", hash = "sha256:d57b9fd5432933c6e899054eb62cee22eab89f560c8493254d327ec27893c866"},
+    {file = "daiquiri-2.0.0.tar.gz", hash = "sha256:6b235ed15b73b87fd3cc2521aacbb727bf8443a0896dc534b07503841d03cfdb"},
+]
+flexmock = [
+    {file = "flexmock-0.10.5.tar.gz", hash = "sha256:003422fdbcf5d6570e60a0eafeb54c0af624c6cddab5fc3bfe026e52dd0f9c5a"},
+]
+python-json-logger = [
+    {file = "python-json-logger-0.1.11.tar.gz", hash = "sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"},
+]

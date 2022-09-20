@@ -1,0 +1,19 @@
+[tool.poetry]
+name = "aaa"
+version = "0.1.0"
+description = ""
+authors = ["Fridolin Pokorny <fridolin@redhat.com>"]
+
+[tool.poetry.dependencies]
+daiquiri = "2.0.0"
+ada = {version = "*", source = "private_repo"}
+
+[[tool.poetry.source]]
+name = "private_repo"
+url = "https://testpypi.python.org/simple"
+default = false
+secondary = true
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

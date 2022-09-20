@@ -1,0 +1,81 @@
+[[package]]
+name = "ada"
+version = "0.0.0"
+description = ""
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+click = "*"
+colorama = "*"
+
+[package.source]
+type = "legacy"
+url = "https://testpypi.python.org/simple"
+reference = "private_repo"
+
+[[package]]
+name = "click"
+version = "7.0"
+description = "Composable command line interface toolkit"
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
+name = "colorama"
+version = "0.4.1"
+description = "Cross-platform colored terminal text."
+category = "main"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
+
+[[package]]
+name = "daiquiri"
+version = "2.0.0"
+description = "Library to configure Python logging easily"
+category = "main"
+optional = false
+python-versions = "*"
+
+[package.dependencies]
+python-json-logger = "*"
+
+[package.extras]
+systemd = ["systemd-python (>=234)"]
+test = ["mock", "pytest", "six"]
+
+[[package]]
+name = "python-json-logger"
+version = "0.1.11"
+description = "A python library adding a json log formatter"
+category = "main"
+optional = false
+python-versions = ">=2.7"
+
+[metadata]
+lock-version = "1.1"
+python-versions = "*"
+content-hash = "ef4b8e435e0d476fbc292f5b4fb2803e6782cf672e629a2af65c7dbe21ff2975"
+
+[metadata.files]
+ada = [
+    {file = "ada-0.0.0-py2.py3-none-any.whl", hash = "sha256:974c37a321deb18d0ba4fd0d0d121e24126849216269fd0f5887f1241a0e8462"},
+    {file = "ada-0.0.0.tar.gz", hash = "sha256:572d928f97a417aef1f239b45d3e331914b59b5d29724e605cec6dbb09a9f08b"},
+]
+click = [
+    {file = "Click-7.0-py2.py3-none-any.whl", hash = "sha256:2335065e6395b9e67ca716de5f7526736bfa6ceead690adf616d925bdc622b13"},
+    {file = "Click-7.0.tar.gz", hash = "sha256:5b94b49521f6456670fdb30cd82a4eca9412788a93fa6dd6df72c94d5a8ff2d7"},
+]
+colorama = [
+    {file = "colorama-0.4.1-py2.py3-none-any.whl", hash = "sha256:f8ac84de7840f5b9c4e3347b3c1eaa50f7e49c2b07596221daec5edaabbd7c48"},
+    {file = "colorama-0.4.1.tar.gz", hash = "sha256:05eed71e2e327246ad6b38c540c4a3117230b19679b875190486ddd2d721422d"},
+]
+daiquiri = [
+    {file = "daiquiri-2.0.0-py2.py3-none-any.whl", hash = "sha256:d57b9fd5432933c6e899054eb62cee22eab89f560c8493254d327ec27893c866"},
+    {file = "daiquiri-2.0.0.tar.gz", hash = "sha256:6b235ed15b73b87fd3cc2521aacbb727bf8443a0896dc534b07503841d03cfdb"},
+]
+python-json-logger = [
+    {file = "python-json-logger-0.1.11.tar.gz", hash = "sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"},
+]
