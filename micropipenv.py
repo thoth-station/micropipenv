@@ -28,7 +28,7 @@ dependencies using raw pip. The virtual environment is not created, but one can
 issue `python3 -m venv venv/ && . venv/bin/activate` to create one.
 """
 
-__version__ = "1.4.2"
+__version__ = "1.4.3"
 __author__ = "Fridolin Pokorny <fridex.devel@gmail.com>"
 __title__ = "micropipenv"
 

@@ -1,5 +1,16 @@
 # Changelog for Thoth's micropipenv
 
+## [1.4.3] - 2022-Oct-04 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Test with pip==22.2.2
+
+### Fixed
+
+* Compatibility with pip==22.3 (not released yet)
+* Compatibility with source type "legacy" in poetry.lock
+
 ## [1.4.2] - 2022-Aug-01 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
