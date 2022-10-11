@@ -429,6 +429,9 @@ license terms.
 
 Copyright (C) 2020-2022 `Project Thoth <http://thoth-station.ninja/>`__; Red Hat Inc.
 
-Authors and maintainers:
+Original author:
  * Fridolín 'fridex' Pokorný <fridolin@redhat.com>
+
+Maintainers:
  * Lumír 'Frenzy' Balhar <lbalhar@redhat.com>
+ * Max Gautier <max.gautier@redhat.com>
