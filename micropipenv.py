@@ -302,6 +302,15 @@ def _compute_poetry_hash(pyproject):  # type: (MutableMapping[str, Any]) -> str
     relevant_keys = ["dependencies", "dev-dependencies", "source", "extras"]
     relevant_content = {key: poetry_data.get(key) for key in relevant_keys}
 
+    # relevant_keys are the original one and they should always be in
+    # the relevant_content even their value is None.
+    # group is a new key since poetry 1.2 and we should include it only
+    # if pyproject.toml contains it. Including it always would break
+    # backward compatibility.
+    # See: https://github.com/python-poetry/poetry/blob/4a07b5e0243bb8879dd6725cb901d9fa0f6eb182/src/poetry/packages/locker.py#L278-L293
+    if "group" in poetry_data:
+        relevant_content["group"] = poetry_data.get("group")
+
     return hashlib.sha256(json.dumps(relevant_content, sort_keys=True).encode()).hexdigest()
 
 
