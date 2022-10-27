@@ -1129,9 +1129,10 @@ def test_get_package_entry_str(info, expected):
     assert result == expected
 
 
-def test_poetry_lockfile_verify():
+@pytest.mark.parametrize("path", ["poetry", "poetry_group"])
+def test_poetry_lockfile_verify(path):
     """Test verifying poetry lockfile."""
-    with cwd(os.path.join(_DATA_DIR, "verify", "poetry")):
+    with cwd(os.path.join(_DATA_DIR, "verify", path)):
         micropipenv.verify_poetry_lockfile()
 
 
