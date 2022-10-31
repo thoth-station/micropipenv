@@ -1,5 +1,15 @@
 # Changelog for Thoth's micropipenv
 
+## [1.4.4] - 2022-Oct-31 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Test with pip==22.3
+
+### Fixed
+
+* Compatibility with new poetry groups
+
 ## [1.4.3] - 2022-Oct-04 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
