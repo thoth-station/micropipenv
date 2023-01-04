@@ -801,7 +801,11 @@ def _poetry2pipfile_lock(
             raise PoetryError(message)
 
         hashes = []
-        for file_entry in poetry_lock["metadata"]["files"][entry["name"]]:
+        # Older poetry.lock format contains files in [metadata].
+        # New version 2.0 has files in [[package]] section.
+        metadata_file_entries = poetry_lock["metadata"].get("files", {}).get(entry["name"], [])
+        package_file_entries = entry.get("files", [])
+        for file_entry in metadata_file_entries + package_file_entries:
             hashes.append(file_entry["hash"])
 
         requirement: Dict[str, Any] = {"version": "=={}".format(entry["version"])}

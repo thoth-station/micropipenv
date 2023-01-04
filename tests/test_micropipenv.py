@@ -284,6 +284,21 @@ def test_install_poetry_secondary_source(venv):
 
 
 @pytest.mark.online
+def test_install_poetry_lock_format_2(venv):
+    """Test invoking installation using information from a Poetry project using lock file format 2."""
+    cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
+    if MICROPIPENV_TEST_TOML_MODULE:
+        venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    work_dir = os.path.join(_DATA_DIR, "install", "poetry_lock_format_2")
+    with cwd(work_dir):
+        subprocess.run(cmd, check=True, env=get_updated_env(venv))
+        assert str(venv.get_version("daiquiri")) == "2.0.0"
+        assert str(venv.get_version("python-json-logger")) == "2.0.4"
+
+        check_generated_pipfile_lock(os.path.join(work_dir, "Pipfile.lock"), os.path.join(work_dir, "_Pipfile.lock"))
+
+
+@pytest.mark.online
 def test_install_pipenv_env_vars(venv):
     """Test installation using enviroment variables in source URL."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
@@ -806,6 +821,7 @@ def test_parse_requirements2pipfile_lock_not_locked():
         "poetry_default_dev_diff",
         "poetry_default_source_legacy",
         "poetry_legacy_source_and_groups",
+        "poetry_lock_format_2",
         "poetry_markers_direct",
         "poetry_markers_extra",
         "poetry_markers_indirect",
