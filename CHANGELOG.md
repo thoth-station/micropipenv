@@ -1,5 +1,15 @@
 # Changelog for Thoth's micropipenv
 
+## [1.4.5] - 2023-Jan-05 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Test with pip==22.3.1
+
+### Fixed
+
+* Compatibility with new poetry lock file format version 2.0
+
 ## [1.4.4] - 2022-Oct-31 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
