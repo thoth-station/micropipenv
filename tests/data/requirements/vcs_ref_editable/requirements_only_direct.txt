@@ -1,0 +1,5 @@
+--index-url https://pypi.org/simple
+#
+# Default dependencies
+#
+--editable git+https://github.com/Rapptz/discord.py@87bc79e6e311da60b024ae61a2a3757e55606aa6#egg=discord-py
