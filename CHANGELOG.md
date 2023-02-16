@@ -1,5 +1,15 @@
 # Changelog for Thoth's micropipenv
 
+## [1.4.6] - 2023-Feb-18 - Max Gautier <max.gautier@redhat.com>
+
+### Added
+
+* Test with pip=23.0
+
+### Fixed
+
+* Fix error for 'only-direct' when package entry has no explicit 'version' in the Pipfile (#256)
+
 ## [1.4.5] - 2023-Jan-05 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
