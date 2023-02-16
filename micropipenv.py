@@ -1061,15 +1061,7 @@ def _parse_pipfile_dependency_info(pipfile_entry):  # type: (Union[str, Dict[str
     if isinstance(pipfile_entry, str):
         return {"version": pipfile_entry}
     elif isinstance(pipfile_entry, dict):
-        result = {"version": pipfile_entry["version"]}
-
-        if pipfile_entry.get("extras"):
-            result["extras"] = pipfile_entry["extras"]
-
-        if pipfile_entry.get("markers"):
-            result["markers"] = pipfile_entry["markers"]
-
-        return result
+        return pipfile_entry
 
     raise ValueError("Unknown entry in Pipfile (should be of type dict or a str): {}".format(pipfile_entry))
 
