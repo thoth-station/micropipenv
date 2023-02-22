@@ -184,7 +184,7 @@ def _check_pip_version(raise_on_incompatible=False):  # type: (bool) -> bool
 
 
 def _import_toml():  # type: () -> Any
-    """Import and return toml or pytoml module (in this order)."""
+    """Import and return tomllib, toml, pytoml, or tomli module (in this order)."""
     exception_names = {
         "tomllib": "TOMLDecodeError",
         "toml": "TomlDecodeError",
