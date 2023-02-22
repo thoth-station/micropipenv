@@ -4,7 +4,7 @@
 
 ### Added
 
-* Test with pip=23.0
+* Test with pip=23.0.1
 
 ### Fixed
 
