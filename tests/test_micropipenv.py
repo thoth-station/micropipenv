@@ -143,6 +143,16 @@ def test_install_pipenv_file(venv):
 
 
 @pytest.mark.online
+def test_install_pipenv_url(venv):
+    """Test invoking installation using information in Pipfile.lock, a url source is used."""
+    cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
+    with cwd(os.path.join(_DATA_DIR, "install", "pipenv_url")):
+        subprocess.run(cmd, check=True, env=get_updated_env(venv))
+        assert str(venv.get_version("daiquiri")) == "3.0.0"
+        assert str(venv.get_version("python-json-logger")) == "2.0.7"
+
+
+@pytest.mark.online
 def test_install_pipenv_editable(venv):
     """Test invoking installation using information in Pipfile.lock, an editable mode is used."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
@@ -294,6 +304,21 @@ def test_install_poetry_lock_format_2(venv):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
         assert str(venv.get_version("daiquiri")) == "2.0.0"
         assert str(venv.get_version("python-json-logger")) == "2.0.4"
+
+        check_generated_pipfile_lock(os.path.join(work_dir, "Pipfile.lock"), os.path.join(work_dir, "_Pipfile.lock"))
+
+
+@pytest.mark.online
+def test_install_poetry_type_url(venv):
+    """Test invoking installation using information from a Poetry project using url source format."""
+    cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
+    if MICROPIPENV_TEST_TOML_MODULE:
+        venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    work_dir = os.path.join(_DATA_DIR, "install", "poetry_url")
+    with cwd(work_dir):
+        subprocess.run(cmd, check=True, env=get_updated_env(venv))
+        assert str(venv.get_version("daiquiri")) == "3.0.0"
+        assert str(venv.get_version("python-json-logger")) == "2.0.7"
 
         check_generated_pipfile_lock(os.path.join(work_dir, "Pipfile.lock"), os.path.join(work_dir, "_Pipfile.lock"))
 
