@@ -828,6 +828,8 @@ def _poetry2pipfile_lock(
                 # Otherwise, configure it explicitly.
                 if len(sources) > 1:
                     requirement["index"] = entry["source"]["reference"]
+            elif entry["source"]["type"] == "url":
+                requirement["file"] = entry["source"]["url"]
             else:
                 raise NotSupportedError(
                     "micropipenv supports Git VCS or directories, got {} instead".format(entry["source"]["type"])

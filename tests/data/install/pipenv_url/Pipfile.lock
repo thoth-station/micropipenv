@@ -1,0 +1,37 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "6033ee69d81447f2f9a8d500602461b797ec3b57b82a538b681a5f42db13f4df"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.11"
+        },
+        "sources": [
+            {
+                "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "daiquiri": {
+            "file": "https://files.pythonhosted.org/packages/37/9e/5783ab066e5c6ca9600e54c0e015751438737dc4626bef62e383e4c6c659/daiquiri-3.0.0-py3-none-any.whl",
+            "hashes": [
+                "sha256:1df8f03a9a59d82108d7fc4c0e531f0d049191859eab3a6e22df13b46bf123f8"
+            ],
+            "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+            "version": "==3.0.0"
+        },
+        "python-json-logger": {
+            "hashes": [
+                "sha256:23e7ec02d34237c5aa1e29a070193a4ea87583bb4e7f8fd06d3de8264c4b2e1c",
+                "sha256:f380b826a991ebbe3de4d897aeec42760035ac760345e57b812938dc8b35e2bd"
+            ],
+            "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+            "version": "==2.0.7"
+        }
+    },
+    "develop": {}
+}

@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "micropipenv-test"
+version = "0.1.0"
+description = ""
+authors = ["Fridolin Pokorny <fridolin@redhat.com>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+daiquiri = {url = "https://files.pythonhosted.org/packages/37/9e/5783ab066e5c6ca9600e54c0e015751438737dc4626bef62e383e4c6c659/daiquiri-3.0.0-py3-none-any.whl"}
+
+[tool.poetry.dev-dependencies]
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
