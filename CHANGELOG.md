@@ -1,5 +1,11 @@
 # Changelog for Thoth's micropipenv
 
+## [1.5.0] - 2023-Mar-03 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Support for package.source.type = "url" in poetry.lock
+
 ## [1.4.6] - 2023-Feb-18 - Max Gautier <max.gautier@redhat.com>
 
 ### Added
