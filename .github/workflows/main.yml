@@ -17,7 +17,7 @@ jobs:
       uses: actions/checkout@v2
     - name: Run Tox tests
       id: test
-      uses: fedora-python/tox-github-action@master
+      uses: fedora-python/tox-github-action@main
       with:
         tox_env: ${{ matrix.tox_env }}
         dnf_install: /usr/bin/make
