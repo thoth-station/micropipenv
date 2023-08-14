@@ -843,6 +843,7 @@ def test_parse_requirements2pipfile_lock_not_locked():
     "directory",
     (
         "poetry",
+        "poetry_1_5",
         "poetry_default_dev_diff",
         "poetry_default_source_legacy",
         "poetry_legacy_source_and_groups",

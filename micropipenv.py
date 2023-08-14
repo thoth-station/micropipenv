@@ -794,9 +794,20 @@ def _poetry2pipfile_lock(
 
     for entry in poetry_lock["package"]:
 
-        if entry["category"] not in ("dev", "main"):
+        entry_category = entry.get("category")
+
+        # Poetry 1.5+ no longer provides category in poetry.lock so we have to
+        # guess it from the content of pyproject.toml.
+        # All deps in groups are considered dev dependencies.
+        if entry_category is None:
+            if entry["name"] in pyproject_poetry_section.get("dependencies", ()):
+                entry_category = "main"
+            else:
+                entry_category = "dev"
+
+        if entry_category not in ("dev", "main"):
             message = ("Unknown category for package '{}': '{}'. Supported categories are 'dev' and 'main'.").format(
-                entry["name"], entry["category"]
+                entry["name"], entry_category
             )
             raise PoetryError(message)
 
@@ -879,7 +890,7 @@ def _poetry2pipfile_lock(
             # So, if a package is in dev and has a dependency in main, add the dependency also to dev or
             # if a package is already in "add_to_dev", add there also all its dependencies.
             if (
-                entry["category"] == "dev" and dependency_name in pyproject_poetry_section.get("dependencies", ())
+                entry_category == "dev" and dependency_name in pyproject_poetry_section.get("dependencies", ())
             ) or entry["name"] in add_to_dev:
                 add_to_dev.append(dependency_name)
 
@@ -896,12 +907,10 @@ def _poetry2pipfile_lock(
         if "extras" in requirement:
             requirement["extras"] = sorted(requirement["extras"])
 
-        if entry["category"] == "main" and not no_default:
+        if entry_category == "main" and not no_default:
             default[entry["name"]] = requirement
 
-        if (entry["category"] == "dev" and not no_dev) or (
-            entry["name"] in add_to_dev and entry["name"] not in default
-        ):
+        if (entry_category == "dev" and not no_dev) or (entry["name"] in add_to_dev and entry["name"] not in default):
             develop[entry["name"]] = requirement
 
     for dependency_name, markers in additional_markers.items():
