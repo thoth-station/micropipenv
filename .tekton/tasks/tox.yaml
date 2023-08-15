@@ -11,11 +11,19 @@ metadata:
 spec:
   description: >-
     run tox using Fedora-Python
+  params:
+    - name: TOXENV
+      description: >-
+        The tox environment to run.
+      default: "py310"
   steps:
     - name: tox
       image: docker.io/fedorapython/fedora-python-tox:latest
       command:
         - /bin/bash
+      env:
+        - name: TOXENV
+          value: "$(params.TOXENV)"
       args:
         - -c
         - |

@@ -31,11 +31,25 @@ spec:
             value: $(params.repo_url)
           - name: revision
             value: $(params.revision)
-      - name: tox
+      - name: tox-py310
         runAfter:
           - fetch-repository
         taskRef:
           name: tox
+        params:
+          - name: TOXENV
+            value: py310
+        workspaces:
+          - name: source
+            workspace: source
+      - name: tox-py311-pipgit
+        runAfter:
+          - fetch-repository
+        taskRef:
+          name: tox
+        params:
+          - name: TOXENV
+            value: py311-pipgit
         workspaces:
           - name: source
             workspace: source
