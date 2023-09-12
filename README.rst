@@ -180,6 +180,7 @@ To set the default Python Package Index to something other than `https://pypi.or
 .. code-block:: console
 
   export MICROPIPENV_DEFAULT_INDEX_URLS=https://pypi.example.com/simple,https://pypi.org/simple
+  micropipenv install
 
 
 ``micropipenv install --deploy``
