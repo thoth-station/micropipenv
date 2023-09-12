@@ -173,6 +173,15 @@ To create a virtual environment to be used by ``micropipenv``:
 
   python3 -m venv venv/ && . venv/bin/activate
 
+To set the default Python Package Index to something other than ``https://pypi.org/simple``, set the ``MICROPIPENV_DEFAULT_INDEX_URLS`` to one or more comma-separated URLs.
+
+  Note: if the package manager file contains a package index URL, it will be used over this value.
+
+.. code-block:: console
+
+  export MICROPIPENV_DEFAULT_INDEX_URLS=https://pypi.example.com/simple,https://pypi.org/simple
+  micropipenv install
+
 
 ``micropipenv install --deploy``
 ================================

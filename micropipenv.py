@@ -96,7 +96,16 @@ if TYPE_CHECKING:
     from typing import Union
     from pip._internal.req.req_file import ParsedRequirement
 
-_DEFAULT_INDEX_URLS = ("https://pypi.org/simple",)
+
+def get_index_urls():  # type: () -> Tuple[str, ...]
+    """Return parsed MICROPIPENV_DEFAULT_INDEX_URLS env variable or the default value."""
+    urls = os.getenv("MICROPIPENV_DEFAULT_INDEX_URLS")
+    if urls and urls.strip() != "":
+        return tuple([url.strip() for url in urls.split(",")])
+    return ("https://pypi.org/simple",)
+
+
+_DEFAULT_INDEX_URLS = get_index_urls()
 _MAX_DIR_TRAVERSAL = 42  # Avoid any symlinks that would loop.
 _PIP_BIN = os.getenv("MICROPIPENV_PIP_BIN", "pip")
 _SUPPORTED_PIP = SpecifierSet(_SUPPORTED_PIP_STR)
