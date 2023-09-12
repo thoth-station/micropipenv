@@ -96,7 +96,7 @@ if TYPE_CHECKING:
     from typing import Union
     from pip._internal.req.req_file import ParsedRequirement
 
-_DEFAULT_INDEX_URLS = ("https://pypi.org/simple",)
+_DEFAULT_INDEX_URLS = tuple(os.getenv("MICROPIPENV_DEFAULT_INDEX_URLS", "https://pypi.org/simple").split(","))
 _MAX_DIR_TRAVERSAL = 42  # Avoid any symlinks that would loop.
 _PIP_BIN = os.getenv("MICROPIPENV_PIP_BIN", "pip")
 _SUPPORTED_PIP = SpecifierSet(_SUPPORTED_PIP_STR)
