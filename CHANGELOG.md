@@ -1,5 +1,11 @@
 # Changelog for Thoth's micropipenv
 
+## [1.5.1] - 2023-Oct-17 - Lumír Balhar <lbalhar@redhat.com>
+
+### Fixed
+
+* Fix compatibility with poetry 1.5+
+
 ## [1.5.0] - 2023-Mar-03 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
