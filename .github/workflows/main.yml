@@ -75,6 +75,8 @@ jobs:
           py311-pip213,
           py311-piplatest,
           py311-pipgit,
+          py312-piplatest,
+          py312-pipgit,
           mypy,
         ]
 
