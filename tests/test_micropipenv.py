@@ -854,6 +854,7 @@ def test_parse_requirements2pipfile_lock_not_locked():
         "poetry_markers_order",
         "poetry_markers_skip",
         "poetry_markers_transitive_deps",
+        "poetry_normalized_names",
         "poetry_secondary_source",
         "poetry_source_directory",
     ),
