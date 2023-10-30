@@ -792,6 +792,10 @@ def _poetry2pipfile_lock(
     skip_all_markers = object()
     add_to_dev = list()
 
+    normalized_pyproject_poetry_dependencies = [
+        normalize_package_name(name) for name in pyproject_poetry_section.get("dependencies", ())
+    ]
+
     for entry in poetry_lock["package"]:
 
         entry_category = entry.get("category")
@@ -800,7 +804,7 @@ def _poetry2pipfile_lock(
         # guess it from the content of pyproject.toml.
         # All deps in groups are considered dev dependencies.
         if entry_category is None:
-            if entry["name"] in pyproject_poetry_section.get("dependencies", ()):
+            if normalize_package_name(entry["name"]) in normalized_pyproject_poetry_dependencies:
                 entry_category = "main"
             else:
                 entry_category = "dev"
