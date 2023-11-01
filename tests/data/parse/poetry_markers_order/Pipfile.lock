@@ -12,7 +12,7 @@
    }
   ],
   "requires": {
-   "python_version": "3.9"
+   "python_version": "3.11"
   }
  },
  "default": {
@@ -108,7 +108,7 @@
    ],
    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706"
   },
-  "zope.interface": {
+  "zope-interface": {
    "version": "==5.4.0",
    "hashes": [
     "sha256:7df1e1c05304f26faa49fa752a8c690126cf98b40b91d54e6e9cc3b7d6ffe8b7",
