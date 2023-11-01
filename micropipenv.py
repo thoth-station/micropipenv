@@ -797,14 +797,17 @@ def _poetry2pipfile_lock(
     ]
 
     for entry in poetry_lock["package"]:
-
+        # Use normalized names everywhere possible.
+        # Original name is needed for example for getting hashes from poetry.lock.
+        original_name = entry["name"]
+        entry["name"] = normalize_package_name(entry["name"])
         entry_category = entry.get("category")
 
         # Poetry 1.5+ no longer provides category in poetry.lock so we have to
         # guess it from the content of pyproject.toml.
         # All deps in groups are considered dev dependencies.
         if entry_category is None:
-            if normalize_package_name(entry["name"]) in normalized_pyproject_poetry_dependencies:
+            if entry["name"] in normalized_pyproject_poetry_dependencies or entry["name"] in add_to_main:
                 entry_category = "main"
             else:
                 entry_category = "dev"
@@ -818,7 +821,7 @@ def _poetry2pipfile_lock(
         hashes = []
         # Older poetry.lock format contains files in [metadata].
         # New version 2.0 has files in [[package]] section.
-        metadata_file_entries = poetry_lock["metadata"].get("files", {}).get(entry["name"], [])
+        metadata_file_entries = poetry_lock["metadata"].get("files", {}).get(original_name, [])
         package_file_entries = entry.get("files", [])
         for file_entry in metadata_file_entries + package_file_entries:
             hashes.append(file_entry["hash"])
@@ -859,6 +862,7 @@ def _poetry2pipfile_lock(
         extra_dependencies = set()
 
         for dependency_name, dependency_info in entry.get("dependencies", {}).items():
+            dependency_name = normalize_package_name(dependency_name)
             if isinstance(dependency_info, dict):
                 if dependency_info.get("optional", False):
                     extra_dependencies.add(dependency_name)
@@ -870,15 +874,15 @@ def _poetry2pipfile_lock(
             # we have to skip all other additional markers.
             # Also, we don't care about "extra" markers which are computed separatedly
             # and are usually not combined with other markers.
-            if dependency_name not in pyproject_poetry_section.get("dependencies", {}):
+            if dependency_name not in normalized_pyproject_poetry_dependencies:
                 if (
                     isinstance(dependency_info, dict)
                     and "markers" in dependency_info
                     and not dependency_info["markers"].startswith("extra")
                 ):
-                    additional_markers[normalize_package_name(dependency_name)].append(dependency_info["markers"])
+                    additional_markers[dependency_name].append(dependency_info["markers"])
                 else:
-                    additional_markers[normalize_package_name(dependency_name)].append(skip_all_markers)
+                    additional_markers[dependency_name].append(skip_all_markers)
 
             # If package fits into both main and dev categories, poetry add it to the main one.
             # This might be a problem in the following scenario:
@@ -893,9 +897,9 @@ def _poetry2pipfile_lock(
             # all dependencies with their hashes and pinned versions.
             # So, if a package is in dev and has a dependency in main, add the dependency also to dev or
             # if a package is already in "add_to_dev", add there also all its dependencies.
-            if (
-                entry_category == "dev" and dependency_name in pyproject_poetry_section.get("dependencies", ())
-            ) or entry["name"] in add_to_dev:
+            if (entry_category == "dev" and dependency_name in normalized_pyproject_poetry_dependencies) or entry[
+                "name"
+            ] in add_to_dev:
                 add_to_dev.append(dependency_name)
 
         for extra_name, extras_listed in entry.get("extras", {}).items():
@@ -925,20 +929,17 @@ def _poetry2pipfile_lock(
 
         category: Optional[Dict[str, Any]]
 
-        for name in dependency_name, normalize_package_name(dependency_name):
-            if dependency_name in default:
-                category = default
-                break
-            elif dependency_name in develop:
-                category = develop
-                break
+        if dependency_name in default:
+            category = default
+        elif dependency_name in develop:
+            category = develop
         else:
             category = None
 
         if category:
-            all_markers = [category[name].get("markers", None), *markers]
+            all_markers = [category[dependency_name].get("markers", None), *markers]
             all_markers.remove(None)
-            category[name]["markers"] = "(" + ") or (".join(all_markers) + ")"
+            category[dependency_name]["markers"] = "(" + ") or (".join(all_markers) + ")"
 
     if len(sources) == 1:
         # Explicitly assign index if there is just one.
