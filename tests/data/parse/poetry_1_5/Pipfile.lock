@@ -23,20 +23,20 @@
     "sha256:6b235ed15b73b87fd3cc2521aacbb727bf8443a0896dc534b07503841d03cfdb"
    ],
    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706"
-  }
+  },
+  "python-json-logger": {
+    "version": "==0.1.11",
+    "hashes": [
+     "sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"
+    ],
+    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706"
+   }
  },
  "develop": {
   "flexmock": {
    "version": "==0.10.10",
    "hashes": [
     "sha256:8bb073f4b7b590672e8c312e73d6a14f88ae624a867b691462f9e8c24b9f19d1"
-   ],
-   "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706"
-  },
-  "python-json-logger": {
-   "version": "==0.1.11",
-   "hashes": [
-    "sha256:b7a31162f2a01965a5efb94453ce69230ed208468b0bbc7fdfc56e6d8df2e281"
    ],
    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706"
   }
