@@ -791,6 +791,7 @@ def _poetry2pipfile_lock(
     additional_markers = defaultdict(list)
     skip_all_markers = object()
     add_to_dev = list()
+    add_to_main = set()
 
     normalized_pyproject_poetry_dependencies = [
         normalize_package_name(name) for name in pyproject_poetry_section.get("dependencies", ())
@@ -902,6 +903,11 @@ def _poetry2pipfile_lock(
             ] in add_to_dev:
                 add_to_dev.append(dependency_name)
 
+            # If this package is in main category, all of it's dependencies has to be
+            # there as well.
+            if entry_category == "main":
+                add_to_main.add(dependency_name)
+
         for extra_name, extras_listed in entry.get("extras", {}).items():
             # Turn requirement specification into the actual requirement name.
             all_extra_dependencies = set(Requirement(r.split(" ", maxsplit=1)[0]).name for r in extras_listed)
@@ -918,8 +924,24 @@ def _poetry2pipfile_lock(
         if entry_category == "main" and not no_default:
             default[entry["name"]] = requirement
 
-        if (entry_category == "dev" and not no_dev) or (entry["name"] in add_to_dev and entry["name"] not in default):
+        if (entry_category == "dev" or (entry["name"] in add_to_dev and entry["name"] not in default)) and not no_dev:
             develop[entry["name"]] = requirement
+
+    # Post processing categories once more because the category handling above
+    # is not perfect. Let's say we have flask in direct dependencies.
+    # Flask depends on click but click is processed sooner than flask
+    # and because it isn't a direct dependency, it's identified as dev dependency.
+    # Because flask is direct dependency (main category) all of its dependencies
+    # has to be in the main category as well so we move them from develop to default
+    # here.
+    new_develop = dict(develop)
+    for name, requirement in develop.items():
+        if name in add_to_main:
+            if not no_default:
+                default[name] = requirement
+            if name not in add_to_dev:
+                del new_develop[name]
+    develop = new_develop
 
     for dependency_name, markers in additional_markers.items():
         # If a package depends on another package unconditionaly
