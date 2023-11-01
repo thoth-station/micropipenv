@@ -12,7 +12,7 @@
    }
   ],
   "requires": {
-   "python_version": "3.9"
+   "python_version": "3.11"
   }
  },
  "default": {
@@ -25,7 +25,7 @@
    "markers": "(python_version < \"3.8\") or (python_version <= \"3.7\")",
    "index": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706"
   },
-  "jaraco.packaging": {
+  "jaraco-packaging": {
    "version": "==8.2.1",
    "hashes": [
     "sha256:a17fa9ecb912d89950cf137019127321d47857fbe80e3e3d749be813c06b6ca0",
