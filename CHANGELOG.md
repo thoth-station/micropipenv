@@ -1,6 +1,6 @@
 # Changelog for Thoth's micropipenv
 
-## [1.5.2] - 2023-Oct-31 - Lumír Balhar <lbalhar@redhat.com>
+## [1.5.2] - 2023-Nov-07 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
 
@@ -9,6 +9,7 @@
 ### Fixed
 
 * Fix comparing of packages' names in pyproject.toml and poetry.lock
+* Fix support for poetry main/dev groups
 
 ## [1.5.1] - 2023-Oct-17 - Lumír Balhar <lbalhar@redhat.com>
 
