@@ -80,7 +80,7 @@ except Exception:
     raise
 
 try:
-    from typing import TYPE_CHECKING
+    from typing import TYPE_CHECKING, Tuple
 except ImportError:
     TYPE_CHECKING = False
 
@@ -96,7 +96,15 @@ if TYPE_CHECKING:
     from typing import Union
     from pip._internal.req.req_file import ParsedRequirement
 
-_DEFAULT_INDEX_URLS = tuple(os.getenv("MICROPIPENV_DEFAULT_INDEX_URLS", "https://pypi.org/simple").split(","))
+
+def get_index_urls():  # type: () -> tuple[str, ...]
+    value = os.getenv("MICROPIPENV_DEFAULT_INDEX_URLS", "https://pypi.org/simple")
+    if value is None or value == "":
+        value = "https://pypi.org/simple"
+    return tuple([x.strip() for x in value.split(",")])
+
+
+_DEFAULT_INDEX_URLS = get_index_urls()
 _MAX_DIR_TRAVERSAL = 42  # Avoid any symlinks that would loop.
 _PIP_BIN = os.getenv("MICROPIPENV_PIP_BIN", "pip")
 _SUPPORTED_PIP = SpecifierSet(_SUPPORTED_PIP_STR)

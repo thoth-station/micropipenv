@@ -105,6 +105,22 @@ def check_generated_pipfile_lock(pipfile_lock_path, pipfile_lock_path_expected):
 
 
 @pytest.mark.online
+def test_get_index_urls():
+    """Test index url parsing"""
+    os.environ["MICROPIPENV_DEFAULT_INDEX_URLS"] = "https://pypi.org/simple, https://example.org/simple"
+    result = micropipenv.get_index_urls()
+    assert result == ("https://pypi.org/simple", "https://example.org/simple")
+
+    os.environ["MICROPIPENV_DEFAULT_INDEX_URLS"] = "https://example.org/simple"
+    result = micropipenv.get_index_urls()
+    assert result == ("https://example.org/simple",)
+
+    os.environ["MICROPIPENV_DEFAULT_INDEX_URLS"] = ""
+    result = micropipenv.get_index_urls()
+    assert result == ("https://pypi.org/simple",)
+
+
+@pytest.mark.online
 def test_install_pipenv(venv):
     """Test invoking installation using information in Pipfile.lock."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
