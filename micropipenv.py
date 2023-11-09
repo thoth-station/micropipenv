@@ -80,7 +80,7 @@ except Exception:
     raise
 
 try:
-    from typing import TYPE_CHECKING, Tuple
+    from typing import TYPE_CHECKING
 except ImportError:
     TYPE_CHECKING = False
 

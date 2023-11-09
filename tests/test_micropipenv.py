@@ -104,20 +104,16 @@ def check_generated_pipfile_lock(pipfile_lock_path, pipfile_lock_path_expected):
     os.remove(pipfile_lock_path)
 
 
-@pytest.mark.online
-def test_get_index_urls():
+@pytest.mark.parametrize("input,expected", [
+    ["https://pypi.org/simple, https://example.org/simple", ("https://pypi.org/simple", "https://example.org/simple")],
+    ["https://example.org/simple", ("https://example.org/simple",)],
+    ["", ("https://pypi.org/simple",)]
+])
+def test_get_index_urls(input, expected):
     """Test index url parsing"""
-    os.environ["MICROPIPENV_DEFAULT_INDEX_URLS"] = "https://pypi.org/simple, https://example.org/simple"
+    os.environ["MICROPIPENV_DEFAULT_INDEX_URLS"] = input
     result = micropipenv.get_index_urls()
-    assert result == ("https://pypi.org/simple", "https://example.org/simple")
-
-    os.environ["MICROPIPENV_DEFAULT_INDEX_URLS"] = "https://example.org/simple"
-    result = micropipenv.get_index_urls()
-    assert result == ("https://example.org/simple",)
-
-    os.environ["MICROPIPENV_DEFAULT_INDEX_URLS"] = ""
-    result = micropipenv.get_index_urls()
-    assert result == ("https://pypi.org/simple",)
+    assert result == expected
 
 
 @pytest.mark.online
