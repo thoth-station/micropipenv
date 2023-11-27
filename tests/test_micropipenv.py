@@ -308,11 +308,11 @@ def test_install_poetry_complex_example(venv):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
         assert str(venv.get_version("requests")) == "2.27.1"
         # Dependency defined as requests[use_chardet_on_py3] extra
-        assert venv.get_version_or_none("chardet") is not None
+        assert venv.get_version("chardet", raises=False) is not None
         # unicodedata2 is provided as charset-normalizer[unicode_backport] but is not specified for installation
-        assert venv.get_version_or_none("unicodedata2") is None
+        assert venv.get_version("unicodedata2", raises=False) is None
         # also, requests[socks] or urllib3[socks] should not be installed
-        assert venv.get_version_or_none("PySocks") is None
+        assert venv.get_version("PySocks", raises=False) is None
 
 
 @pytest.mark.online
