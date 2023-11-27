@@ -20,7 +20,6 @@
 import pytest
 import os
 import subprocess
-import sys
 from tempfile import TemporaryDirectory
 
 try:
@@ -52,14 +51,6 @@ def _venv_install_pip(venv):
 
     if MICROPIPENV_TEST_SETUPTOOLS_VERSION is not None:
         venv.install(f"setuptools{MICROPIPENV_TEST_SETUPTOOLS_VERSION}")
-    elif sys.version_info >= (3, 12):
-        # pytest-venv does not work with Python 3.12
-        # because it uses pkg_resources in venv but
-        # setuptools is not in the venv by default for 3.12+
-        # This branch can be removed when
-        # https://github.com/mmerickel/pytest-venv/issues/5
-        # is fixed and released
-        venv.install("setuptools")
 
 
 def _venv_get_version_or_none(self, package):
