@@ -19,7 +19,6 @@
 
 import pytest
 import os
-import subprocess
 from tempfile import TemporaryDirectory
 
 try:
@@ -53,18 +52,6 @@ def _venv_install_pip(venv):
         venv.install(f"setuptools{MICROPIPENV_TEST_SETUPTOOLS_VERSION}")
 
 
-def _venv_get_version_or_none(self, package):
-    """Extend the original method from pytest-venv fixture.
-
-    See https://github.com/mmerickel/pytest-venv/issues/3
-    """
-    try:
-        version = self.get_version(package)
-        return version
-    except subprocess.CalledProcessError:
-        return None
-
-
 def pytest_configure(config):
     """Configure tests before pytest collects tests."""
     global PIP_VERSION
@@ -94,7 +81,6 @@ def venv_with_pip():
 
     with TemporaryDirectory() as tmp_dir:
         # Extend the VirtulEnvironment class first
-        VirtualEnvironment.get_version_or_none = _venv_get_version_or_none
         venv = VirtualEnvironment(str(tmp_dir))
         venv.create()
         _venv_install_pip(venv)
