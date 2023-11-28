@@ -1,5 +1,15 @@
 # Changelog for Thoth's micropipenv
 
+## [1.6.0] - 2023-Nov-28 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Possibility to override the default index URL via `MICROPIPENV_DEFAULT_INDEX_URLS`
+
+### Fixed
+
+* Tests with Python 3.12 without setuptools by default in virtual environments
+
 ## [1.5.2] - 2023-Nov-07 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
