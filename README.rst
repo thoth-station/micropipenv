@@ -163,15 +163,41 @@ Use double dashes to distinguish ``pip`` options from ``micropipenv`` options.
   # issue `pip install --user'
   micropipenv install -- --user
 
-``micropipenv`` does not create any virtual environment as in case of
-Pipenv/Poetry.  It rather directly talks to ``pip``, if necessary, and
-constructs arguments out of the lock file used.
 
-To create a virtual environment to be used by ``micropipenv``:
+Virtual environment management
+==============================
+
+``micropipenv`` does not create any virtual environment as in the case of
+Pipenv/Poetry.  It simply executes ``pip``, and constructs arguments out of the
+lock file used. ``pip``'s default behaviour is to install its arguments into
+the same Python environment where ``pip`` is installed (i.e., the system Python
+environment).
+
+To rather install its arguments into a virtual environment, run ``micropipenv``
+from a shell where that virtual environment has been activated. This causes
+``micropipenv`` to run the ``pip`` command already installed in the virtual
+environment:
 
 .. code-block:: console
 
-  python3 -m venv venv/ && . venv/bin/activate
+  python3 -m venv venv/ && (. venv/bin/activate && micropipenv install)
+
+Alternatively, ``micropipenv`` can run the ``pip`` command from the system
+Python environment, which can in turn be told to install its arguments into an
+explicitly specified virtual environment by using the ``PIP_PYTHON``
+environment variable.
+
+This allows for the installation of dependencies into a minimal virtual
+environment that does not itself have ``pip`` and its dependencies installed
+into it:
+
+.. code-block:: console
+
+  python3 -m venv venv/ --without-pip && PIP_PYTHON=venv/bin/python micropipenv install
+
+
+Using another package index
+===========================
 
 To set the default Python Package Index to something other than ``https://pypi.org/simple``, set the ``MICROPIPENV_DEFAULT_INDEX_URLS`` to one or more comma-separated URLs.
 
@@ -319,7 +345,6 @@ omitted):
   $ python3 -m venv venv/
   $ . venv/bin/activate
   (venv) $ micropipenv install --dev
-
 
 Perform deployment of an application as Pipenv would do with Python interpreter
 version check and Pipfile file hash check (you can create virtual environment
