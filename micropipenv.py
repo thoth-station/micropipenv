@@ -847,7 +847,7 @@ def _poetry2pipfile_lock(
         if "source" in entry:
             if entry["source"]["type"] == "git":
                 requirement["git"] = entry["source"]["url"]
-                requirement["ref"] = entry["source"]["reference"]
+                requirement["ref"] = entry["source"].get("resolved_reference", entry["source"]["reference"])
                 try:
                     requirement["subdirectory"] = entry["source"]["subdirectory"]
                 except KeyError:
