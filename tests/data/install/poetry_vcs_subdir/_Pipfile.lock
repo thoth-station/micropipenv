@@ -18,7 +18,7 @@
     "default": {
         "pygstc": {
             "git": "https://github.com/RidgeRun/gstd-1.x.git",
-            "ref": "v0.13.2",
+            "ref": "5cd3e718028daeae234a0898768b162862a304f9",
             "subdirectory": "libgstc/python",
             "version": "==0.2.1"
         }

@@ -65,7 +65,7 @@
         },
         "daiquiri": {
             "git": "https://github.com/jd/daiquiri",
-            "ref": "2.1.0",
+            "ref": "080a7b9076ede4d4c5e300be13f4c9a34c271bb5",
             "version": "==2.1.0"
         },
         "graphviz": {
