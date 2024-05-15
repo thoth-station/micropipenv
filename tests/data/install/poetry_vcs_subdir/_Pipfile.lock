@@ -1,0 +1,27 @@
+{
+    "_meta": {
+        "hash": {
+            "sha256": "05ffc83da0ac914ee0ee2d0535c14f694918c45df35680bbe1ebc637d5c49e1c"
+        },
+        "pipfile-spec": 6,
+        "requires": {
+            "python_version": "3.7"
+        },
+        "sources": [
+            {
+                "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                "url": "https://pypi.org/simple",
+                "verify_ssl": true
+            }
+        ]
+    },
+    "default": {
+        "pygstc": {
+            "git": "https://github.com/RidgeRun/gstd-1.x.git",
+            "ref": "v0.13.2",
+            "subdirectory": "libgstc/python",
+            "version": "==0.2.1"
+        }
+    },
+    "develop": {}
+}

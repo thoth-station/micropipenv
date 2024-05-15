@@ -848,6 +848,10 @@ def _poetry2pipfile_lock(
             if entry["source"]["type"] == "git":
                 requirement["git"] = entry["source"]["url"]
                 requirement["ref"] = entry["source"]["reference"]
+                try:
+                    requirement["subdirectory"] = entry["source"]["subdirectory"]
+                except KeyError:
+                    pass
             elif entry["source"]["type"] == "directory":
                 requirement["path"] = entry["source"]["url"]
             elif entry["source"]["type"] == "legacy":

@@ -255,6 +255,20 @@ def test_install_poetry_vcs(venv):
 
 
 @pytest.mark.online
+def test_install_poetry_vcs_subdir(venv):
+    """Test invoking installation using information from a Poetry project, a git version and a subdirectory are used."""
+    cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
+    if MICROPIPENV_TEST_TOML_MODULE:
+        venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    work_dir = os.path.join(_DATA_DIR, "install", "poetry_vcs_subdir")
+    with cwd(work_dir):
+        subprocess.run(cmd, check=True, env=get_updated_env(venv))
+        assert str(venv.get_version("pygstc")) == "0.2.1"
+
+        check_generated_pipfile_lock(os.path.join(work_dir, "Pipfile.lock"), os.path.join(work_dir, "_Pipfile.lock"))
+
+
+@pytest.mark.online
 def test_install_poetry_directory(venv):
     """Test invoking installation using information from a Poetry project, a directory source is used."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "poetry"]
