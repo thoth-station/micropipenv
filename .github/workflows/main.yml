@@ -37,8 +37,6 @@ jobs:
           py37-pip193-toml,
           py37-pip203-toml,
           py37-pip213-toml,
-          py37-piplatest-toml,
-          py37-pipgit-toml,
           py38-pip90-toml,
           py38-pip192-toml,
           py38-pip193-toml,
