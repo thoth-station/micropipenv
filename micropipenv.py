@@ -806,21 +806,40 @@ def _poetry2pipfile_lock(
         normalize_package_name(name) for name in pyproject_poetry_section.get("dependencies", ())
     ]
 
-    for entry in poetry_lock["package"]:
+    normalized_pyproject_poetry_dev_dependencies = []
+
+    groups = pyproject_poetry_section.get("group", {})
+    for group, content in groups.items():
+        print(group)
+        if "dependencies" in content:
+            normalized_pyproject_poetry_dev_dependencies.extend(
+                [normalize_package_name(name) for name in content["dependencies"]]
+            )
+
+    # Double-ended queue for entries
+    entries_queue = deque(poetry_lock["package"])
+
+    while entries_queue:
+        entry = entries_queue.popleft()
+
+        entry_category = entry.get("category")
+
+        # Poetry 1.5+ no longer provides category in poetry.lock so we have to
+        # guess it from the content of pyproject.toml and dependency graph.
+        if entry_category is None:
+            if entry["name"] in normalized_pyproject_poetry_dependencies or entry["name"] in add_to_main:
+                entry_category = "main"
+            elif entry["name"] in normalized_pyproject_poetry_dev_dependencies or entry["name"] in add_to_dev:
+                entry_category = "dev"
+            else:
+                # If we don't know the category yet, process the package later
+                entries_queue.append(entry)
+                continue
+
         # Use normalized names everywhere possible.
         # Original name is needed for example for getting hashes from poetry.lock.
         original_name = entry["name"]
         entry["name"] = normalize_package_name(entry["name"])
-        entry_category = entry.get("category")
-
-        # Poetry 1.5+ no longer provides category in poetry.lock so we have to
-        # guess it from the content of pyproject.toml.
-        # All deps in groups are considered dev dependencies.
-        if entry_category is None:
-            if entry["name"] in normalized_pyproject_poetry_dependencies or entry["name"] in add_to_main:
-                entry_category = "main"
-            else:
-                entry_category = "dev"
 
         if entry_category not in ("dev", "main"):
             message = ("Unknown category for package '{}': '{}'. Supported categories are 'dev' and 'main'.").format(
@@ -911,9 +930,7 @@ def _poetry2pipfile_lock(
             # all dependencies with their hashes and pinned versions.
             # So, if a package is in dev and has a dependency in main, add the dependency also to dev or
             # if a package is already in "add_to_dev", add there also all its dependencies.
-            if (entry_category == "dev" and dependency_name in normalized_pyproject_poetry_dependencies) or entry[
-                "name"
-            ] in add_to_dev:
+            if entry_category == "dev":
                 add_to_dev.append(dependency_name)
 
             # If this package is in main category, all of it's dependencies has to be
