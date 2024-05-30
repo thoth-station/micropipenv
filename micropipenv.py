@@ -799,8 +799,8 @@ def _poetry2pipfile_lock(
 
     additional_markers = defaultdict(list)
     skip_all_markers = object()
-    add_to_dev = list()
-    add_to_main = set()
+    dev_category = set()
+    main_category = set()
 
     normalized_pyproject_poetry_dependencies = [
         normalize_package_name(name) for name in pyproject_poetry_section.get("dependencies", ())
@@ -822,30 +822,21 @@ def _poetry2pipfile_lock(
     while entries_queue:
         entry = entries_queue.popleft()
 
-        entry_category = entry.get("category")
-
-        # Poetry 1.5+ no longer provides category in poetry.lock so we have to
-        # guess it from the content of pyproject.toml and dependency graph.
-        if entry_category is None:
-            if entry["name"] in normalized_pyproject_poetry_dependencies or entry["name"] in add_to_main:
-                entry_category = "main"
-            elif entry["name"] in normalized_pyproject_poetry_dev_dependencies or entry["name"] in add_to_dev:
-                entry_category = "dev"
-            else:
-                # If we don't know the category yet, process the package later
-                entries_queue.append(entry)
-                continue
-
         # Use normalized names everywhere possible.
         # Original name is needed for example for getting hashes from poetry.lock.
         original_name = entry["name"]
         entry["name"] = normalize_package_name(entry["name"])
 
-        if entry_category not in ("dev", "main"):
-            message = ("Unknown category for package '{}': '{}'. Supported categories are 'dev' and 'main'.").format(
-                entry["name"], entry_category
-            )
-            raise PoetryError(message)
+        # Poetry 1.5+ no longer provides category in poetry.lock so we have to
+        # guess it from the content of pyproject.toml and dependency graph.
+        if entry.get("category") == "main" or entry["name"] in normalized_pyproject_poetry_dependencies:
+            main_category.add(entry["name"])
+        if entry.get("category") == "dev" or entry["name"] in normalized_pyproject_poetry_dev_dependencies:
+            dev_category.add(entry["name"])
+        if entry["name"] not in main_category and entry["name"] not in dev_category:
+            # If we don't know the category yet, process the package later
+            entries_queue.append(entry)
+            continue
 
         hashes = []
         # Older poetry.lock format contains files in [metadata].
@@ -929,14 +920,14 @@ def _poetry2pipfile_lock(
             # only package B but no package A. But using requirements file requires to have
             # all dependencies with their hashes and pinned versions.
             # So, if a package is in dev and has a dependency in main, add the dependency also to dev or
-            # if a package is already in "add_to_dev", add there also all its dependencies.
-            if entry_category == "dev":
-                add_to_dev.append(dependency_name)
+            # if a package is already in "dev_category", add there also all its dependencies.
+            if entry["name"] in dev_category:
+                dev_category.add(dependency_name)
 
             # If this package is in main category, all of it's dependencies has to be
             # there as well.
-            if entry_category == "main":
-                add_to_main.add(dependency_name)
+            if entry["name"] in main_category:
+                main_category.add(dependency_name)
 
         for extra_name, extras_listed in entry.get("extras", {}).items():
             # Turn requirement specification into the actual requirement name.
@@ -951,27 +942,11 @@ def _poetry2pipfile_lock(
         if "extras" in requirement:
             requirement["extras"] = sorted(requirement["extras"])
 
-        if entry_category == "main" and not no_default:
+        if not no_default and entry["name"] in main_category:
             default[entry["name"]] = requirement
 
-        if (entry_category == "dev" or (entry["name"] in add_to_dev and entry["name"] not in default)) and not no_dev:
+        if not no_dev and (entry["name"] in dev_category):
             develop[entry["name"]] = requirement
-
-    # Post processing categories once more because the category handling above
-    # is not perfect. Let's say we have flask in direct dependencies.
-    # Flask depends on click but click is processed sooner than flask
-    # and because it isn't a direct dependency, it's identified as dev dependency.
-    # Because flask is direct dependency (main category) all of its dependencies
-    # has to be in the main category as well so we move them from develop to default
-    # here.
-    new_develop = dict(develop)
-    for name, requirement in develop.items():
-        if name in add_to_main:
-            if not no_default:
-                default[name] = requirement
-            if name not in add_to_dev:
-                del new_develop[name]
-    develop = new_develop
 
     for dependency_name, markers in additional_markers.items():
         # If a package depends on another package unconditionaly
