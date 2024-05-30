@@ -1301,16 +1301,28 @@ def requirements_str(
 
     result = _get_index_entry_str(sections)
 
+    included = set()
+
     if not no_comments and sections.get("default"):
         result += "#\n# Default dependencies\n#\n"
 
     for package_name, info in sections.get("default", {}).items():
+        if package_name in included:
+            continue
+        else:
+            included.add(package_name)
+
         result += _get_package_entry_str(package_name, info, no_versions=no_versions, no_hashes=no_hashes)
 
     if not no_comments and sections.get("develop"):
         result += "#\n# Dev dependencies\n#\n"
 
     for package_name, info in sections.get("develop", {}).items():
+        if package_name in included:
+            continue
+        else:
+            included.add(package_name)
+
         result += _get_package_entry_str(package_name, info, no_versions=no_versions, no_hashes=no_hashes)
 
     return result
