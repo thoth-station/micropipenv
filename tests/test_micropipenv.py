@@ -373,6 +373,30 @@ def test_install_poetry_type_url(venv):
 
 
 @pytest.mark.online
+def test_install_poetry_complex_dep_tree_deploy(venv):
+    """Test invoking installation using information from a Poetry project using url source format."""
+    cmd = [
+        os.path.join(venv.path, BIN_DIR, "python"),
+        micropipenv.__file__,
+        "install",
+        "--method",
+        "poetry",
+        "--deploy",
+    ]
+    if MICROPIPENV_TEST_TOML_MODULE:
+        venv.install(MICROPIPENV_TEST_TOML_MODULE)
+    work_dir = os.path.join(_DATA_DIR, "install", "poetry_complex_dep_tree")
+    with cwd(work_dir):
+        subprocess.run(cmd, check=True, env=get_updated_env(venv))
+        assert venv.get_version("h2", raises=False) is not None
+        assert venv.get_version("hpack", raises=False) is not None
+        assert venv.get_version("hyperframe", raises=False) is not None
+        assert venv.get_version("wsproto", raises=False) is not None
+
+        check_generated_pipfile_lock(os.path.join(work_dir, "Pipfile.lock"), os.path.join(work_dir, "_Pipfile.lock"))
+
+
+@pytest.mark.online
 def test_install_pipenv_env_vars(venv):
     """Test installation using enviroment variables in source URL."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
