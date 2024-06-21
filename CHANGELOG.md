@@ -1,5 +1,15 @@
 # Changelog for Thoth's micropipenv
 
+## [1.7.0] - 2024-Jun-21 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Test with pip=24.1
+
+### Fixed
+
+* Implementation of default/devel package groups
+
 ## [1.6.0] - 2023-Nov-28 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
