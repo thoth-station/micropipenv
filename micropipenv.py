@@ -810,7 +810,6 @@ def _poetry2pipfile_lock(
 
     groups = pyproject_poetry_section.get("group", {})
     for group, content in groups.items():
-        print(group)
         if "dependencies" in content:
             normalized_pyproject_poetry_dev_dependencies.extend(
                 [normalize_package_name(name) for name in content["dependencies"]]
