@@ -961,6 +961,37 @@ def test_parse_poetry2pipfile_lock(directory, options, expected_file):
         assert python_version == "{}.{}".format(sys.version_info.major, sys.version_info.minor)
 
 
+def test_parse_poetry2pipfile_source_without_url():
+    """Test parsing Poetry files with source without URL"""
+    work_dir = os.path.join(_DATA_DIR, "parse", "poetry_source_without_url")
+    with cwd(work_dir):
+        pipfile_lock = micropipenv._poetry2pipfile_lock(only_direct=True)
+
+        python_version = pipfile_lock["_meta"]["requires"].pop("python_version")
+        assert python_version == "{}.{}".format(sys.version_info.major, sys.version_info.minor)
+
+        assert pipfile_lock == {
+            "_meta": {
+                "hash": {"sha256": "735029730bde8fac7a13976310edf93d63ef123733a43758632ed3e2879c22ec"},
+                "pipfile-spec": 6,
+                "requires": {},
+                "sources": [
+                    {
+                        "name": "5a06749b2297be54ac5699f6f2761716adc5001a2d5f8b915ab2172922dd5706",
+                        "url": "https://pypi.org/simple",
+                        "verify_ssl": True,
+                    },
+                    {
+                        "name": "PyPI",
+                        "verify_ssl": True,
+                    },
+                ],
+            },
+            "default": {"daiquiri": "==2.0.0"},
+            "develop": {"flexmock": "^0.10.4"},
+        }
+
+
 @pytest.mark.parametrize(
     "test,options,expected_file",
     [

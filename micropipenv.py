@@ -760,7 +760,10 @@ def _poetry2pipfile_lock(
     sources = []
     has_default = False  # If default flag is set, it disallows PyPI.
     for item in pyproject_poetry_section.get("source", []):
-        sources.append({"name": item["name"], "url": item["url"], "verify_ssl": True})
+        source = {"name": item["name"], "verify_ssl": True}
+        if item.get("url"):
+            source["url"] = item.get("url")
+        sources.append(source)
 
         has_default = has_default or item.get("default", False)
 
