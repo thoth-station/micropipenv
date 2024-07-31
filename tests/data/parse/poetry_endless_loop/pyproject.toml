@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "aaa"
+version = "0.1.0"
+description = ""
+authors = ["Fridolin Pokorny <fridolin@redhat.com>"]
+
+[tool.poetry.dependencies]
+daiquiri = "2.0.0"
+
+[[tool.poetry.source]]
+name = "PyPI"
+priority = "primary"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"
