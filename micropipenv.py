@@ -820,6 +820,11 @@ def _poetry2pipfile_lock(
 
     # Double-ended queue for entries
     entries_queue = deque(poetry_lock["package"])
+    # Record of attempts of getting a category of an entry
+    # to potentially break endless loop caused by corrupted metadata.
+    # Example: a package is in poetry.lock but it's neither direct
+    # nor indirect dependency.
+    entry_category_attempts = defaultdict(int)  # type: Dict[str, int]
 
     while entries_queue:
         entry = entries_queue.popleft()
@@ -837,6 +842,9 @@ def _poetry2pipfile_lock(
             dev_category.add(entry["name"])
         if entry["name"] not in main_category and entry["name"] not in dev_category:
             # If we don't know the category yet, process the package later
+            entry_category_attempts[entry["name"]] += 1
+            if entry_category_attempts[entry["name"]] > 3:
+                raise PoetryError(f"Failed to find package category for: {entry['name']}")
             entries_queue.append(entry)
             continue
 

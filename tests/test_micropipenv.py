@@ -992,6 +992,14 @@ def test_parse_poetry2pipfile_source_without_url():
         }
 
 
+def test_parse_poetry2pipfile_causing_endless_loop():
+    """Test parsing Poetry files with source without URL"""
+    work_dir = os.path.join(_DATA_DIR, "parse", "poetry_endless_loop")
+    with cwd(work_dir):
+        with pytest.raises(micropipenv.PoetryError, match="Failed to find package category for: flexmock"):
+            micropipenv._poetry2pipfile_lock()
+
+
 @pytest.mark.parametrize(
     "test,options,expected_file",
     [
