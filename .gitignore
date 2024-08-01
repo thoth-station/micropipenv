@@ -102,3 +102,8 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+
+# These files are created by tests run but are useless
+tests/data/install/pip-tools_direct_reference/requirements.txt
+tests/data/install/poetry_secondary_source/Pipfile.lock
+tests/data/install/requirements_editable/Pipfile.lock
