@@ -1,5 +1,16 @@
 # Changelog for Thoth's micropipenv
 
+## [1.8.0] - 2024-Aug-01 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Test with pip=24.2
+
+### Fixed
+
+* Support for `[[tool.poetry.source]]` without any URL
+* Terminal condition for possible endless loops in the implementation of default/devel package groups
+
 ## [1.7.0] - 2024-Jun-21 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
