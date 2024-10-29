@@ -1,5 +1,12 @@
 # Changelog for Thoth's micropipenv
 
+## [1.8.1] - 2024-Oct-29 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Test with pip=24.3.1
+* Test with Python 3.13
+
 ## [1.8.0] - 2024-Aug-01 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
