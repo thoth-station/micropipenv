@@ -12,6 +12,9 @@ sed -i "/_SUPPORTED_PIP_STR/s/<=[^\"]*\"/<=$PIP_VERSION\"/" micropipenv.py
 if [[ -n $(git status --porcelain --untracked-files=no) ]]; then
   echo "New pip available"
 
+  # Show the diff first
+  git --no-pager diff
+
   # Commit the change
   git config --global user.email "lbalhar@redhat.com"
   git config --global user.name "Lumír Balhar"
