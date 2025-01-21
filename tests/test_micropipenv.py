@@ -1300,7 +1300,7 @@ def test_get_package_entry_str(info, expected):
     assert result == expected
 
 
-@pytest.mark.parametrize("path", ["poetry", "poetry_group", "poetry_project"])
+@pytest.mark.parametrize("path", ["poetry", "poetry_group", "poetry_2_project"])
 def test_poetry_lockfile_verify(path):
     """Test verifying poetry lockfile."""
     with cwd(os.path.join(_DATA_DIR, "verify", path)):

@@ -310,22 +310,28 @@ def _compute_poetry_hash(pyproject):  # type: (MutableMapping[str, Any]) -> str
     project_data = pyproject.get("project", {})
     poetry_data = pyproject.get("tool", {}).get("poetry", {})
 
+    # legacy_keys are the original (pre poetry 2) concept, and should be in
+    # the relevant_content even if their value is None as long as it is not a poetry 2 config.
     legacy_keys = ["dependencies", "source", "extras", "dev-dependencies"]
-    # relevant_keys are the original concept, and they should always be in
-    # the relevant_content even if their value is None.
-    # group is a new key since poetry 1.2, and we must include it only
+    # group is a new key since poetry 1.2, and must be included
     # if pyproject.toml contains it. Including it always would break
     # backward compatibility.
     # See: https://github.com/python-poetry/poetry/blob/4a07b5e0243bb8879dd6725cb901d9fa0f6eb182/src/poetry/packages/locker.py#L278-L293
     relevant_keys = [*legacy_keys, "group"]
     relevant_project_keys = ["requires-python", "dependencies", "optional-dependencies"]
 
-    relevant_project_content = {k: project_data.get(k) for k in relevant_project_keys if project_data.get(k)}
-    relevant_poetry_content = {k: poetry_data.get(k) for k in relevant_keys if poetry_data.get(k) or (k in legacy_keys and not relevant_project_content)}
+    relevant_project_content = {k: project_data[k] for k in relevant_project_keys if project_data.get(k)}
+    relevant_poetry_content = {}
+    for key in relevant_keys:
+        value = poetry_data.get(key)
+        # Set legacy keys as None for backwards compatibility to older poetry configs
+        if not value and (key not in legacy_keys or relevant_project_content):
+            continue
+        relevant_poetry_content[key] = value
 
     relevant_content = relevant_poetry_content
     if relevant_project_content:
-        # project is a new concept since poetry 2.0 and must be used if new format is used
+        # project is introduced as the new format in poetry 2.0 and must be used when configured.
         # Always using the new format would break backward compatibility.
         # See: https://github.com/python-poetry/poetry/blob/6f6fd7012983a2e749c6030c1f5f155fd4397058/src/poetry/packages/locker.py#L266-L302
         relevant_content = {
