@@ -307,18 +307,31 @@ def _compute_pipfile_hash(pipfile):  # type: (Dict[str, Any]) -> str
 
 def _compute_poetry_hash(pyproject):  # type: (MutableMapping[str, Any]) -> str
     """Compute pyproject.toml hash based on poetry content."""
-    poetry_data = pyproject["tool"]["poetry"]
-    relevant_keys = ["dependencies", "dev-dependencies", "source", "extras"]
-    relevant_content = {key: poetry_data.get(key) for key in relevant_keys}
+    project_data = pyproject.get("project", {})
+    poetry_data = pyproject.get("tool", {}).get("poetry", {})
 
-    # relevant_keys are the original one and they should always be in
-    # the relevant_content even their value is None.
-    # group is a new key since poetry 1.2 and we should include it only
+    legacy_keys = ["dependencies", "source", "extras", "dev-dependencies"]
+    # relevant_keys are the original concept, and they should always be in
+    # the relevant_content even if their value is None.
+    # group is a new key since poetry 1.2, and we must include it only
     # if pyproject.toml contains it. Including it always would break
     # backward compatibility.
     # See: https://github.com/python-poetry/poetry/blob/4a07b5e0243bb8879dd6725cb901d9fa0f6eb182/src/poetry/packages/locker.py#L278-L293
-    if "group" in poetry_data:
-        relevant_content["group"] = poetry_data.get("group")
+    relevant_keys = [*legacy_keys, "group"]
+    relevant_project_keys = ["requires-python", "dependencies", "optional-dependencies"]
+
+    relevant_project_content = {k: project_data.get(k) for k in relevant_project_keys if project_data.get(k)}
+    relevant_poetry_content = {k: poetry_data.get(k) for k in relevant_keys if poetry_data.get(k) or (k in legacy_keys and not relevant_project_content)}
+
+    relevant_content = relevant_poetry_content
+    if relevant_project_content:
+        # project is a new concept since poetry 2.0 and must be used if new format is used
+        # Always using the new format would break backward compatibility.
+        # See: https://github.com/python-poetry/poetry/blob/6f6fd7012983a2e749c6030c1f5f155fd4397058/src/poetry/packages/locker.py#L266-L302
+        relevant_content = {
+            "project": relevant_project_content,
+            "tool": {"poetry": relevant_content},
+        }
 
     return hashlib.sha256(json.dumps(relevant_content, sort_keys=True).encode()).hexdigest()
 
