@@ -1,5 +1,15 @@
 # Changelog for Thoth's micropipenv
 
+## [1.9.0] - 2025-Jan-23 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Support for Poetry 2.0
+
+### Removed
+
+* Python 3.7 from CI
+
 ## [1.8.1] - 2024-Oct-29 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
