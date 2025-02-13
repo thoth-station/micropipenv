@@ -45,6 +45,7 @@ from collections import defaultdict, deque, OrderedDict
 from itertools import chain
 from importlib import import_module
 from pathlib import Path
+from typing import TYPE_CHECKING
 from urllib.parse import urlparse
 
 _LOGGER = logging.getLogger(__title__)
@@ -78,11 +79,6 @@ try:
 except Exception:
     _LOGGER.error("Check your pip version, supported pip versions: %s", _SUPPORTED_PIP_STR)
     raise
-
-try:
-    from typing import TYPE_CHECKING
-except ImportError:
-    TYPE_CHECKING = False
 
 if TYPE_CHECKING:
     from typing import Any
