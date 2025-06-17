@@ -19,6 +19,7 @@
 
 import pytest
 import os
+import sys
 from tempfile import TemporaryDirectory
 
 try:
@@ -50,6 +51,10 @@ def _venv_install_pip(venv):
 
     if MICROPIPENV_TEST_SETUPTOOLS_VERSION is not None:
         venv.install(f"setuptools{MICROPIPENV_TEST_SETUPTOOLS_VERSION}")
+
+    if sys.version_info >= (3, 9):
+        # Newer versions will depend in packaging
+        venv.install("wheel==0.45.1")
 
 
 def pytest_configure(config):
