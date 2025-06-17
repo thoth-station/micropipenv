@@ -189,14 +189,10 @@ def test_install_pipenv_editable(venv):
             assert str(venv.get_version("daiquiri")) == "2.0.0"
             assert str(venv.get_version("python-json-logger")) == "0.1.11"
             assert str(venv.get_version("micropipenv-editable-test")) == "1.2.3"
-            if sys.version_info >= (3, 12):
-                assert (
-                    len(glob.glob(os.path.join(venv.path, *SP_DIR, "__editable__*micropipenv_editable_test*"))) == 2
-                ), "No __editable__ files found for editable install"
-            else:
-                assert (
-                    len(glob.glob(os.path.join(venv.path, *SP_DIR, "micropipenv-editable-test.egg-link"))) == 1
-                ), "No egg-link found for editable install"
+            editable_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "__editable__*micropipenv_editable_test*")))
+            egg_link_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "micropipenv-editable-test.egg-link")))
+            if editable_files != 2 and egg_link_files != 1:
+                assert False, "No __editable__ or egg-link files found for editable install"
         finally:
             # Clean up this file, can cause issues across multiple test runs.
             shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
@@ -216,14 +212,10 @@ def test_install_pipenv_vcs_editable(venv):
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_vcs_editable")):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
         assert str(venv.get_version("daiquiri")) == "1.6.0"
-        if sys.version_info >= (3, 12):
-            assert (
-                len(glob.glob(os.path.join(venv.path, *SP_DIR, "__editable__*daiquiri*"))) == 2
-            ), "No __editable__ files found for editable install"
-        else:
-            assert (
-                len(glob.glob(os.path.join(venv.path, *SP_DIR, "daiquiri.egg-link"))) == 1
-            ), "No egg-link found for editable install"
+        editable_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "__editable__*daiquiri*")))
+        egg_link_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "daiquiri.egg-link")))
+        if editable_files != 2 and egg_link_files != 1:
+            assert False, "No __editable__ or egg-link files found for editable install"
 
 
 @pytest.mark.online
@@ -474,14 +466,10 @@ def test_install_pip_editable(venv):
             subprocess.run(cmd, check=True, env=get_updated_env(venv))
             assert str(venv.get_version("micropipenv-editable-test")) == "3.3.3"
             assert str(venv.get_version("q")) == "1.0"
-            if sys.version_info >= (3, 12):
-                assert (
-                    len(glob.glob(os.path.join(venv.path, *SP_DIR, "__editable__*micropipenv_editable_test*"))) == 2
-                ), "No __editable__ files found for editable install"
-            else:
-                assert (
-                    len(glob.glob(os.path.join(venv.path, *SP_DIR, "micropipenv-editable-test.egg-link"))) == 1
-                ), "No egg-link found for editable install"
+            editable_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "__editable__*micropipenv_editable_test*")))
+            egg_link_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "micropipenv-editable-test.egg-link")))
+            if editable_files != 2 and egg_link_files != 1:
+                assert False, "No __editable__ or egg-link files found for editable install"
         finally:
             # Clean up this file, can cause issues across multiple test runs.
             shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
@@ -498,15 +486,10 @@ def test_install_pip_tools_editable(venv):
             assert str(venv.get_version("micropipenv-editable-test")) == "3.2.1"
             assert str(venv.get_version("daiquiri")) == "2.0.0"
             assert str(venv.get_version("python-json-logger")) == "0.1.11"
-            if sys.version_info >= (3, 12):
-                assert (
-                    len(glob.glob(os.path.join(venv.path, *SP_DIR, "__editable__*micropipenv_editable_test*"))) == 2
-                ), "No __editable__ files found for editable install"
-            else:
-                assert (
-                    len(glob.glob(os.path.join(venv.path, *SP_DIR, "micropipenv-editable-test.egg-link"))) == 1
-                ), "No egg-link found for editable install"
-
+            editable_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "__editable__*micropipenv_editable_test*")))
+            egg_link_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "micropipenv-editable-test.egg-link")))
+            if editable_files != 2 and egg_link_files != 1:
+                assert False, "No __editable__ or egg-link files found for editable install"
         finally:
             # Clean up this file, can cause issues across multiple test runs.
             shutil.rmtree("micropipenv_editable_test.egg-info", ignore_errors=True)
