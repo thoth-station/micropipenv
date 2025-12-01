@@ -14,10 +14,10 @@
         ]
     },
     "default": {
-        "daiquiri": {
+        "Pello": {
             "editable": true,
-            "git": "https://github.com/jd/daiquiri",
-            "ref": "d73e3870a0be324bf3b39d05cfca896c188ce7f4"
+            "git": "https://github.com/fedora-python/Pello",
+            "ref": "7fcfdb9340d38750136d8cb2fb5ff9427d39053c"
         }
     },
     "develop": {}

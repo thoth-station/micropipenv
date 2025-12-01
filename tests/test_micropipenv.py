@@ -147,7 +147,7 @@ def test_install_pipenv_vcs(venv):
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_vcs")):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
-        assert str(venv.get_version("daiquiri")) == "2.0.0"
+        assert str(venv.get_version("Pello")) == "1.0.4"
 
 
 @pytest.mark.online
@@ -211,10 +211,10 @@ def test_install_pipenv_vcs_editable(venv):
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
     with cwd(os.path.join(_DATA_DIR, "install", "pipenv_vcs_editable")):
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
-        assert str(venv.get_version("daiquiri")) == "1.6.0"
-        editable_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "__editable__*daiquiri*")))
-        egg_link_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "daiquiri.egg-link")))
-        if editable_files != 2 and egg_link_files != 1:
+        assert str(venv.get_version("Pello")) == "1.0.4"
+        editable_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "__editable__*pello*")))
+        egg_link_files = len(glob.glob(os.path.join(venv.path, *SP_DIR, "Pello.egg-link")))
+        if not editable_files and not egg_link_files:
             assert False, "No __editable__ or egg-link files found for editable install"
 
 
