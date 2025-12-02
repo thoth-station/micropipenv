@@ -204,8 +204,17 @@ def test_install_pipenv_editable(venv):
 # Python 3.10 has an option to ignore errors like this so we can enable it
 # back soon at least for Python 3.10.
 # See: https://github.com/python/cpython/pull/24793
+#
+# Another problem is with older pip versions.
+# Old pips run setup.py develop that installs new setuptools version
+# that calls back to pip to install the package in editable mode using PEP 517.
+# And that combination does not work with older pips.
 @pytest.mark.online
 @pytest.mark.skipif(WIN, reason="Fails to remove .git folder on Windows")
+@pytest.mark.skipif(
+    PIP_VERSION.major < 21,
+    reason="Old pip versions do not work with new setuptools and deprecated setup.py develop command",
+)
 def test_install_pipenv_vcs_editable(venv):
     """Test invoking installation using information in Pipfile.lock, a git version in editable mode is used."""
     cmd = [os.path.join(venv.path, BIN_DIR, "python"), micropipenv.__file__, "install", "--method", "pipenv"]
