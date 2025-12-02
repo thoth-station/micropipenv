@@ -43,7 +43,7 @@ MICROPIPENV_TEST_TOML_MODULE = os.getenv("MICROPIPENV_TEST_TOML_MODULE")
 WIN = sys.platform == "win32"
 BIN_DIR = "Scripts" if WIN else "bin"
 SP_DIR = ("lib", "site-packages") if WIN else ("lib", "python*", "site-packages")
-PY_LE_38 = sys.version_info[:2] <= (3, 8)
+PY_LE_39 = sys.version_info[:2] <= (3, 9)
 MANYLINUX_2014 = PIP_VERSION.major >= 19 and PIP_VERSION.minor >= 3
 
 
@@ -376,7 +376,7 @@ def test_install_poetry_type_url(venv):
 
 
 @pytest.mark.online
-@pytest.mark.skipif(PY_LE_38, reason="Deps not compatible with Python <= 3.8")
+@pytest.mark.skipif(PY_LE_39, reason="Deps not compatible with Python <= 3.9")
 @pytest.mark.skipif(not MANYLINUX_2014, reason="Deps provided as manylinux2014 wheels - needs pip 19.3+.")
 def test_install_poetry_complex_dep_tree_deploy(venv):
     """Test invoking installation using information from a Poetry project using url source format."""
