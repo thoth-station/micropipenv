@@ -25,16 +25,12 @@ jobs:
       matrix:
         tox_env: [
           # This list has to be maintained manually :(
-          # You can get it from `tox -l | sed "s/$/,/"`
+          # You can get it from `tox -l | grep -v "^ROOT:" | sed "s/$/,/"`
           py36-pip90-toml,
-          py36-pip192-toml,
-          py36-pip193-toml,
           py36-pip203-toml,
           py36-pip213-toml,
           py36-pip90-pytoml,
           py39-pip90-toml,
-          py39-pip192-toml,
-          py39-pip193-toml,
           py39-pip203-toml,
           py39-pip213-toml,
           py39-piplatest-toml,
@@ -42,8 +38,6 @@ jobs:
           py39-pip90-pytoml,
           py39-piplatest-pytoml,
           py39-pipgit-pytoml,
-          py310-pip192-toml,
-          py310-pip193-toml,
           py310-pip203-toml,
           py310-pip213-toml,
           py310-piplatest-toml,
@@ -52,8 +46,6 @@ jobs:
           py310-pipgit-pytoml,
           py310-piplatest-tomli,
           py310-pipgit-tomli,
-          py311-pip192,
-          py311-pip193,
           py311-pip203,
           py311-pip213,
           py311-piplatest,
@@ -62,8 +54,13 @@ jobs:
           py312-piplatest,
           py312-pipgit,
           py313-pip233,
+          py313-pip243,
           py313-piplatest,
           py313-pipgit,
+          py314-pip233,
+          py314-pip243,
+          py314-piplatest,
+          py314-pipgit,
           mypy,
         ]
 

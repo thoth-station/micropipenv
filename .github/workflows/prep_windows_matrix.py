@@ -10,6 +10,8 @@ TEMPLATE = '''- python_version: "{}"
 
 for line in fileinput.input():
     line = line.strip()
+    if line.startswith("ROOT:"):
+        continue
     m = re.match(r"^py(\d)(\d+)-", line)
     if m:
         # Keeps the latest Python version for
