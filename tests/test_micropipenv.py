@@ -24,6 +24,7 @@ import sys
 from contextlib import contextmanager
 from contextlib import redirect_stdout
 from flexmock import flexmock
+from pathlib import Path
 import os
 import pytest
 import re
@@ -518,11 +519,9 @@ def test_install_pip_tools_direct_reference(venv):
     work_dir = os.path.join(_DATA_DIR, "install", "pip-tools_direct_reference")
     with cwd(work_dir):
         with open("requirements.txt", "w") as requirements_file:
-            artifact_path = os.path.join(os.getcwd(), "micropipenv-0.0.0.tar.gz")
+            artifact_path = Path.cwd() / "micropipenv-0.0.0.tar.gz"
             requirements_file.write(
-                "micropipenv @ file://{} --hash=sha256:03b3f06d0e3c403337c73d8d95b1976449af8985e40a6aabfd9620c282c8d060\n".format(
-                    artifact_path
-                )
+                f"micropipenv @ {artifact_path.as_uri()} --hash=sha256:03b3f06d0e3c403337c73d8d95b1976449af8985e40a6aabfd9620c282c8d060\n"
             )
 
         subprocess.run(cmd, check=True, env=get_updated_env(venv))
