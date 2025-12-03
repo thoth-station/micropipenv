@@ -22,6 +22,7 @@ jobs:
         tox_env: ${{ matrix.tox_env }}
         dnf_install: /usr/bin/make
     strategy:
+      fail-fast: false
       matrix:
         tox_env: [
           # This list has to be maintained manually :(
