@@ -27,6 +27,7 @@ jobs:
 
     runs-on: windows-latest
     strategy:
+      fail-fast: false
       matrix:
         # This has to be manually configured because Windows images contains
         # more than just the main Python and there is no easy way how to tell
