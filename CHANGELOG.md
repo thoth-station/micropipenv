@@ -1,5 +1,23 @@
 # Changelog for Thoth's micropipenv
 
+## [1.10.0] - 2025-Dec-04 - Lumír Balhar <lbalhar@redhat.com>
+
+### Added
+
+* Test with pip 25.0, 25.0.1, 25.1, 25.1.1, 25.2, 25.3
+* Test with Python 3.14
+
+### Fixed
+
+* Improved handling of file:// URIs in tests
+* Made detection of editable installs in tests more universal
+* Type checker configuration
+
+### Removed
+
+* Python 3.8 and pip 19 from CI
+* Wheel from build requirements
+
 ## [1.9.0] - 2025-Jan-23 - Lumír Balhar <lbalhar@redhat.com>
 
 ### Added
