@@ -1,0 +1,37 @@
+apiVersion: tekton.dev/v1beta1
+kind: Task
+metadata:
+  name: tox
+  labels:
+    app.kubernetes.io/version: "0.1.0"
+  annotations:
+    tekton.dev/pipelines.minVersion: "0.12.1"
+    tekton.dev/tags: python, tox
+    tekton.dev/displayName: "Tox"
+spec:
+  description: >-
+    run tox using Fedora-Python
+  params:
+    - name: TOXENV
+      description: >-
+        The tox environment to run.
+      default: "py310"
+  steps:
+    - name: tox
+      image: docker.io/fedorapython/fedora-python-tox:latest
+      command:
+        - /bin/bash
+      env:
+        - name: TOXENV
+          value: "$(params.TOXENV)"
+      args:
+        - -c
+        - |
+          set -x
+          cd /workspace/src
+          tox
+  workspaces:
+    - name: source
+      mountPath: /workspace/src
+      description: >-
+        The workspace containing the source code which needs to be released.
